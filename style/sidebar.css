@@ -142,16 +142,16 @@ body.day .sidebar.expanded .sb-chat-row.active { background: rgba(0,0,0,0.07); }
 .sidebar.expanded .sb-chat-row:hover .sb-chat-item { color: var(--cream); }
 .sidebar.expanded .sb-chat-row.active .sb-chat-item { color: var(--cream); }
 
-.sb-chat-toggle {
+.sb-chat-delete {
   width: 24px; height: 24px; flex-shrink: 0;
   background: transparent; border: none; color: transparent;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; margin-right: 4px; border-radius: var(--radius-sm);
-  transition: color var(--transition);
+  transition: color var(--transition), background var(--transition);
 }
-.sb-chat-toggle .material-icons { font-size: 16px; transition: transform .2s ease; }
-.sidebar.expanded .sb-chat-row:hover .sb-chat-toggle { color: var(--cream2); }
-.sidebar.expanded .sb-chat-toggle:hover { color: var(--cream) !important; }
+.sb-chat-delete .material-icons { font-size: 15px; }
+.sidebar.expanded .sb-chat-row:hover .sb-chat-delete { color: var(--cream2); }
+.sidebar.expanded .sb-chat-delete:hover { color: #e06060 !important; background: rgba(200,80,80,0.1); }
 
 /* Opciones inline del chat */
 .sb-chat-opts {
@@ -293,8 +293,7 @@ body.day .sd-toggle.on { box-shadow: inset 0 0 0 3px #f0ede8; }
 .sd-divider { height: 0.5px; background: var(--border-md); }
 
 /* Dropdown flotante opciones de chat */
-.chat-opts-dropdown { padding: 4px 0; }
-.chat-opts-dropdown .sb-chat-opt { padding: 9px 16px; gap: 10px; font-size: 13px; }
+
 
 .sd-logout {
   display: flex; align-items: center; gap: 10px;
