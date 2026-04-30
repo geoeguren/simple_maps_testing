@@ -703,62 +703,49 @@ window.MAP = (() => {
     );
 
     const visibleFields = _getVisibleFields(layerKey, allFields);
-    const name = props.fna || props.nom_pfi || props.nam || '';
+    // Título: primer campo de nombre disponible
+    const name = props.fna || props.nom_pfi || props.nam || props.rtn || '';
 
+    // Filas: mostrar solo el nombre de campo (campo técnico), no el label
     const dataRows = visibleFields
-      .map(k => {
-        const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
-        const label   = attrDef?.label || k;
-        return `<tr><td class="popup-key">${label}</td><td class="popup-val">${props[k]}</td></tr>`;
-      }).join('');
+      .map(k => `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`)
+      .join('');
 
     const currentPref = _popupFieldPrefs[layerKey];
     const isActive    = k => currentPref ? currentPref.has(k) : POPUP_PRIORITY_FIELDS.has(k);
 
-    // Construir el elemento DOM directamente
     const el = document.createElement('div');
     el.className = 'map-popup';
     el.dataset.layerKey = layerKey;
     el.innerHTML = `
       ${name ? `<div class="popup-name">${name}</div>` : ''}
       <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
-      <button class="popup-customize-btn" title="Personalizar campos">
-        <span class="material-icons" style="font-size:13px">tune</span>
-        <span class="pfc-btn-label">Campos</span>
-        <span class="material-icons pfc-chevron" style="font-size:14px">expand_more</span>
-      </button>
+      <button class="popup-customize-btn">Más campos<span class="pfc-chevron">expand_more</span></button>
       <div class="pfc-accordion" style="display:none"></div>
       <div class="pfc-footer" style="display:none">
-        <button class="pfc-btn pfc-apply" disabled>Aplicar</button>
+        <button class="pfc-btn pfc-apply" disabled>Aceptar</button>
       </div>`;
 
-    // Agregar checkboxes como elementos DOM con listeners directos
     const accordion = el.querySelector('.pfc-accordion');
     const applyBtn  = el.querySelector('.pfc-apply');
 
     allFields.forEach(k => {
-      const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
-      const label   = attrDef?.label || k;
-      const active  = isActive(k);
+      const active = isActive(k);
 
       const row = document.createElement('label');
       row.className = 'pfc-row';
 
       const cb = document.createElement('input');
-      cb.type            = 'checkbox';
-      cb.dataset.field   = k;
+      cb.type             = 'checkbox';
+      cb.dataset.field    = k;
       cb.dataset.original = active ? '1' : '0';
-      cb.checked         = active;
+      cb.checked          = active;
 
-      const lblSpan = document.createElement('span');
-      lblSpan.className   = 'pfc-label';
-      lblSpan.textContent = label;
-
+      // Solo nombre de campo técnico, sin label interpretado
       const keySpan = document.createElement('span');
-      keySpan.className   = 'pfc-key';
+      keySpan.className   = 'pfc-label';
       keySpan.textContent = k;
 
-      // Listener de change directo en el checkbox
       cb.addEventListener('change', () => {
         const hasChange = [...accordion.querySelectorAll('input[type=checkbox]')]
           .some(i => (i.checked ? '1' : '0') !== i.dataset.original);
@@ -766,12 +753,10 @@ window.MAP = (() => {
       });
 
       row.appendChild(cb);
-      row.appendChild(lblSpan);
       row.appendChild(keySpan);
       accordion.appendChild(row);
     });
 
-    // Toggle acordeón
     const toggleBtn = el.querySelector('.popup-customize-btn');
     const footer    = el.querySelector('.pfc-footer');
     const chevron   = el.querySelector('.pfc-chevron');
@@ -790,7 +775,7 @@ window.MAP = (() => {
       }
     });
 
-    // Aplicar
+    // Aceptar
     applyBtn.addEventListener('click', () => {
       if (applyBtn.hasAttribute('disabled')) return;
       const checked = [...accordion.querySelectorAll('input[type=checkbox]:checked')]
