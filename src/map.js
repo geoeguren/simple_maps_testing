@@ -26,6 +26,11 @@ window.MAP = (() => {
 
     leafletMap.on('popupclose', () => clearHighlight());
 
+    leafletMap.on('popupopen', e => {
+      const wrapper = e.popup?.getElement?.();
+      if (wrapper) _wirePopupEvents(wrapper);
+    });
+
     const savedBase = localStorage.getItem('sm_basemap') || 'auto';
     applyBasemap(savedBase);
 
@@ -722,14 +727,17 @@ window.MAP = (() => {
     </div>`;
   }
 
-  // Wire global delegado para el acordeón dentro del popup
-  document.addEventListener('click', e => {
+  // Los eventos dentro del popup NO llegan al document (Leaflet los detiene).
+  // Se wirean directamente sobre el contenedor del popup en cada apertura.
+  function _wirePopupEvents(popupEl) {
+    const popup = popupEl.querySelector('.map-popup');
+    if (!popup) return;
+
     // Toggle acordeón
-    const toggleBtn = e.target.closest('.popup-customize-btn');
-    if (toggleBtn) {
-      const popup     = toggleBtn.closest('.map-popup');
-      const accordion = popup?.querySelector('.pfc-accordion');
-      const footer    = popup?.querySelector('.pfc-footer');
+    const toggleBtn = popup.querySelector('.popup-customize-btn');
+    toggleBtn?.addEventListener('click', () => {
+      const accordion = popup.querySelector('.pfc-accordion');
+      const footer    = popup.querySelector('.pfc-footer');
       const chevron   = toggleBtn.querySelector('.pfc-chevron');
       if (!accordion) return;
       const open = accordion.style.display !== 'none';
@@ -737,50 +745,40 @@ window.MAP = (() => {
       if (footer) footer.style.display = open ? 'none' : 'flex';
       toggleBtn.classList.toggle('pfc-open', !open);
       if (chevron) chevron.textContent = open ? 'expand_more' : 'expand_less';
-      // Recalcular tamaño sin mover el popup
-      setTimeout(() => {
-        const lp = leafletMap?.openedPopup?.();
-        if (!lp) return;
+      const lp = leafletMap?.openedPopup?.();
+      if (lp) {
         const _ap = lp.options.autoPan;
         lp.options.autoPan = false;
         lp.update();
         lp.options.autoPan = _ap;
-      }, 0);
-      return;
-    }
+      }
+    });
 
-    // Aplicar — el botón disabled no dispara click en todos los browsers,
-    // pero lo chequeamos igual por las dudas
-    const applyBtn = e.target.closest('.pfc-apply');
-    if (applyBtn) {
-      const popup = applyBtn.closest('.map-popup');
-      if (!popup) return;
-      if (applyBtn.getAttribute('disabled') !== null) return;
+    // Cambio en checkboxes → habilitar/deshabilitar Aplicar
+    popup.querySelectorAll('.pfc-accordion input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const applyBtn  = popup.querySelector('.pfc-apply');
+        if (!applyBtn) return;
+        const hasChange = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]')]
+          .some(i => (i.checked ? '1' : '0') !== i.dataset.original);
+        applyBtn.toggleAttribute('disabled', !hasChange);
+      });
+    });
+
+    // Aplicar
+    const applyBtn = popup.querySelector('.pfc-apply');
+    applyBtn?.addEventListener('click', () => {
+      if (applyBtn.hasAttribute('disabled')) return;
       const lk = popup.dataset.layerKey;
       if (!lk) return;
-      // Leer checkboxes ANTES de que setContent destruya el DOM
       const checked = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]:checked')]
         .map(i => i.dataset.field);
       if (checked.length === 0) return;
       _popupFieldPrefs[lk] = new Set(checked);
       _savePopupPrefs();
       _refreshOpenPopup(false);
-    }
-  });
-
-  // Activar botón Aplicar cuando el usuario cambia algún checkbox
-  // Nota: e.target ES el checkbox (input), no usar closest con selector descendente
-  document.addEventListener('change', e => {
-    const cb = e.target;
-    if (cb.type !== 'checkbox' || !cb.dataset.field) return;
-    const popup    = cb.closest('.map-popup');
-    if (!popup) return;
-    const applyBtn = popup.querySelector('.pfc-apply');
-    if (!applyBtn) return;
-    const hasChange = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]')]
-      .some(i => (i.checked ? '1' : '0') !== i.dataset.original);
-    applyBtn.toggleAttribute('disabled', !hasChange);
-  });
+    });
+  }
 
   // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo.
   // keepAccordion=true → deja el acordeón abierto (usado internamente por _refreshOpenPopup)
@@ -789,6 +787,9 @@ window.MAP = (() => {
     if (!openPopup || !_lastIdentifyFeature) return;
     const newContent = buildPopupContent(_lastIdentifyFeature, _lastIdentifyMapKey);
     openPopup.setContent(newContent);
+    // setContent recrea el DOM — re-wirear eventos
+    const wrapper = openPopup.getElement?.();
+    if (wrapper) _wirePopupEvents(wrapper);
     if (keepAccordion) {
       const accordion = openPopup.getElement()?.querySelector('.pfc-accordion');
       const footer    = openPopup.getElement()?.querySelector('.pfc-footer');
