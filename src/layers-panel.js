@@ -238,36 +238,17 @@ window.LAYERS_PANEL = (() => {
 
     const l = window.MAP.getActiveLayers()[k];
     if (!l) return;
-    const geom     = l.geomType || 'polygon';
-    const s        = l.style || {};
-    const layerDef = window.LAYERS[l.layerKey] || {};
-    const attrs    = layerDef.attributes || [];
-    const allFields    = attrs.filter(a => a.campo);
-    const numericFields = attrs.filter(a => a.numeric);
-
-    // Estado actual de clasificación
-    const curMode   = l.classification?.type || 'simple';
-    const curField  = l.classification?.field || '';
-    const curPalette = l.classification?.palette || (curMode === 'graduated' ? 'blues' : 'qualitative');
+    const geom = l.geomType || 'polygon';
+    const s    = l.style || {};
 
     const acc = document.createElement('div');
     acc.className = 'layer-edit-accordion';
     acc.dataset.key = k;
 
-    // ── Selector de modo ──────────────────────────────────────
-    const modeHTML = `
-      <div class="lea-mode-selector">
-        <span class="lea-label" style="margin-bottom:6px;display:block">Símbolo</span>
-        <div class="lea-mode-tabs">
-          <button class="lea-mode-tab ${curMode==='simple'?'active':''}" data-mode="simple">Simple</button>
-          <button class="lea-mode-tab ${curMode==='categorized'?'active':''}" data-mode="categorized">Categorizado</button>
-          <button class="lea-mode-tab ${curMode==='graduated'?'active':''}" data-mode="graduated">Graduado</button>
-        </div>
-      </div>`;
-
-    acc.innerHTML = modeHTML +
+    acc.innerHTML =
       `<div class="lea-mode-content" id="lea-content-${k}"></div>` +
       `<div class="lea-sep"></div>` +
+      `<button class="lea-advanced-btn" data-key="${k}"><span class="material-icons">tune</span>Edición avanzada</button>` +
       `<button class="lea-delete-btn" data-key="${k}"><span class="material-icons">delete</span>Eliminar capa</button>`;
 
     const row = sec.querySelector(`.layers-data-row[data-key="${k}"]`);
@@ -275,90 +256,14 @@ window.LAYERS_PANEL = (() => {
 
     const contentEl = acc.querySelector(`#lea-content-${k}`);
 
-    // ── Render según modo ─────────────────────────────────────
+    // Render modo simple directamente
+    contentEl.innerHTML = styleControlsHTML(geom, s, k);
+    wireStyleControls(contentEl, k, geom, sec);
+    if (geom === 'line') wireCsel(contentEl, `lea-dash-${k}`, () => applySimpleStyle(k, contentEl, sec));
 
-    function renderMode(mode) {
-      if (mode === 'simple') {
-        contentEl.innerHTML = styleControlsHTML(geom, s, k);
-        wireStyleControls(contentEl, k, geom, sec);
-        if (geom === 'line') wireCsel(contentEl, `lea-dash-${k}`, () => applySimpleStyle(k, contentEl, sec));
-      }
-      else if (mode === 'categorized') {
-        const MAX_UNIQUE = 15;
-        const fieldOpts = allFields.map(a => {
-          const vals = [...new Set(
-            (l.geojson?.features || []).map(f => f.properties?.[a.campo]).filter(v => v != null)
-          )];
-          const disabled = vals.length > MAX_UNIQUE ? 'disabled' : '';
-          const suffix   = vals.length > MAX_UNIQUE ? ` (${vals.length} valores, máx ${MAX_UNIQUE})` : '';
-          return `<option value="${a.campo}" ${curField===a.campo?'selected':''} ${disabled}>${a.label}${suffix}</option>`;
-        }).join('');
-        contentEl.innerHTML = `
-          ${leaRow('Valor', `<select class="lea-field-select">${fieldOpts}</select>`)}
-          <div class="lea-row-spacer"></div>
-          ${leaRow('Rampa de colores', buildPaletteSelect(['qualitative','blues','greens','oranges','purples'], curPalette, `lea-pal-${k}`))}
-          <div class="lea-cat-items"></div>`;
-
-        wireClassifiedControls(contentEl, k, geom, sec, 'categorized');
-        wireCsel(contentEl, `lea-pal-${k}`, () => {
-          const palette = getCselValue(contentEl, `lea-pal-${k}`);
-          const field   = contentEl.querySelector('.lea-field-select')?.value;
-          if (!field) return;
-          window.MAP.applyClassification(k, { type: 'categorized', field, palette, paletteColors: window.PALETTES[palette] });
-          const nl = window.MAP.getActiveLayers()[k];
-          persistClassification(k, nl?.classification);
-          buildCatItems(contentEl, k, geom, 'categorized');
-        });
-      }
-      else if (mode === 'graduated') {
-        if (!numericFields.length) {
-          contentEl.innerHTML = `<p class="lea-na" style="padding:8px 0">Esta capa no tiene campos numéricos para graduación.</p>`;
-          return;
-        }
-        const fieldOpts = numericFields.map(a =>
-          `<option value="${a.campo}" ${curField===a.campo?'selected':''}>${a.label}</option>`
-        ).join('');
-        const gradPalOpts = buildPaletteOptions(['blues','greens','oranges','purples','redblue','browngreen'], curPalette);
-        const methods = [
-          {v:'jenks', l:'Natural Breaks (Jenks)'},
-          {v:'equal',   l:'Intervalos iguales'},
-          {v:'quantile',l:'Cuantiles'},
-        ];
-        const methodOpts = methods.map(m =>
-          `<option value="${m.v}" ${(l.classification?.method||'jenks')===m.v?'selected':''}>${m.l}</option>`
-        ).join('');
-        const classes = l.classification?.classes || 5;
-
-        contentEl.innerHTML = `
-          ${leaRow('Valor', `<select class="lea-field-select">${fieldOpts}</select>`)}
-          ${leaRow('Método', `<select class="lea-method-select">${methodOpts}</select>`)}
-          ${leaRow('Clases', `<div class="lea-slider-wrap"><input class="lea-range-input lea-classes-input" type="range" min="3" max="8" step="1" value="${classes}" /><span class="lea-val">${classes}</span></div>`)}
-          <div class="lea-row-spacer"></div>
-          ${leaRow('Rampa de colores', buildPaletteSelect(['blues','greens','oranges','purples','redblue','browngreen'], curPalette, `lea-pal-${k}`))}
-          <div class="lea-grad-items"></div>`;
-
-        wireClassifiedControls(contentEl, k, geom, sec, 'graduated');
-        wireCsel(contentEl, `lea-pal-${k}`, () => {
-          const palette = getCselValue(contentEl, `lea-pal-${k}`);
-          const field   = contentEl.querySelector('.lea-field-select')?.value;
-          const method  = contentEl.querySelector('.lea-method-select')?.value  || 'jenks';
-          const classes = parseInt(contentEl.querySelector('.lea-classes-input')?.value || 5);
-          if (!field) return;
-          window.MAP.applyClassification(k, { type: 'graduated', field, palette, method, classes, paletteColors: window.PALETTES[palette] });
-          const nl = window.MAP.getActiveLayers()[k];
-          persistClassification(k, nl?.classification);
-          buildCatItems(contentEl, k, geom, 'graduated');
-        });
-      }
-    }
-
-    // ── Wire tabs ─────────────────────────────────────────────
-    acc.querySelectorAll('.lea-mode-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        acc.querySelectorAll('.lea-mode-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        renderMode(tab.dataset.mode);
-      });
+    // Botón edición avanzada → modal
+    acc.querySelector('.lea-advanced-btn').addEventListener('click', () => {
+      openAdvancedModal(k, sec);
     });
 
     // ── Wire controles simple ─────────────────────────────────
@@ -608,10 +513,11 @@ window.LAYERS_PANEL = (() => {
       });
     }
 
-    function wireClassifiedControls(container, mapKey, geom, sec, mode) {
+    function wireClassifiedControls(container, mapKey, geom, sec, mode, isModal = false) {
+      const palId = isModal ? `adv-pal-${k}` : `lea-pal-${k}`;
       function applyClassification() {
         const field   = container.querySelector('.lea-field-select')?.value;
-        const palette = getCselValue(container, `lea-pal-${k}`) || 'qualitative';
+        const palette = getCselValue(container, palId) || 'qualitative';
         const method  = container.querySelector('.lea-method-select')?.value  || 'jenks';
         const classes = parseInt(container.querySelector('.lea-classes-input')?.value || 5);
         if (!field) return;
@@ -655,8 +561,131 @@ window.LAYERS_PANEL = (() => {
       }
     });
 
-    // Render inicial
-    renderMode(curMode);
+  }
+
+  // ── Modal de edición avanzada (categorizado / graduado) ──────────
+
+  function openAdvancedModal(k, sec) {
+    document.getElementById('adv-modal-backdrop')?.remove();
+    document.getElementById('adv-modal')?.remove();
+
+    const l = window.MAP.getActiveLayers()[k];
+    if (!l) return;
+    const geom      = l.geomType || 'polygon';
+    const layerDef  = window.LAYERS[l.layerKey] || {};
+    const attrs     = layerDef.attributes || [];
+    const allFields     = attrs.filter(a => a.campo);
+    const numericFields = attrs.filter(a => a.numeric);
+
+    const curMode    = l.classification?.type || 'categorized';
+    const curField   = l.classification?.field || '';
+    const curPalette = l.classification?.palette || (curMode === 'graduated' ? 'blues' : 'qualitative');
+
+    // Backdrop
+    const backdrop = document.createElement('div');
+    backdrop.id = 'adv-modal-backdrop';
+    backdrop.className = 'adv-modal-backdrop';
+    document.body.appendChild(backdrop);
+
+    // Modal
+    const modal = document.createElement('div');
+    modal.id = 'adv-modal';
+    modal.className = 'adv-modal';
+    modal.innerHTML = `
+      <div class="adv-modal-header">
+        <span class="adv-modal-title">Edición avanzada — ${l.titulo || k}</span>
+        <button class="adv-modal-close" id="adv-close-btn"><span class="material-icons">close</span></button>
+      </div>
+      <div class="adv-modal-tabs">
+        <button class="adv-tab ${curMode!=='graduated'?'active':''}" data-mode="categorized">Categorizado</button>
+        <button class="adv-tab ${curMode==='graduated'?'active':''}" data-mode="graduated">Graduado</button>
+      </div>
+      <div class="adv-modal-body" id="adv-modal-body"></div>`;
+    document.body.appendChild(modal);
+
+    const bodyEl = modal.querySelector('#adv-modal-body');
+
+    function renderAdvMode(mode) {
+      bodyEl.innerHTML = '';
+      if (mode === 'categorized') {
+        const MAX_UNIQUE = 15;
+        const fieldOpts = allFields.map(a => {
+          const vals = [...new Set(
+            (l.geojson?.features || []).map(f => f.properties?.[a.campo]).filter(v => v != null)
+          )];
+          const disabled = vals.length > MAX_UNIQUE ? 'disabled' : '';
+          const suffix   = vals.length > MAX_UNIQUE ? ` (${vals.length} val., máx ${MAX_UNIQUE})` : '';
+          return `<option value="${a.campo}" ${curField===a.campo?'selected':''} ${disabled}>${a.label}${suffix}</option>`;
+        }).join('');
+        bodyEl.innerHTML = `
+          ${leaRow('Campo', `<select class="lea-field-select">${fieldOpts}</select>`)}
+          <div class="lea-row-spacer"></div>
+          ${leaRow('Rampa', buildPaletteSelect(['qualitative','blues','greens','oranges','purples'], curPalette, `adv-pal-${k}`))}
+          <div class="lea-cat-items"></div>`;
+        wireClassifiedControls(bodyEl, k, geom, sec, 'categorized', true);
+        wireCsel(bodyEl, `adv-pal-${k}`, () => {
+          const palette = getCselValue(bodyEl, `adv-pal-${k}`);
+          const field   = bodyEl.querySelector('.lea-field-select')?.value;
+          if (!field) return;
+          window.MAP.applyClassification(k, { type: 'categorized', field, palette, paletteColors: window.PALETTES[palette] });
+          persistClassification(k, window.MAP.getActiveLayers()[k]?.classification);
+          buildCatItems(bodyEl, k, geom, 'categorized');
+        });
+      } else {
+        if (!numericFields.length) {
+          bodyEl.innerHTML = `<p class="lea-na" style="padding:12px 0">Esta capa no tiene campos numéricos para graduación.</p>`;
+          return;
+        }
+        const fieldOpts = numericFields.map(a =>
+          `<option value="${a.campo}" ${curField===a.campo?'selected':''}>${a.label}</option>`
+        ).join('');
+        const methods = [
+          {v:'jenks',    l:'Natural Breaks (Jenks)'},
+          {v:'equal',    l:'Intervalos iguales'},
+          {v:'quantile', l:'Cuantiles'},
+        ];
+        const methodOpts = methods.map(m =>
+          `<option value="${m.v}" ${(l.classification?.method||'jenks')===m.v?'selected':''}>${m.l}</option>`
+        ).join('');
+        const classes = l.classification?.classes || 5;
+        bodyEl.innerHTML = `
+          ${leaRow('Campo', `<select class="lea-field-select">${fieldOpts}</select>`)}
+          ${leaRow('Método', `<select class="lea-method-select">${methodOpts}</select>`)}
+          ${leaRow('Clases', `<div class="lea-slider-wrap"><input class="lea-range-input lea-classes-input" type="range" min="3" max="8" step="1" value="${classes}" /><span class="lea-val">${classes}</span></div>`)}
+          <div class="lea-row-spacer"></div>
+          ${leaRow('Rampa', buildPaletteSelect(['blues','greens','oranges','purples','redblue','browngreen'], curPalette, `adv-pal-${k}`))}
+          <div class="lea-grad-items"></div>`;
+        wireClassifiedControls(bodyEl, k, geom, sec, 'graduated', true);
+        wireCsel(bodyEl, `adv-pal-${k}`, () => {
+          const palette  = getCselValue(bodyEl, `adv-pal-${k}`);
+          const field    = bodyEl.querySelector('.lea-field-select')?.value;
+          const method   = bodyEl.querySelector('.lea-method-select')?.value || 'jenks';
+          const classesN = parseInt(bodyEl.querySelector('.lea-classes-input')?.value || 5);
+          if (!field) return;
+          window.MAP.applyClassification(k, { type: 'graduated', field, palette, method, classes: classesN, paletteColors: window.PALETTES[palette] });
+          persistClassification(k, window.MAP.getActiveLayers()[k]?.classification);
+          buildCatItems(bodyEl, k, geom, 'graduated');
+        });
+      }
+    }
+
+    modal.querySelectorAll('.adv-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        modal.querySelectorAll('.adv-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderAdvMode(tab.dataset.mode);
+      });
+    });
+
+    function closeModal() {
+      backdrop.remove();
+      modal.remove();
+    }
+
+    modal.querySelector('#adv-close-btn').addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+
+    renderAdvMode(curMode !== 'simple' ? curMode : 'categorized');
   }
 
   // ── Helpers de persistencia ───────────────────────────────────
