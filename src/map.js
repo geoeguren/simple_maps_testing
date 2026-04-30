@@ -207,7 +207,17 @@ window.MAP = (() => {
 
     entry.leafletLayer.eachLayer(l => {
       const val   = l.feature?.properties?.[campo];
-      const color = classMap[val] || entry.style.fillColor || entry.style.color || '#888';
+      const color = classMap[val];
+      // Si el valor no tiene categoría asignada, ocultar el feature
+      if (!classMap.hasOwnProperty(val)) {
+        const hiddenStyle = geomType === 'point'
+          ? { ...entry.style, radius: 0, opacity: 0, fillOpacity: 0 }
+          : { ...entry.style, opacity: 0, fillOpacity: 0, weight: 0 };
+        if (geomType === 'point')   l.setStyle(pointStyle(hiddenStyle));
+        else if (geomType === 'line') l.setStyle(lineStyle(hiddenStyle));
+        else l.setStyle(polygonStyle(hiddenStyle));
+        return;
+      }
       const s     = { ...entry.style, fillColor: color, color };
 
       if (geomType === 'point')   l.setStyle(pointStyle(s));
@@ -471,11 +481,17 @@ window.MAP = (() => {
           ? { ...entry.style, color }
           : { ...entry.style, color, fillColor: color };
       }
-      // categorized
-      const color = cl.colorMap?.[val] || entry.style?.color || '#888';
+      // categorized — si el valor no está en colorMap, ocultar el feature
+      if (!cl.colorMap?.hasOwnProperty(val)) {
+        return geom === 'point'
+          ? { ...entry.style, radius: 0, opacity: 0, fillOpacity: 0 }
+          : { ...entry.style, opacity: 0, fillOpacity: 0, weight: 0 };
+      }
+      const color = cl.colorMap[val];
+      const valStyle = cl.styleMap?.[val] || {};
       return geom === 'line'
-        ? { ...entry.style, color }
-        : { ...entry.style, color, fillColor: color };
+        ? { ...entry.style, ...valStyle, color }
+        : { ...entry.style, ...valStyle, color, fillColor: valStyle.fillColor || color };
     };
 
     if (geom === 'point') {
