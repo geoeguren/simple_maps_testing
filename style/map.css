@@ -385,12 +385,20 @@ body.day .lea-dash-btn.active { background: var(--accent); color: #fff; }
 .lea-dash-select, .lea-field-select, .lea-palette-select, .lea-method-select {
   flex: 1; background: var(--bg2); border: 0.5px solid var(--border-md);
   border-radius: 4px; color: var(--cream); font-family: var(--font-sans);
-  font-size: 12px; padding: 3px 6px; outline: none; cursor: pointer;
+  font-size: 12px; padding: 3px 24px 3px 6px; outline: none; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
 }
 .lea-classify-select:focus, .lea-field-select:focus,
 .lea-palette-select:focus, .lea-method-select:focus { border-color: var(--accent); }
 body.day .lea-classify-select, body.day .lea-field-select,
-body.day .lea-palette-select, body.day .lea-method-select { color: #1a1814; background: rgba(0,0,0,0.05); }
+body.day .lea-palette-select, body.day .lea-method-select {
+  color: #1a1814; background: rgba(0,0,0,0.05);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 7px center;
+}
 
 /* Leyenda con clasificación */
 .legend-item-title { padding: 4px 0 2px; }
