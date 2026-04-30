@@ -574,12 +574,20 @@ window.LAYERS_PANEL = (() => {
     const geom      = l.geomType || 'polygon';
     const layerDef  = window.LAYERS[l.layerKey] || {};
     const attrs     = layerDef.attributes || [];
+    // Usar campo real del WFS (campo), mostrar label como etiqueta legible
     const allFields     = attrs.filter(a => a.campo);
     const numericFields = attrs.filter(a => a.numeric);
 
-    const curMode    = l.classification?.type || 'categorized';
-    const curField   = l.classification?.field || '';
-    const curPalette = l.classification?.palette || (curMode === 'graduated' ? 'blues' : 'qualitative');
+    // Estado inicial del modal: si la capa tiene clasificación la recordamos,
+    // si no, arrancamos en símbolo único
+    const initMode    = l.classification?.type || 'single';
+    const initField   = l.classification?.field || (allFields[0]?.campo || '');
+    const initPalette = l.classification?.palette || 'qualitative';
+    const initMethod  = l.classification?.method || 'jenks';
+    const initClasses = l.classification?.classes || 5;
+
+    // Snapshot del estado actual para poder cancelar
+    const _savedClassification = l.classification ? JSON.parse(JSON.stringify(l.classification)) : null;
 
     // Backdrop
     const backdrop = document.createElement('div');
@@ -591,101 +599,172 @@ window.LAYERS_PANEL = (() => {
     const modal = document.createElement('div');
     modal.id = 'adv-modal';
     modal.className = 'adv-modal';
+
+    const modeButtons = [
+      { mode: 'single',      label: 'Símbolo único' },
+      { mode: 'categorized', label: 'Categorizado' },
+      { mode: 'graduated',   label: 'Graduado',   disabled: geom === 'line' ? false : false },
+      { mode: 'heatmap',     label: 'Mapa de calor', disabled: true },
+    ];
+
+    const modePills = modeButtons.map(b => `
+      <button class="adv-pill ${b.mode===initMode?'active':''}" data-mode="${b.mode}"
+              ${b.disabled ? 'disabled title="Próximamente"' : ''}>
+        ${b.label}
+      </button>`).join('');
+
     modal.innerHTML = `
       <div class="adv-modal-header">
-        <span class="adv-modal-title">Edición avanzada — ${l.titulo || k}</span>
+        <span class="adv-modal-title">Edición avanzada — ${esc(l.titulo || k)}</span>
         <button class="adv-modal-close" id="adv-close-btn"><span class="material-icons">close</span></button>
       </div>
-      <div class="adv-modal-tabs">
-        <button class="adv-tab ${curMode!=='graduated'?'active':''}" data-mode="categorized">Categorizado</button>
-        <button class="adv-tab ${curMode==='graduated'?'active':''}" data-mode="graduated">Graduado</button>
-      </div>
-      <div class="adv-modal-body" id="adv-modal-body"></div>`;
+      <div class="adv-modal-pills">${modePills}</div>
+      <div class="adv-modal-body" id="adv-modal-body"></div>
+      <div class="adv-modal-footer">
+        <button class="adv-footer-btn adv-cancel" id="adv-cancel-btn">Cancelar</button>
+        <button class="adv-footer-btn adv-apply"  id="adv-apply-btn">Aplicar</button>
+        <button class="adv-footer-btn adv-accept" id="adv-accept-btn">Aceptar</button>
+      </div>`;
     document.body.appendChild(modal);
 
-    const bodyEl = modal.querySelector('#adv-modal-body');
+    const bodyEl   = modal.querySelector('#adv-modal-body');
+    let   curMode  = initMode;
+
+    // ── Render del cuerpo según modo ────────────────────────────
 
     function renderAdvMode(mode) {
+      curMode = mode;
       bodyEl.innerHTML = '';
+
+      if (mode === 'single') {
+        bodyEl.innerHTML = `<p class="lea-na" style="padding:4px 0 8px">
+          El estilo simple se edita directamente en el panel de capas.</p>`;
+        return;
+      }
+
       if (mode === 'categorized') {
         const MAX_UNIQUE = 15;
         const fieldOpts = allFields.map(a => {
           const vals = [...new Set(
             (l.geojson?.features || []).map(f => f.properties?.[a.campo]).filter(v => v != null)
           )];
-          const disabled = vals.length > MAX_UNIQUE ? 'disabled' : '';
-          const suffix   = vals.length > MAX_UNIQUE ? ` (${vals.length} val., máx ${MAX_UNIQUE})` : '';
-          return `<option value="${a.campo}" ${curField===a.campo?'selected':''} ${disabled}>${a.label}${suffix}</option>`;
+          const tooMany  = vals.length > MAX_UNIQUE;
+          const suffix   = tooMany ? ` (${vals.length} val.)` : '';
+          // Mostrar el campo real (campo) con el label legible como prefijo
+          return `<option value="${a.campo}" ${initField===a.campo?'selected':''} ${tooMany?'disabled':''}>${a.label} [${a.campo}]${suffix}</option>`;
         }).join('');
+        const palId = `adv-pal-${k}`;
         bodyEl.innerHTML = `
-          ${leaRow('Campo', `<select class="lea-field-select">${fieldOpts}</select>`)}
+          ${leaRow('Campo', `<select class="lea-field-select adv-field">${fieldOpts}</select>`)}
           <div class="lea-row-spacer"></div>
-          ${leaRow('Rampa', buildPaletteSelect(['qualitative','blues','greens','oranges','purples'], curPalette, `adv-pal-${k}`))}
-          <div class="lea-cat-items"></div>`;
-        wireClassifiedControls(bodyEl, k, geom, sec, 'categorized', true);
-        wireCsel(bodyEl, `adv-pal-${k}`, () => {
-          const palette = getCselValue(bodyEl, `adv-pal-${k}`);
-          const field   = bodyEl.querySelector('.lea-field-select')?.value;
-          if (!field) return;
-          window.MAP.applyClassification(k, { type: 'categorized', field, palette, paletteColors: window.PALETTES[palette] });
-          persistClassification(k, window.MAP.getActiveLayers()[k]?.classification);
-          buildCatItems(bodyEl, k, geom, 'categorized');
-        });
-      } else {
+          ${leaRow('Rampa', buildPaletteSelect(['qualitative','blues','greens','oranges','purples','redblue','browngreen'], initPalette, palId))}
+          <div class="lea-cat-items" style="margin-top:6px"></div>`;
+        wireCsel(bodyEl, palId, () => previewClassification());
+        bodyEl.querySelector('.adv-field')?.addEventListener('change', () => previewClassification());
+        previewClassification();
+        return;
+      }
+
+      if (mode === 'graduated') {
         if (!numericFields.length) {
-          bodyEl.innerHTML = `<p class="lea-na" style="padding:12px 0">Esta capa no tiene campos numéricos para graduación.</p>`;
+          bodyEl.innerHTML = `<p class="lea-na" style="padding:4px 0">Esta capa no tiene campos numéricos.</p>`;
           return;
         }
         const fieldOpts = numericFields.map(a =>
-          `<option value="${a.campo}" ${curField===a.campo?'selected':''}>${a.label}</option>`
+          `<option value="${a.campo}" ${initField===a.campo?'selected':''}>${a.label} [${a.campo}]</option>`
         ).join('');
         const methods = [
-          {v:'jenks',    l:'Natural Breaks (Jenks)'},
+          {v:'jenks',    l:'Natural Breaks'},
           {v:'equal',    l:'Intervalos iguales'},
           {v:'quantile', l:'Cuantiles'},
         ];
         const methodOpts = methods.map(m =>
-          `<option value="${m.v}" ${(l.classification?.method||'jenks')===m.v?'selected':''}>${m.l}</option>`
+          `<option value="${m.v}" ${initMethod===m.v?'selected':''}>${m.l}</option>`
         ).join('');
-        const classes = l.classification?.classes || 5;
+        const palId = `adv-pal-${k}`;
         bodyEl.innerHTML = `
-          ${leaRow('Campo', `<select class="lea-field-select">${fieldOpts}</select>`)}
-          ${leaRow('Método', `<select class="lea-method-select">${methodOpts}</select>`)}
-          ${leaRow('Clases', `<div class="lea-slider-wrap"><input class="lea-range-input lea-classes-input" type="range" min="3" max="8" step="1" value="${classes}" /><span class="lea-val">${classes}</span></div>`)}
+          ${leaRow('Campo',  `<select class="lea-field-select adv-field">${fieldOpts}</select>`)}
+          ${leaRow('Método', `<select class="lea-method-select adv-method">${methodOpts}</select>`)}
+          ${leaRow('Clases', `<div class="lea-slider-wrap"><input class="lea-range-input adv-classes" type="range" min="3" max="8" step="1" value="${initClasses}" /><span class="lea-val">${initClasses}</span></div>`)}
           <div class="lea-row-spacer"></div>
-          ${leaRow('Rampa', buildPaletteSelect(['blues','greens','oranges','purples','redblue','browngreen'], curPalette, `adv-pal-${k}`))}
-          <div class="lea-grad-items"></div>`;
-        wireClassifiedControls(bodyEl, k, geom, sec, 'graduated', true);
-        wireCsel(bodyEl, `adv-pal-${k}`, () => {
-          const palette  = getCselValue(bodyEl, `adv-pal-${k}`);
-          const field    = bodyEl.querySelector('.lea-field-select')?.value;
-          const method   = bodyEl.querySelector('.lea-method-select')?.value || 'jenks';
-          const classesN = parseInt(bodyEl.querySelector('.lea-classes-input')?.value || 5);
-          if (!field) return;
-          window.MAP.applyClassification(k, { type: 'graduated', field, palette, method, classes: classesN, paletteColors: window.PALETTES[palette] });
-          persistClassification(k, window.MAP.getActiveLayers()[k]?.classification);
-          buildCatItems(bodyEl, k, geom, 'graduated');
+          ${leaRow('Rampa', buildPaletteSelect(['blues','greens','oranges','purples','redblue','browngreen'], initPalette, palId))}
+          <div class="lea-grad-items" style="margin-top:6px"></div>`;
+        bodyEl.querySelector('.adv-classes')?.addEventListener('input', e => {
+          const valEl = e.target.closest('.lea-slider-wrap')?.querySelector('.lea-val');
+          if (valEl) valEl.textContent = e.target.value;
+          previewClassification();
         });
+        wireCsel(bodyEl, palId, () => previewClassification());
+        bodyEl.querySelector('.adv-field')?.addEventListener('change',  () => previewClassification());
+        bodyEl.querySelector('.adv-method')?.addEventListener('change', () => previewClassification());
+        previewClassification();
       }
     }
 
-    modal.querySelectorAll('.adv-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        modal.querySelectorAll('.adv-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        renderAdvMode(tab.dataset.mode);
+    // ── Preview (Aplicar temporal) ───────────────────────────────
+
+    function previewClassification() {
+      if (curMode === 'single') {
+        window.MAP.clearClassification(k);
+        return;
+      }
+      const field   = bodyEl.querySelector('.adv-field')?.value;
+      const palette = getCselValue(bodyEl, `adv-pal-${k}`) || (curMode === 'graduated' ? 'blues' : 'qualitative');
+      const method  = bodyEl.querySelector('.adv-method')?.value  || 'jenks';
+      const classes = parseInt(bodyEl.querySelector('.adv-classes')?.value || 5);
+      if (!field) return;
+      window.MAP.applyClassification(k, {
+        type: curMode, field, palette, method, classes,
+        paletteColors: window.PALETTES[palette]
+      });
+      // Reconstruir items categorizados/graduados en el modal
+      const nl = window.MAP.getActiveLayers()[k];
+      buildCatItems(bodyEl, k, geom, curMode);
+    }
+
+    // ── Pills ────────────────────────────────────────────────────
+
+    modal.querySelectorAll('.adv-pill:not([disabled])').forEach(pill => {
+      pill.addEventListener('click', () => {
+        modal.querySelectorAll('.adv-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        renderAdvMode(pill.dataset.mode);
       });
     });
+
+    // ── Footer buttons ───────────────────────────────────────────
 
     function closeModal() {
       backdrop.remove();
       modal.remove();
     }
 
-    modal.querySelector('#adv-close-btn').addEventListener('click', closeModal);
-    backdrop.addEventListener('click', closeModal);
+    function cancelModal() {
+      // Restaurar estado original
+      if (_savedClassification) {
+        window.MAP.applyClassificationFromData(k, _savedClassification);
+        persistClassification(k, _savedClassification);
+      } else {
+        window.MAP.clearClassification(k);
+        persistClassification(k, null);
+      }
+      closeModal();
+    }
 
-    renderAdvMode(curMode !== 'simple' ? curMode : 'categorized');
+    function acceptModal() {
+      // Ya está aplicado el preview — solo persistir y cerrar
+      const nl = window.MAP.getActiveLayers()[k];
+      persistClassification(k, nl?.classification || null);
+      closeModal();
+    }
+
+    modal.querySelector('#adv-close-btn').addEventListener('click', cancelModal);
+    modal.querySelector('#adv-cancel-btn').addEventListener('click', cancelModal);
+    backdrop.addEventListener('click', cancelModal);
+    modal.querySelector('#adv-apply-btn').addEventListener('click', () => previewClassification());
+    modal.querySelector('#adv-accept-btn').addEventListener('click', acceptModal);
+
+    renderAdvMode(initMode);
   }
 
   // ── Helpers de persistencia ───────────────────────────────────
