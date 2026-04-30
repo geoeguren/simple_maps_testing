@@ -137,7 +137,7 @@ async function streamOpenAI(url, model, apiKey, systemPrompt, messages, res) {
     body: JSON.stringify({
       model,
       temperature: 0.7,
-      max_tokens: 1024,
+      max_tokens: 2048,
       stream: true,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -154,19 +154,24 @@ async function streamOpenAI(url, model, apiKey, systemPrompt, messages, res) {
     throw new Error(`HTTP ${resp.status}: ${err}`);
   }
 
-  // Leer el stream de SSE
+  // Leer el stream de SSE con buffer acumulativo para no partir líneas
   const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
+  const decoder = new TextDecoder('utf-8', { fatal: false });
   let fullText = '';
+  let lineBuffer = '';
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    const chunk = decoder.decode(value, { stream: true });
-    const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+    // decode sin stream:true para evitar corrupción de caracteres UTF-8 en límites de chunk
+    lineBuffer += decoder.decode(value, { stream: true });
+    const lines = lineBuffer.split('\n');
+    // La última "línea" puede estar incompleta — guardarla para el próximo chunk
+    lineBuffer = lines.pop();
     for (const line of lines) {
-      const data = line.slice(6);
-      if (data === '[DONE]') continue;
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (!data || data === '[DONE]') continue;
       try {
         const json = JSON.parse(data);
         const token = json.choices?.[0]?.delta?.content || '';
@@ -174,6 +179,17 @@ async function streamOpenAI(url, model, apiKey, systemPrompt, messages, res) {
           fullText += token;
           res.write(`data: ${JSON.stringify({ token })}\n\n`);
         }
+      } catch {}
+    }
+  }
+  // Procesar cualquier dato restante en el buffer
+  if (lineBuffer.startsWith('data: ')) {
+    const data = lineBuffer.slice(6).trim();
+    if (data && data !== '[DONE]') {
+      try {
+        const json = JSON.parse(data);
+        const token = json.choices?.[0]?.delta?.content || '';
+        if (token) { fullText += token; res.write(`data: ${JSON.stringify({ token })}\n\n`); }
       } catch {}
     }
   }
@@ -193,7 +209,7 @@ async function callGemini(apiKey, systemPrompt, messages) {
     body: JSON.stringify({
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents,
-      generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+      generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
     })
   });
   if (resp.status === 429 || resp.status === 503) {
