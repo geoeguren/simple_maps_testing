@@ -574,19 +574,16 @@ window.LAYERS_PANEL = (() => {
     const geom      = l.geomType || 'polygon';
     const layerDef  = window.LAYERS[l.layerKey] || {};
     const attrs     = layerDef.attributes || [];
-    // Usar campo real del WFS (campo), mostrar label como etiqueta legible
     const allFields     = attrs.filter(a => a.campo);
     const numericFields = attrs.filter(a => a.numeric);
 
-    // Estado inicial del modal: si la capa tiene clasificación la recordamos,
-    // si no, arrancamos en símbolo único
     const initMode    = l.classification?.type || 'single';
     const initField   = l.classification?.field || (allFields[0]?.campo || '');
-    const initPalette = l.classification?.palette || 'qualitative';
+    const initPalette = l.classification?.palette || null; // null = ninguna seleccionada
     const initMethod  = l.classification?.method || 'jenks';
     const initClasses = l.classification?.classes || 5;
 
-    // Snapshot del estado actual para poder cancelar
+    // Snapshot para cancelar
     const _savedClassification = l.classification ? JSON.parse(JSON.stringify(l.classification)) : null;
 
     // Backdrop
@@ -600,116 +597,218 @@ window.LAYERS_PANEL = (() => {
     modal.id = 'adv-modal';
     modal.className = 'adv-modal';
 
-    const modeButtons = [
+    const modes = [
       { mode: 'single',      label: 'Símbolo único' },
       { mode: 'categorized', label: 'Categorizado' },
-      { mode: 'graduated',   label: 'Graduado',   disabled: geom === 'line' ? false : false },
+      { mode: 'graduated',   label: 'Graduado' },
       { mode: 'heatmap',     label: 'Mapa de calor', disabled: true },
     ];
-
-    const modePills = modeButtons.map(b => `
-      <button class="adv-pill ${b.mode===initMode?'active':''}" data-mode="${b.mode}"
-              ${b.disabled ? 'disabled title="Próximamente"' : ''}>
-        ${b.label}
-      </button>`).join('');
+    const pills = modes.map(b =>
+      `<button class="adv-pill ${b.mode===initMode?'active':''}" data-mode="${b.mode}"
+               ${b.disabled?'disabled title="Próximamente"':''}>${b.label}</button>`
+    ).join('');
 
     modal.innerHTML = `
       <div class="adv-modal-header">
         <span class="adv-modal-title">Edición avanzada — ${esc(l.titulo || k)}</span>
         <button class="adv-modal-close" id="adv-close-btn"><span class="material-icons">close</span></button>
       </div>
-      <div class="adv-modal-pills">${modePills}</div>
+      <div class="adv-modal-pills">${pills}</div>
       <div class="adv-modal-body" id="adv-modal-body"></div>
       <div class="adv-modal-footer">
-        <button class="adv-footer-btn adv-cancel" id="adv-cancel-btn">Cancelar</button>
-        <button class="adv-footer-btn adv-apply"  id="adv-apply-btn">Aplicar</button>
-        <button class="adv-footer-btn adv-accept" id="adv-accept-btn">Aceptar</button>
+        <button class="adv-footer-btn adv-cancel"  id="adv-cancel-btn">Cancelar</button>
+        <button class="adv-footer-btn adv-apply"   id="adv-apply-btn">Aplicar</button>
+        <button class="adv-footer-btn adv-accept"  id="adv-accept-btn">Aceptar</button>
       </div>`;
     document.body.appendChild(modal);
 
-    const bodyEl   = modal.querySelector('#adv-modal-body');
-    let   curMode  = initMode;
+    const bodyEl  = modal.querySelector('#adv-modal-body');
+    let   curMode = initMode;
+    // Paleta actualmente seleccionada (null = personalizada)
+    let   selPalette = initPalette;
 
-    // ── Render del cuerpo según modo ────────────────────────────
+    // ── Helpers de rampa ─────────────────────────────────────────
+
+    function buildRampPicker(palKeys, currentPalette, onSelect) {
+      const wrap = document.createElement('div');
+      wrap.className = 'adv-ramp-picker';
+      palKeys.forEach(pk => {
+        const colors = window.PALETTES[pk] || [];
+        const btn = document.createElement('button');
+        btn.className = 'adv-ramp-btn' + (pk === currentPalette ? ' active' : '');
+        btn.dataset.pal = pk;
+        btn.title = window.PALETTE_LABELS[pk] || pk;
+        btn.innerHTML = colors.slice(0, 8).map(c =>
+          `<span style="background:${c};flex:1;min-width:0"></span>`
+        ).join('');
+        btn.addEventListener('click', () => {
+          wrap.querySelectorAll('.adv-ramp-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selPalette = pk;
+          onSelect(pk);
+        });
+        wrap.appendChild(btn);
+      });
+      return wrap;
+    }
+
+    function deselectRamp() {
+      selPalette = null;
+      modal.querySelectorAll('.adv-ramp-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    // ── Render de modos ──────────────────────────────────────────
 
     function renderAdvMode(mode) {
       curMode = mode;
       bodyEl.innerHTML = '';
 
       if (mode === 'single') {
-        bodyEl.innerHTML = `<p class="lea-na" style="padding:4px 0 8px">
-          El estilo simple se edita directamente en el panel de capas.</p>`;
+        const p = document.createElement('p');
+        p.className = 'lea-na';
+        p.style.padding = '6px 0';
+        p.textContent = 'El estilo simple se edita directamente en el panel de capas.';
+        bodyEl.appendChild(p);
         return;
       }
 
       if (mode === 'categorized') {
+        if (!allFields.length) {
+          bodyEl.innerHTML = `<p class="lea-na" style="padding:6px 0">Esta capa no tiene campos clasificables.</p>`;
+          return;
+        }
         const MAX_UNIQUE = 15;
-        const fieldOpts = allFields.map(a => {
+
+        // Campo
+        const fieldRow = document.createElement('div');
+        fieldRow.className = 'lea-row';
+        const sel = document.createElement('select');
+        sel.className = 'lea-field-select adv-field';
+        allFields.forEach(a => {
           const vals = [...new Set(
             (l.geojson?.features || []).map(f => f.properties?.[a.campo]).filter(v => v != null)
           )];
-          const tooMany  = vals.length > MAX_UNIQUE;
-          const suffix   = tooMany ? ` (${vals.length} val.)` : '';
-          // Mostrar el campo real (campo) con el label legible como prefijo
-          return `<option value="${a.campo}" ${initField===a.campo?'selected':''} ${tooMany?'disabled':''}>${a.label} [${a.campo}]${suffix}</option>`;
-        }).join('');
-        const palId = `adv-pal-${k}`;
-        bodyEl.innerHTML = `
-          ${leaRow('Campo', `<select class="lea-field-select adv-field">${fieldOpts}</select>`)}
-          <div class="lea-row-spacer"></div>
-          ${leaRow('Rampa', buildPaletteSelect(['qualitative','blues','greens','oranges','purples','redblue','browngreen'], initPalette, palId))}
-          <div class="lea-cat-items" style="margin-top:6px"></div>`;
-        wireCsel(bodyEl, palId, () => previewClassification());
-        bodyEl.querySelector('.adv-field')?.addEventListener('change', () => previewClassification());
-        previewClassification();
+          const opt = document.createElement('option');
+          opt.value = a.campo;
+          opt.textContent = a.campo + (vals.length > MAX_UNIQUE ? ` (${vals.length})` : '');
+          opt.disabled = vals.length > MAX_UNIQUE;
+          if (a.campo === initField) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        fieldRow.innerHTML = `<span class="lea-label">Campo</span>`;
+        const ctrl = document.createElement('div'); ctrl.className = 'lea-control';
+        ctrl.appendChild(sel); fieldRow.appendChild(ctrl);
+        bodyEl.appendChild(fieldRow);
+
+        // Separador
+        bodyEl.appendChild(Object.assign(document.createElement('div'), {className:'lea-row-spacer'}));
+
+        // Rampas
+        const rampLabel = document.createElement('p');
+        rampLabel.className = 'adv-section-label';
+        rampLabel.textContent = 'Rampa de color';
+        bodyEl.appendChild(rampLabel);
+
+        const catPalKeys = Object.keys(window.CAT_PALETTES);
+        const rampPicker = buildRampPicker(catPalKeys, selPalette, () => applyPreview());
+        bodyEl.appendChild(rampPicker);
+
+        bodyEl.appendChild(Object.assign(document.createElement('div'), {className:'lea-row-spacer'}));
+
+        // Items de categorías
+        const itemsWrap = document.createElement('div');
+        itemsWrap.className = 'lea-cat-items';
+        bodyEl.appendChild(itemsWrap);
+
+        sel.addEventListener('change', () => applyPreview());
+        applyPreview();
         return;
       }
 
       if (mode === 'graduated') {
         if (!numericFields.length) {
-          bodyEl.innerHTML = `<p class="lea-na" style="padding:4px 0">Esta capa no tiene campos numéricos.</p>`;
+          bodyEl.innerHTML = `<p class="lea-na" style="padding:6px 0">Esta capa no tiene campos numéricos.</p>`;
           return;
         }
-        const fieldOpts = numericFields.map(a =>
-          `<option value="${a.campo}" ${initField===a.campo?'selected':''}>${a.label} [${a.campo}]</option>`
-        ).join('');
+
+        // Campo
+        const fieldRow = document.createElement('div');
+        fieldRow.className = 'lea-row';
+        const sel = document.createElement('select');
+        sel.className = 'lea-field-select adv-field';
+        numericFields.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.campo;
+          opt.textContent = a.campo;
+          if (a.campo === initField) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        fieldRow.innerHTML = `<span class="lea-label">Campo</span>`;
+        const ctrl = document.createElement('div'); ctrl.className = 'lea-control';
+        ctrl.appendChild(sel); fieldRow.appendChild(ctrl);
+        bodyEl.appendChild(fieldRow);
+
+        // Método
         const methods = [
           {v:'jenks',    l:'Natural Breaks'},
           {v:'equal',    l:'Intervalos iguales'},
           {v:'quantile', l:'Cuantiles'},
         ];
-        const methodOpts = methods.map(m =>
-          `<option value="${m.v}" ${initMethod===m.v?'selected':''}>${m.l}</option>`
-        ).join('');
-        const palId = `adv-pal-${k}`;
-        bodyEl.innerHTML = `
-          ${leaRow('Campo',  `<select class="lea-field-select adv-field">${fieldOpts}</select>`)}
-          ${leaRow('Método', `<select class="lea-method-select adv-method">${methodOpts}</select>`)}
-          ${leaRow('Clases', `<div class="lea-slider-wrap"><input class="lea-range-input adv-classes" type="range" min="3" max="8" step="1" value="${initClasses}" /><span class="lea-val">${initClasses}</span></div>`)}
-          <div class="lea-row-spacer"></div>
-          ${leaRow('Rampa', buildPaletteSelect(['blues','greens','oranges','purples','redblue','browngreen'], initPalette, palId))}
-          <div class="lea-grad-items" style="margin-top:6px"></div>`;
+        const methodSel = document.createElement('select');
+        methodSel.className = 'lea-field-select adv-method';
+        methods.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.v; opt.textContent = m.l;
+          if (m.v === initMethod) opt.selected = true;
+          methodSel.appendChild(opt);
+        });
+        const methodRow = document.createElement('div');
+        methodRow.className = 'lea-row';
+        methodRow.innerHTML = `<span class="lea-label">Método</span>`;
+        const mc = document.createElement('div'); mc.className = 'lea-control';
+        mc.appendChild(methodSel); methodRow.appendChild(mc);
+        bodyEl.appendChild(methodRow);
+
+        // Clases
+        const classesRow = document.createElement('div');
+        classesRow.innerHTML = leaRow('Clases',
+          `<div class="lea-slider-wrap"><input class="lea-range-input adv-classes" type="range" min="3" max="8" step="1" value="${initClasses}" /><span class="lea-val">${initClasses}</span></div>`);
+        bodyEl.appendChild(classesRow.firstElementChild || classesRow);
+
+        bodyEl.appendChild(Object.assign(document.createElement('div'), {className:'lea-row-spacer'}));
+
+        const rampLabel = document.createElement('p');
+        rampLabel.className = 'adv-section-label';
+        rampLabel.textContent = 'Rampa de color';
+        bodyEl.appendChild(rampLabel);
+
+        const seqPalKeys = Object.keys(window.SEQ_PALETTES);
+        const rampPicker = buildRampPicker(seqPalKeys, selPalette, () => applyPreview());
+        bodyEl.appendChild(rampPicker);
+
+        bodyEl.appendChild(Object.assign(document.createElement('div'), {className:'lea-row-spacer'}));
+
+        const itemsWrap = document.createElement('div');
+        itemsWrap.className = 'lea-grad-items';
+        bodyEl.appendChild(itemsWrap);
+
         bodyEl.querySelector('.adv-classes')?.addEventListener('input', e => {
           const valEl = e.target.closest('.lea-slider-wrap')?.querySelector('.lea-val');
           if (valEl) valEl.textContent = e.target.value;
-          previewClassification();
+          applyPreview();
         });
-        wireCsel(bodyEl, palId, () => previewClassification());
-        bodyEl.querySelector('.adv-field')?.addEventListener('change',  () => previewClassification());
-        bodyEl.querySelector('.adv-method')?.addEventListener('change', () => previewClassification());
-        previewClassification();
+        sel.addEventListener('change', () => applyPreview());
+        methodSel.addEventListener('change', () => applyPreview());
+        applyPreview();
       }
     }
 
-    // ── Preview (Aplicar temporal) ───────────────────────────────
+    // ── Preview ──────────────────────────────────────────────────
 
-    function previewClassification() {
-      if (curMode === 'single') {
-        window.MAP.clearClassification(k);
-        return;
-      }
+    function applyPreview() {
+      if (curMode === 'single') { window.MAP.clearClassification(k); return; }
       const field   = bodyEl.querySelector('.adv-field')?.value;
-      const palette = getCselValue(bodyEl, `adv-pal-${k}`) || (curMode === 'graduated' ? 'blues' : 'qualitative');
+      const palette = selPalette || (curMode === 'graduated' ? 'seq_blues' : 'cat_tableau');
       const method  = bodyEl.querySelector('.adv-method')?.value  || 'jenks';
       const classes = parseInt(bodyEl.querySelector('.adv-classes')?.value || 5);
       if (!field) return;
@@ -717,9 +816,154 @@ window.LAYERS_PANEL = (() => {
         type: curMode, field, palette, method, classes,
         paletteColors: window.PALETTES[palette]
       });
-      // Reconstruir items categorizados/graduados en el modal
+      buildCatItemsAdv();
+    }
+
+    // ── Items editables (categorized + graduated) ─────────────────
+
+    function buildCatItemsAdv() {
+      const nl       = window.MAP.getActiveLayers()[k];
+      const cl       = nl?.classification;
+      const itemsEl  = bodyEl.querySelector('.lea-cat-items, .lea-grad-items');
+      if (!itemsEl || !cl?.colorMap) return;
+      itemsEl.innerHTML = '';
+
+      Object.entries(cl.colorMap).forEach(([val, color]) => {
+        const item = document.createElement('div');
+        item.className = 'adv-cat-item';
+
+        // Header siempre visible
+        const header = document.createElement('div');
+        header.className = 'adv-cat-header';
+
+        const swatch = document.createElement('label');
+        swatch.className = 'adv-cat-swatch';
+        swatch.style.background = color;
+        const pick = document.createElement('input');
+        pick.type = 'color'; pick.value = color;
+        pick.addEventListener('input', e => {
+          const c = e.target.value;
+          swatch.style.background = c;
+          deselectRamp();
+          updateCatColor(val, c);
+        });
+        swatch.appendChild(pick);
+
+        const label = document.createElement('span');
+        label.className = 'adv-cat-label';
+        label.textContent = val;
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'adv-cat-toggle';
+        toggleBtn.innerHTML = '<span class="material-icons" style="font-size:14px">tune</span>';
+
+        header.appendChild(swatch);
+        header.appendChild(label);
+        header.appendChild(toggleBtn);
+        item.appendChild(header);
+
+        // Detalle colapsable
+        const detail = document.createElement('div');
+        detail.className = 'adv-cat-detail hidden';
+
+        const baseStyle = nl.style || {};
+        const valStyle  = cl.styleMap?.[val] || {};
+        const s         = { ...baseStyle, ...valStyle, color, fillColor: color };
+
+        detail.innerHTML = buildDetailHTML(geom, s, val);
+        item.appendChild(detail);
+        itemsEl.appendChild(item);
+
+        toggleBtn.addEventListener('click', () => {
+          const wasHidden = detail.classList.contains('hidden');
+          itemsEl.querySelectorAll('.adv-cat-detail').forEach(d => d.classList.add('hidden'));
+          itemsEl.querySelectorAll('.adv-cat-toggle').forEach(b => b.classList.remove('open'));
+          if (wasHidden) {
+            detail.classList.remove('hidden');
+            toggleBtn.classList.add('open');
+            wireDetailControls(detail, val, s);
+          }
+        });
+      });
+    }
+
+    function buildDetailHTML(geom, s, val) {
+      let rows = '';
+      if (geom === 'point') {
+        rows += leaRow('Tamaño', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="radius" type="range" min="1" max="25" step="0.5" value="${s.radius??5}" /><span class="lea-val">${s.radius??5}</span></div>`);
+        rows += leaRow('Borde',  colorPickerHTML('color', toHex(s.color)));
+        rows += leaRow('Grosor', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
+        rows += leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${s.fillOpacity??0.85}" /><span class="lea-val">${Math.round((s.fillOpacity??0.85)*100)}%</span></div>`);
+      } else if (geom === 'polygon') {
+        rows += leaRow('Relleno', colorPickerHTML('fillColor', toHex(s.fillColor)));
+        rows += leaRow('Borde',   colorPickerHTML('color',     toHex(s.color)));
+        rows += leaRow('Grosor',  `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
+        rows += leaRow('Opacidad',`<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${s.fillOpacity??0.5}" /><span class="lea-val">${Math.round((s.fillOpacity??0.5)*100)}%</span></div>`);
+      } else {
+        rows += leaRow('Color',   colorPickerHTML('color', toHex(s.color)));
+        rows += leaRow('Grosor',  `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??2}" /><span class="lea-val">${s.weight??2}</span></div>`);
+        rows += leaRow('Opacidad',`<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${s.opacity??1}" /><span class="lea-val">${Math.round((s.opacity??1)*100)}%</span></div>`);
+      }
+      return rows;
+    }
+
+    function wireDetailControls(detail, val, initStyle) {
+      if (detail.dataset.wired) return;
+      detail.dataset.wired = '1';
+      detail.querySelectorAll('.lea-range-input').forEach(inp => {
+        inp.addEventListener('input', e => {
+          const prop  = e.target.dataset.prop;
+          const v     = parseFloat(e.target.value);
+          const valEl = e.target.closest('.lea-slider-wrap')?.querySelector('.lea-val');
+          if (valEl) valEl.textContent = (prop==='fillOpacity'||prop==='opacity') ? Math.round(v*100)+'%' : v;
+          deselectRamp();
+          updateCatValStyle(val, {[prop]: v});
+        });
+      });
+      detail.querySelectorAll('.lea-color-pick').forEach(pick => {
+        pick.addEventListener('input', e => {
+          const prop = e.target.dataset.prop;
+          e.target.closest('label').style.background = e.target.value;
+          const hex = detail.querySelector(`.lea-hex-input[data-prop="${prop}"]`);
+          if (hex) hex.value = e.target.value.toUpperCase();
+          deselectRamp();
+          updateCatValStyle(val, {[prop]: e.target.value});
+        });
+      });
+      detail.querySelectorAll('.lea-hex-input').forEach(inp => {
+        inp.addEventListener('change', e => {
+          let v = e.target.value.trim();
+          if (!v.startsWith('#')) v = '#' + v;
+          v = v.slice(0,7).toUpperCase();
+          if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+            e.target.value = v;
+            const prop = e.target.dataset.prop;
+            const pick = detail.querySelector(`.lea-color-pick[data-prop="${prop}"]`);
+            if (pick) { pick.value = v; pick.closest('label').style.background = v; }
+            deselectRamp();
+            updateCatValStyle(val, {[prop]: v});
+          }
+        });
+      });
+    }
+
+    function updateCatColor(val, color) {
       const nl = window.MAP.getActiveLayers()[k];
-      buildCatItems(bodyEl, k, geom, curMode);
+      if (!nl?.classification) return;
+      nl.classification.colorMap[val] = color;
+      if (!nl.classification.styleMap) nl.classification.styleMap = {};
+      nl.classification.styleMap[val] = { ...(nl.classification.styleMap[val]||nl.style||{}), fillColor: color, color };
+      window.MAP.applyClassificationFromData(k, nl.classification);
+    }
+
+    function updateCatValStyle(val, changes) {
+      const nl = window.MAP.getActiveLayers()[k];
+      if (!nl?.classification) return;
+      if (!nl.classification.styleMap) nl.classification.styleMap = {};
+      nl.classification.styleMap[val] = { ...(nl.classification.styleMap[val]||nl.style||{}), ...changes };
+      if (changes.fillColor) nl.classification.colorMap[val] = changes.fillColor;
+      if (changes.color && !changes.fillColor) nl.classification.colorMap[val] = changes.color;
+      window.MAP.applyClassificationFromData(k, nl.classification);
     }
 
     // ── Pills ────────────────────────────────────────────────────
@@ -728,19 +972,16 @@ window.LAYERS_PANEL = (() => {
       pill.addEventListener('click', () => {
         modal.querySelectorAll('.adv-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
+        selPalette = initPalette;
         renderAdvMode(pill.dataset.mode);
       });
     });
 
-    // ── Footer buttons ───────────────────────────────────────────
+    // ── Footer ───────────────────────────────────────────────────
 
-    function closeModal() {
-      backdrop.remove();
-      modal.remove();
-    }
+    function closeModal() { backdrop.remove(); modal.remove(); }
 
     function cancelModal() {
-      // Restaurar estado original
       if (_savedClassification) {
         window.MAP.applyClassificationFromData(k, _savedClassification);
         persistClassification(k, _savedClassification);
@@ -752,7 +993,6 @@ window.LAYERS_PANEL = (() => {
     }
 
     function acceptModal() {
-      // Ya está aplicado el preview — solo persistir y cerrar
       const nl = window.MAP.getActiveLayers()[k];
       persistClassification(k, nl?.classification || null);
       closeModal();
@@ -760,9 +1000,9 @@ window.LAYERS_PANEL = (() => {
 
     modal.querySelector('#adv-close-btn').addEventListener('click', cancelModal);
     modal.querySelector('#adv-cancel-btn').addEventListener('click', cancelModal);
-    backdrop.addEventListener('click', cancelModal);
-    modal.querySelector('#adv-apply-btn').addEventListener('click', () => previewClassification());
+    modal.querySelector('#adv-apply-btn').addEventListener('click', () => applyPreview());
     modal.querySelector('#adv-accept-btn').addEventListener('click', acceptModal);
+    backdrop.addEventListener('click', cancelModal);
 
     renderAdvMode(initMode);
   }
