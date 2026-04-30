@@ -570,7 +570,9 @@ window.MAP = (() => {
 
   // ── Modo consulta (identify) ─────────────────────────────────
 
-  let _identifyMode = false;
+  let _identifyMode             = false;
+  let _identifyHighlight        = null;
+  let _identifyClickedOnFeature = false;
 
   function setIdentifyMode(active) {
     _identifyMode = active;
@@ -579,27 +581,240 @@ window.MAP = (() => {
     if (!active) {
       leafletMap?.closePopup();
       clearHighlight();
+    } else {
+      // Cuando se activa: el próximo click en el mapa sin tocar un feature → desactivar
+      setTimeout(() => {
+        if (_identifyMode) leafletMap?.once('click', _onMapClickOutsideFeature);
+      }, 0);
+    }
+  }
+
+  function _onMapClickOutsideFeature() {
+    if (!_identifyMode) return;
+    if (_identifyClickedOnFeature) {
+      _identifyClickedOnFeature = false;
+      setTimeout(() => {
+        if (_identifyMode) leafletMap?.once('click', _onMapClickOutsideFeature);
+      }, 0);
+    } else {
+      _deactivateIdentify();
+    }
+  }
+
+  function _deactivateIdentify() {
+    _identifyMode = false;
+    const container = leafletMap?.getContainer();
+    if (container) container.classList.remove('identify-active');
+    leafletMap?.closePopup();
+    clearHighlight();
+    document.getElementById('popup-field-customizer')?.remove();
+    // Actualizar el botón en la UI
+    const btn = document.getElementById('btn-identify');
+    if (btn) {
+      btn.classList.remove('active');
+      btn.title = 'Consultar elementos';
     }
   }
 
   function getIdentifyMode() { return _identifyMode; }
 
-  function buildPopupContent(feature) {
+  // ── Campos ocultos por defecto en el popup ────────────────────
+  // Campos siempre excluidos (técnicos/internos):
+  const POPUP_ALWAYS_EXCLUDE = new Set(['gid', 'fdc', 'sag', 'entidad', 'objeto', 'gna']);
+
+  // Campos prioritarios que siempre se muestran (nombre, entidad política, clasificables):
+  const POPUP_PRIORITY_FIELDS = new Set([
+    'fna', 'nam', 'nom_pfi',                            // nombre
+    'nom_pcia', 'nom_depto', 'prov', 'pvecino',         // entidad política / país
+    'tipo_asent', 'cruce_pfi', 'gna', 'tap', 'jap',     // clasificación
+    'typ', 'rst', 'rtn', 'tup'                          // tipo/estado (rutas, puentes)
+  ]);
+
+  // Preferencias de campos visibles: layerKey → Set de campos habilitados
+  const _popupFieldPrefs = {};
+  const POPUP_PREFS_KEY  = 'sm_popup_fields';
+
+  function _loadPopupPrefs() {
+    try {
+      const raw = localStorage.getItem(POPUP_PREFS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      Object.entries(parsed).forEach(([lk, fields]) => {
+        _popupFieldPrefs[lk] = new Set(fields);
+      });
+    } catch {}
+  }
+
+  function _savePopupPrefs() {
+    try {
+      const out = {};
+      Object.entries(_popupFieldPrefs).forEach(([lk, set]) => { out[lk] = [...set]; });
+      localStorage.setItem(POPUP_PREFS_KEY, JSON.stringify(out));
+    } catch {}
+  }
+
+  _loadPopupPrefs();
+
+  function _getVisibleFields(layerKey, allFields) {
+    // Si el usuario ya configuró preferencias para esta capa, usar esas
+    if (_popupFieldPrefs[layerKey]) {
+      return allFields.filter(k => _popupFieldPrefs[layerKey].has(k));
+    }
+    // Por defecto: mostrar solo campos prioritarios que estén presentes
+    const priority = allFields.filter(k => POPUP_PRIORITY_FIELDS.has(k));
+    return priority.length ? priority : allFields.slice(0, 8);
+  }
+
+  function buildPopupContent(feature, mapKey) {
     if (!feature.properties) return '';
     const props = feature.properties;
-    const name  = props.fna || props.nom_pfi || props.nam || '';
-    const rows  = Object.entries(props)
-      .filter(([k, v]) => !k.endsWith('Type') && k !== 'gid' && v !== null && v !== 'None' && v !== '')
-      .slice(0, 12)
-      .map(([k, v]) => `<tr><td class="popup-key">${k}</td><td class="popup-val">${v}</td></tr>`)
-      .join('');
-    return `<div class="map-popup">
+
+    // Encontrar el layerKey desde mapKey
+    const layerKey = activeLayers[mapKey]?.layerKey || mapKey;
+    const layerDef = window.LAYERS?.[layerKey] || {};
+
+    // Obtener todos los campos disponibles (excluyendo siempre los técnicos)
+    const allFields = Object.keys(props).filter(k =>
+      !POPUP_ALWAYS_EXCLUDE.has(k) &&
+      !k.endsWith('Type') &&
+      props[k] !== null && props[k] !== undefined &&
+      props[k] !== 'None' && props[k] !== ''
+    );
+
+    const visibleFields = _getVisibleFields(layerKey, allFields);
+    const name = props.fna || props.nom_pfi || props.nam || '';
+
+    const rows = visibleFields
+      .filter(k => props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== '')
+      .map(k => {
+        // Usar label legible si está definido en el catálogo
+        const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
+        const label   = attrDef?.label || k;
+        return `<tr><td class="popup-key">${label}</td><td class="popup-val">${props[k]}</td></tr>`;
+      }).join('');
+
+    // ID único para el popup de personalización
+    const popupId = 'popup-' + Math.random().toString(36).slice(2, 8);
+
+    return `<div class="map-popup" id="${popupId}" data-layer-key="${layerKey}">
       ${name ? `<div class="popup-name">${name}</div>` : ''}
-      <table class="popup-table">${rows}</table>
+      <table class="popup-table">${rows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
+      <button class="popup-customize-btn" data-popup-id="${popupId}" data-layer-key="${layerKey}"
+              title="Personalizar campos">
+        <span class="material-icons" style="font-size:13px">tune</span>
+        Campos
+      </button>
     </div>`;
   }
 
-  let _identifyHighlight = null;
+  function _openFieldCustomizer(layerKey, allFieldsInData, anchorEl) {
+    // Cerrar si ya hay uno abierto
+    document.getElementById('popup-field-customizer')?.remove();
+
+    const layerDef    = window.LAYERS?.[layerKey] || {};
+    const currentPref = _popupFieldPrefs[layerKey];
+
+    // Calcular qué campos están actualmente activos
+    const isActive = (k) => currentPref ? currentPref.has(k) : POPUP_PRIORITY_FIELDS.has(k);
+
+    const items = allFieldsInData.map(k => {
+      const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
+      const label   = attrDef?.label || k;
+      const checked = isActive(k) ? 'checked' : '';
+      return `<label class="pfc-row">
+        <input type="checkbox" data-field="${k}" ${checked} />
+        <span class="pfc-label">${label}</span>
+        <span class="pfc-key">${k}</span>
+      </label>`;
+    }).join('');
+
+    const el = document.createElement('div');
+    el.id        = 'popup-field-customizer';
+    el.className = 'popup-field-customizer';
+    el.innerHTML = `
+      <div class="pfc-header">
+        <span>Campos visibles</span>
+        <button class="pfc-close" id="pfc-close-btn"><span class="material-icons" style="font-size:16px">close</span></button>
+      </div>
+      <div class="pfc-list">${items}</div>
+      <div class="pfc-footer">
+        <button class="pfc-btn pfc-reset" id="pfc-reset-btn">Restablecer</button>
+        <button class="pfc-btn pfc-apply" id="pfc-apply-btn">Aplicar</button>
+      </div>`;
+
+    document.body.appendChild(el);
+
+    // Posicionar junto al ancla
+    const rect = anchorEl.getBoundingClientRect();
+    el.style.position = 'fixed';
+    el.style.zIndex   = '9999';
+    el.style.top      = (rect.top - el.offsetHeight - 8) + 'px';
+    el.style.left     = rect.left + 'px';
+    // Reajustar si se sale de pantalla
+    requestAnimationFrame(() => {
+      const er = el.getBoundingClientRect();
+      if (er.top < 8) el.style.top = (rect.bottom + 8) + 'px';
+      if (er.right > window.innerWidth - 8) el.style.left = (window.innerWidth - er.width - 8) + 'px';
+    });
+
+    el.querySelector('#pfc-close-btn').addEventListener('click', () => el.remove());
+
+    el.querySelector('#pfc-reset-btn').addEventListener('click', () => {
+      delete _popupFieldPrefs[layerKey];
+      _savePopupPrefs();
+      el.remove();
+      leafletMap?.closePopup();
+    });
+
+    el.querySelector('#pfc-apply-btn').addEventListener('click', () => {
+      const checked = [...el.querySelectorAll('input[type=checkbox]:checked')].map(i => i.dataset.field);
+      if (checked.length === 0) return; // evitar dejar todo oculto
+      _popupFieldPrefs[layerKey] = new Set(checked);
+      _savePopupPrefs();
+      el.remove();
+      leafletMap?.closePopup();
+    });
+
+    // Click fuera cierra el customizer
+    setTimeout(() => {
+      document.addEventListener('click', function handler(e) {
+        if (!el.contains(e.target) && !e.target.closest('.popup-customize-btn')) {
+          el.remove();
+          document.removeEventListener('click', handler);
+        }
+      });
+    }, 0);
+  }
+
+  // Wire global para botones de personalización dentro de popups
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.popup-customize-btn');
+    if (!btn) return;
+    const layerKey = btn.dataset.layerKey;
+    const popupEl  = document.getElementById(btn.dataset.popupId);
+    if (!layerKey) return;
+
+    // Reconstruir lista de campos desde el feature actualmente visible
+    const popup   = leafletMap?.openedPopup?.();
+    // Fallback: reconstruir desde el contenido del DOM
+    const tableEl = popupEl?.querySelector('.popup-table');
+    const propsInPopup = tableEl
+      ? [...tableEl.querySelectorAll('tr')].map(tr => tr.querySelector('[data-field]')?.dataset.field).filter(Boolean)
+      : [];
+
+    // Obtener todos los campos del GeoJSON de esa capa para el customizer
+    let allFields = [];
+    Object.entries(activeLayers).forEach(([mk, entry]) => {
+      if (entry.layerKey !== layerKey) return;
+      const sample = entry.geojson?.features?.[0]?.properties || {};
+      allFields = Object.keys(sample).filter(k =>
+        !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type')
+      );
+    });
+
+    _openFieldCustomizer(layerKey, allFields, btn);
+  });
+
 
   function clearHighlight() {
     if (_identifyHighlight) {
@@ -632,18 +847,30 @@ window.MAP = (() => {
   function bindIdentify(feature, layer) {
     layer.on('click', e => {
       if (!_identifyMode) return;
+      L.DomEvent.stopPropagation(e);
+      _identifyClickedOnFeature = true;
+
+      // Buscar el mapKey de este layer para pasar al buildPopupContent
+      let mapKey = null;
+      Object.entries(activeLayers).forEach(([mk, entry]) => {
+        entry.leafletLayer?.eachLayer?.(l => { if (l === layer) mapKey = mk; });
+      });
+
       highlightFeature(feature, e.latlng);
       L.popup({ className: 'sm-popup' })
         .setLatLng(e.latlng)
-        .setContent(buildPopupContent(feature))
+        .setContent(buildPopupContent(feature, mapKey))
         .openOn(leafletMap);
     });
-    layer.on('mouseover', () => {
-      if (!_identifyMode) return;
-      layer.getElement && layer.getElement()?.classList.add('identify-hover');
-    });
-    layer.on('mouseout', () => {
-      layer.getElement && layer.getElement()?.classList.remove('identify-hover');
+
+    // Cursor: solo cambiar a pointer cuando identify está activo
+    layer.on('mouseover', e => {
+      const el = e.originalEvent?.target;
+      if (!_identifyMode) {
+        // Asegurar cursor de mano grab, no pointer
+        if (el) el.style.cursor = '';
+        return;
+      }
     });
   }
 
