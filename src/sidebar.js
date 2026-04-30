@@ -56,11 +56,15 @@ window.SIDEBAR = (() => {
     if (!currentUser) return '<button class="sb-chat-item" style="pointer-events:none;opacity:0">—</button>';
     if (!chats.length) return '<span class="sb-section-title" style="text-transform:none;font-size:13px">No hay chats todavía</span>';
     return chats.map(chat => `
-      <div class="sb-chat-row ${chat.id === currentChatId ? 'active' : ''}">
+      <div class="sb-chat-row ${chat.id === currentChatId ? 'active' : ''}" data-chatid="${chat.id}">
         <button class="sb-chat-item sb-action"
                 data-action="loadchat" data-id="${chat.id}">
           ${esc(chat.titulo || 'Sin título')}
         </button>
+        <input class="sb-chat-rename-input" type="text"
+               value="${esc(chat.titulo || 'Sin título')}"
+               data-id="${chat.id}" data-original="${esc(chat.titulo || 'Sin título')}"
+               autocomplete="off" />
         <button class="sb-chat-delete sb-action" data-action="deletechat"
                 data-id="${chat.id}" data-titulo="${esc(chat.titulo || 'Sin título')}" title="Eliminar chat">
           <span class="material-icons">delete</span>
@@ -113,6 +117,40 @@ window.SIDEBAR = (() => {
         case 'deletechat': confirmDeleteModal(btn.dataset.id, btn.dataset.titulo); break;
       }
     });
+
+    // Doble click en el label del chat → activar input inline
+    document.addEventListener('dblclick', e => {
+      const item = e.target.closest('.sb-chat-item');
+      if (!item) return;
+      const row = item.closest('.sb-chat-row');
+      if (!row) return;
+      activateSidebarRename(row);
+    });
+  }
+
+  function activateSidebarRename(row) {
+    const item  = row.querySelector('.sb-chat-item');
+    const input = row.querySelector('.sb-chat-rename-input');
+    if (!input || !item) return;
+    item.style.display  = 'none';
+    input.style.display = 'block';
+    input.focus();
+    input.select();
+
+    function commitRename() {
+      const newTitulo = input.value.trim();
+      const original  = input.dataset.original || '';
+      item.style.display  = '';
+      input.style.display = 'none';
+      if (!newTitulo || newTitulo === original) { input.value = original; return; }
+      renameChatInline(input.dataset.id, original, newTitulo);
+    }
+
+    input.onblur = commitRename;
+    input.onkeydown = e => {
+      if (e.key === 'Enter')  { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = input.dataset.original || ''; input.blur(); }
+    };
   }
 
   function toggleExpanded() {
@@ -163,8 +201,11 @@ window.SIDEBAR = (() => {
     }
   }
 
-  async function renameChatInline(chatId, currentTitulo) {
-    var newTitulo = prompt('Renombrar chat:', currentTitulo);
+  async function renameChatInline(chatId, currentTitulo, newTitulo) {
+    if (newTitulo === undefined) {
+      // Fallback: prompt (legacy, no se usa más)
+      newTitulo = prompt('Renombrar chat:', currentTitulo);
+    }
     if (!newTitulo || newTitulo.trim() === currentTitulo) return;
     try {
       var user = window.AUTH && window.AUTH.currentUser();
