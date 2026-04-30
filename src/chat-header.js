@@ -60,10 +60,8 @@ window.CHAT_HEADER = (() => {
     const modal = document.createElement('div');
     modal.className = 'delete-confirm-box';
     modal.innerHTML = `
-      <span class="material-icons delete-confirm-icon">warning</span>
-      <p class="delete-confirm-title">¿Eliminar este chat?</p>
-      <p class="delete-confirm-sub">${titulo.slice(0, 60)}${titulo.length > 60 ? '…' : ''}</p>
-      <p class="delete-confirm-warn">Esta acción no se puede deshacer.</p>
+      <p class="delete-confirm-title">Eliminar chat</p>
+      <p class="delete-confirm-body">¿Estás seguro que querés eliminar este chat? Esta acción no se puede deshacer.</p>
       <div class="delete-confirm-btns">
         <button class="delete-confirm-cancel">Cancelar</button>
         <button class="delete-confirm-ok">Eliminar</button>
