@@ -13,15 +13,17 @@
 
 /* Search modal */
 .search-modal {
-  position: fixed; top: 15%; left: 50%;
-  transform: translateX(-50%) translateY(-12px);
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) translateY(-12px);
   width: min(600px, 90vw);
+  max-height: min(80vh, 600px);
   background: var(--bg2); border: 0.5px solid var(--border-md);
   border-radius: var(--radius); box-shadow: var(--shadow-lg);
   z-index: 201; opacity: 0; pointer-events: none;
   transition: opacity .2s ease, transform .2s ease; overflow: hidden;
+  display: flex; flex-direction: column;
 }
-.search-modal.open { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
+.search-modal.open { opacity: 1; pointer-events: all; transform: translate(-50%, -50%) translateY(0); }
 body.day .search-modal { background: #f7f5f2; border-color: #c8c4be; }
 .search-modal-input-row {
   display: flex; align-items: center; gap: 10px;
