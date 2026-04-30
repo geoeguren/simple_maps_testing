@@ -685,7 +685,7 @@ body.day .popup-customize-btn.pfc-open { background: rgba(0,0,0,0.04); color: #1
   border-top: 0.5px solid var(--border);
   background: var(--bg);
   display: flex; flex-direction: column; gap: 2px;
-  max-height: 200px; overflow-y: auto;
+  max-height: 116px; overflow-y: auto;
   scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
   margin: 0 -12px -10px -12px; /* sangrar hasta los bordes del popup */
 }
