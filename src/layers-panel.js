@@ -619,7 +619,6 @@ window.LAYERS_PANEL = (() => {
           style="${_savedClassification ? '' : 'visibility:hidden'}">Borrar clasificación</button>
         <div style="flex:1"></div>
         <button class="adv-footer-btn adv-cancel" id="adv-cancel-btn">Cancelar</button>
-        <button class="adv-footer-btn adv-apply"  id="adv-apply-btn">Aplicar</button>
         <button class="adv-footer-btn adv-accept" id="adv-accept-btn">Aceptar</button>
       </div>`;
     document.body.appendChild(modal);
@@ -745,7 +744,6 @@ window.LAYERS_PANEL = (() => {
         fieldRow.appendChild(sel);
         bodyEl.appendChild(fieldRow);
 
-        bodyEl.appendChild(Object.assign(document.createElement('div'), { className: 'adv-body-sep' }));
 
         // Rampa
         const rampRow = document.createElement('div');
@@ -759,7 +757,6 @@ window.LAYERS_PANEL = (() => {
         rampRow.appendChild(rampCsel);
         bodyEl.appendChild(rampRow);
 
-        bodyEl.appendChild(Object.assign(document.createElement('div'), { className: 'adv-body-sep' }));
 
         const itemsWrap = document.createElement('div');
         itemsWrap.className = 'adv-cat-items';
@@ -823,7 +820,6 @@ window.LAYERS_PANEL = (() => {
           <div class="lea-slider-wrap"><input class="lea-range-input adv-classes" type="range" min="3" max="8" step="1" value="${initClasses}" /><span class="lea-val">${initClasses}</span></div>`;
         bodyEl.appendChild(classesRow);
 
-        bodyEl.appendChild(Object.assign(document.createElement('div'), { className: 'adv-body-sep' }));
 
         // Rampa
         const rampRow = document.createElement('div');
@@ -837,7 +833,6 @@ window.LAYERS_PANEL = (() => {
         rampRow.appendChild(rampCsel);
         bodyEl.appendChild(rampRow);
 
-        bodyEl.appendChild(Object.assign(document.createElement('div'), { className: 'adv-body-sep' }));
 
         const itemsWrap = document.createElement('div');
         itemsWrap.className = 'adv-grad-items';
@@ -1103,7 +1098,6 @@ window.LAYERS_PANEL = (() => {
 
     modal.querySelector('#adv-close-btn').addEventListener('click', cancelModal);
     modal.querySelector('#adv-cancel-btn').addEventListener('click', cancelModal);
-    modal.querySelector('#adv-apply-btn').addEventListener('click', () => applyPreview());
     modal.querySelector('#adv-accept-btn').addEventListener('click', acceptModal);
     modal.querySelector('#adv-clear-btn')?.addEventListener('click', () => {
       window.MAP.clearClassification(k);
