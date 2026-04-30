@@ -186,7 +186,16 @@ body.day .sb-chat-opt:hover { color: #1a1814; background: rgba(0,0,0,0.05); }
 body.day .sb-chat-opt-danger { color: #e06060; border-top-color: var(--border); }
 body.day .sb-chat-opt-danger:hover { background: rgba(200,80,80,0.1); color: #e06060; }
 
-/* Usuario */
+/* Rename input inline en sidebar */
+.sb-chat-rename-input {
+  display: none;
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: var(--font-sans); font-size: 14px; color: var(--cream);
+  padding: 0 10px; height: 36px; line-height: 36px;
+  min-width: 0;
+  border-bottom: 1px solid var(--accent);
+}
+body.day .sb-chat-rename-input { color: #1a1814; }
 .sb-user-row {
   display: flex; align-items: center; justify-content: center;
   width: 36px; height: 36px;
