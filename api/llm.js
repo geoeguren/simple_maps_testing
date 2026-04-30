@@ -153,7 +153,6 @@ async function streamOpenAI(url, model, apiKey, systemPrompt, messages, res) {
     const err = await resp.text();
     throw new Error(`HTTP ${resp.status}: ${err}`);
   }
-  }
 
   // Leer el stream de SSE
   const reader = resp.body.getReader();
@@ -272,11 +271,12 @@ module.exports = async function handler(req, res) {
   if ((!success || model === 'gemini') && geminiKey && !success) {
     try {
       fullText = await callGemini(geminiKey, systemPrompt, messages);
-      // Simular streaming para Gemini: enviar de a palabras
-      const words = fullText.split(' ');
-      for (const word of words) {
-        res.write(`data: ${JSON.stringify({ token: word + ' ' })}\n\n`);
-        await new Promise(r => setTimeout(r, 30));
+      // Simular streaming para Gemini: enviar de a chunks de chars
+      // (no por palabras, para no cortar tokens ni bloques de código)
+      const CHUNK = 8;
+      for (let i = 0; i < fullText.length; i += CHUNK) {
+        res.write(`data: ${JSON.stringify({ token: fullText.slice(i, i + CHUNK) })}\n\n`);
+        await new Promise(r => setTimeout(r, 15));
       }
       success   = true;
       usedModel = 'gemini';
