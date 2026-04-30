@@ -720,12 +720,9 @@ body.day .pfc-footer { border-color: #c8c4be; background: rgba(0,0,0,0.02); }
   font-family: var(--font-sans); font-size: 11px;
   cursor: pointer; border: 0.5px solid var(--border-md);
 }
-.pfc-reset { background: transparent; color: var(--cream2); }
-.pfc-reset:hover { background: var(--hover); color: var(--cream); }
 .pfc-apply { background: var(--accent); color: #fff; border-color: var(--accent); }
-.pfc-apply:hover { opacity: 0.85; }
-body.day .pfc-reset { color: #5a5650; }
-body.day .pfc-reset:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
+.pfc-apply:hover:not(:disabled) { opacity: 0.85; }
+.pfc-apply:disabled { opacity: 0.35; cursor: default; }
 
 /* Leaflet overrides */
 .leaflet-container { background: var(--map-bg) !important; }
