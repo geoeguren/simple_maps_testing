@@ -26,20 +26,6 @@ window.MAP = (() => {
 
     leafletMap.on('popupclose', () => clearHighlight());
 
-    // Desactivar modo consulta al hacer click en área vacía del mapa
-    leafletMap.on('click', () => {
-      if (_identifyMode && !_identifyClickedFeature) {
-        _identifyMode = false;
-        clearHighlight();
-        const btn = document.getElementById('btn-identify');
-        if (btn) {
-          btn.classList.remove('active');
-          btn.title = 'Consultar elementos';
-        }
-      }
-      _identifyClickedFeature = false;
-    });
-
     const savedBase = localStorage.getItem('sm_basemap') || 'auto';
     applyBasemap(savedBase);
 
@@ -588,6 +574,8 @@ window.MAP = (() => {
 
   function setIdentifyMode(active) {
     _identifyMode = active;
+    const container = leafletMap?.getContainer();
+    if (container) container.classList.toggle('identify-active', active);
     if (!active) {
       leafletMap?.closePopup();
       clearHighlight();
@@ -612,7 +600,6 @@ window.MAP = (() => {
   }
 
   let _identifyHighlight = null;
-  let _identifyClickedFeature = false;
 
   function clearHighlight() {
     if (_identifyHighlight) {
@@ -627,16 +614,16 @@ window.MAP = (() => {
     let hl;
     if (geom.includes('point') || geom.includes('multipoint')) {
       hl = L.circleMarker(latlng, {
-        radius: 14, color: '#f97316', weight: 3,
-        fillColor: '#f97316', fillOpacity: 0.2, opacity: 0.9
+        radius: 14, color: '#f5c518', weight: 3,
+        fillColor: '#f5c518', fillOpacity: 0.2, opacity: 0.9
       }).addTo(leafletMap);
     } else if (geom.includes('line')) {
       hl = L.geoJSON(feature, {
-        style: { color: '#f97316', weight: 6, opacity: 0.7 }
+        style: { color: '#f5c518', weight: 12, opacity: 0.75 }
       }).addTo(leafletMap);
     } else {
       hl = L.geoJSON(feature, {
-        style: { color: '#f97316', weight: 3, fillColor: '#f97316', fillOpacity: 0.15, opacity: 0.9 }
+        style: { color: '#f5c518', weight: 3, fillColor: '#f5c518', fillOpacity: 0.2, opacity: 0.9 }
       }).addTo(leafletMap);
     }
     _identifyHighlight = hl;
@@ -645,12 +632,18 @@ window.MAP = (() => {
   function bindIdentify(feature, layer) {
     layer.on('click', e => {
       if (!_identifyMode) return;
-      _identifyClickedFeature = true;
       highlightFeature(feature, e.latlng);
       L.popup({ className: 'sm-popup' })
         .setLatLng(e.latlng)
         .setContent(buildPopupContent(feature))
         .openOn(leafletMap);
+    });
+    layer.on('mouseover', () => {
+      if (!_identifyMode) return;
+      layer.getElement && layer.getElement()?.classList.add('identify-hover');
+    });
+    layer.on('mouseout', () => {
+      layer.getElement && layer.getElement()?.classList.remove('identify-hover');
     });
   }
 
