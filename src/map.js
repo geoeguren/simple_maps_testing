@@ -789,9 +789,11 @@ window.MAP = (() => {
     if (!openPopup || !_lastIdentifyFeature) return;
     const newContent = buildPopupContent(_lastIdentifyFeature, _lastIdentifyMapKey);
     openPopup.setContent(newContent);
-    // setContent recrea el DOM — re-wirear eventos
-    const wrapper = openPopup.getElement?.();
-    if (wrapper) _wirePopupEvents(wrapper);
+    // setContent recrea el DOM — re-wirear eventos tras un tick
+    setTimeout(() => {
+      const wrapper = openPopup.getElement?.();
+      if (wrapper) _wirePopupEvents(wrapper);
+    }, 0);
     if (keepAccordion) {
       const accordion = openPopup.getElement()?.querySelector('.pfc-accordion');
       const footer    = openPopup.getElement()?.querySelector('.pfc-footer');
@@ -867,9 +869,11 @@ window.MAP = (() => {
         .setLatLng(e.latlng)
         .setContent(buildPopupContent(feature, mapKey))
         .openOn(leafletMap);
-      // Wirear eventos directamente (popupopen puede no existir en Leaflet 1.9)
-      const _pw = _currentPopup.getElement?.();
-      if (_pw) _wirePopupEvents(_pw);
+      // setTimeout 0: esperar a que Leaflet inserte el popup en el DOM antes de wirear
+      setTimeout(() => {
+        const _pw = _currentPopup?.getElement?.();
+        if (_pw) _wirePopupEvents(_pw);
+      }, 0);
     });
 
     // Cursor: solo cambiar a pointer cuando identify está activo
