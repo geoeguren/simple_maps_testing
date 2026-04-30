@@ -61,9 +61,9 @@ window.SIDEBAR = (() => {
                 data-action="loadchat" data-id="${chat.id}">
           ${esc(chat.titulo || 'Sin título')}
         </button>
-        <button class="sb-chat-toggle sb-action" data-action="chattoggle"
-                data-id="${chat.id}" data-titulo="${esc(chat.titulo || 'Sin título')}" title="Opciones">
-          <span class="material-icons">expand_more</span>
+        <button class="sb-chat-delete sb-action" data-action="deletechat"
+                data-id="${chat.id}" data-titulo="${esc(chat.titulo || 'Sin título')}" title="Eliminar chat">
+          <span class="material-icons">delete</span>
         </button>
       </div>
     `).join('');
@@ -109,7 +109,6 @@ window.SIDEBAR = (() => {
         case 'login':      handleLogin(); break;
         case 'userconfig': e.stopPropagation(); SETTINGS.openFromBtn(btn); break;
         case 'loadchat':   loadChat(btn.dataset.id); break;
-        case 'chattoggle': toggleChatOpts(btn.dataset.id, btn); break;
         case 'renamechat': renameChatInline(btn.dataset.id, btn.dataset.titulo); break;
         case 'deletechat': confirmDeleteModal(btn.dataset.id, btn.dataset.titulo); break;
       }
@@ -120,69 +119,6 @@ window.SIDEBAR = (() => {
     expanded = !expanded;
     document.querySelectorAll('.sidebar').forEach(el => el.classList.toggle('expanded', expanded));
     document.getElementById('screen-home') && document.getElementById('screen-home').classList.toggle('sidebar-expanded', expanded);
-    if (!expanded) {
-      var dd = document.getElementById('chat-opts-dropdown');
-      if (dd) dd.remove();
-      document.querySelectorAll('.sb-chat-toggle .material-icons').forEach(function(i) { i.textContent = 'expand_more'; });
-    }
-  }
-
-  // ── Dropdown de opciones de chat ──────────────────────────────
-
-  function toggleChatOpts(chatId, btnEl) {
-    var icon = btnEl.querySelector('.material-icons');
-
-    var existing = document.getElementById('chat-opts-dropdown');
-    if (existing) {
-      existing.remove();
-      document.querySelectorAll('.sb-chat-toggle .material-icons').forEach(function(i) { i.textContent = 'expand_more'; });
-      if (existing.dataset.chatId === chatId) return;
-    }
-
-    var chat = chats.find(function(c) { return c.id === chatId; });
-    if (!chat) return;
-
-    var dropdown = document.createElement('div');
-    dropdown.id = 'chat-opts-dropdown';
-    dropdown.dataset.chatId = chatId;
-    dropdown.className = 'settings-dropdown chat-opts-dropdown';
-    dropdown.innerHTML =
-      '<button class="sb-chat-opt sb-action" data-action="renamechat"' +
-      ' data-id="' + chatId + '" data-titulo="' + esc(chat.titulo || 'Sin título') + '">' +
-      '<span class="material-icons" style="font-size:15px">edit</span>Renombrar</button>' +
-      '<button class="sb-chat-opt sb-chat-opt-danger sb-action" data-action="deletechat"' +
-      ' data-id="' + chatId + '" data-titulo="' + esc(chat.titulo || 'Sin título') + '">' +
-      '<span class="material-icons" style="font-size:15px">delete</span>Eliminar</button>';
-
-    document.body.appendChild(dropdown);
-
-    var sidebar = document.querySelector('.sidebar.expanded') || document.querySelector('.sidebar');
-    var sRect   = sidebar ? sidebar.getBoundingClientRect() : null;
-    var ddW     = dropdown.offsetWidth;
-    var btnRect = btnEl.getBoundingClientRect();
-    var left    = sRect
-      ? Math.max(8, sRect.left + (sRect.width - ddW) / 2)
-      : Math.max(8, btnRect.left + btnRect.width / 2 - ddW / 2);
-
-    dropdown.style.top  = (btnRect.bottom + 6) + 'px';
-    dropdown.style.left = left + 'px';
-
-    if (icon) icon.textContent = 'expand_less';
-
-    function close() {
-      dropdown.remove();
-      if (icon) icon.textContent = 'expand_more';
-      document.removeEventListener('mousedown', onOutside);
-    }
-
-    function onOutside(e) {
-      if (!dropdown.contains(e.target) && !btnEl.contains(e.target)) close();
-    }
-    setTimeout(function() { document.addEventListener('mousedown', onOutside); }, 0);
-
-    dropdown.querySelectorAll('.sb-action').forEach(function(el) {
-      el.addEventListener('click', close);
-    });
   }
 
   // ── Auth ──────────────────────────────────────────────────────
