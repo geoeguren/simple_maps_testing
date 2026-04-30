@@ -84,9 +84,13 @@ window.CHAT = (() => {
 
             if (json.token) {
               fullText += json.token;
+              // Eliminar bloques completos y también bloques incompletos (abiertos)
               const display = fullText
                 .replace(/```map[\s\S]*?```/g, '')
                 .replace(/```chat-title[\s\S]*?```/g, '')
+                .replace(/```style[\s\S]*?```/g, '')
+                .replace(/```classify[\s\S]*?```/g, '')
+                .replace(/```\w*[\s\S]*$/g, '')  // bloque abierto sin cerrar
                 .trimEnd();
               UI.setMessageText(msgEl, display || '');
 
