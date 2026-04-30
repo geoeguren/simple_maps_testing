@@ -659,71 +659,70 @@ body.day .popup-name { color: #1a1814; }
 body.day .popup-key { color: #5a5650; }
 body.day .popup-val { color: #1a1814; }
 
-/* Botón de personalización de campos en el popup */
+/* Botón trigger del acordeón de campos — igual al layer-edit-btn */
 .popup-customize-btn {
   display: flex; align-items: center; gap: 4px;
-  margin-top: 8px; padding: 5px 8px; width: 100%;
-  background: transparent; border: 0.5px solid var(--border-md);
-  border-radius: 6px; color: var(--cream2);
+  margin-top: 8px; padding: 4px 6px; width: 100%;
+  background: transparent; border: none;
+  border-top: 0.5px solid var(--border);
+  color: var(--cream2);
   font-family: var(--font-sans); font-size: 11px;
-  cursor: pointer; transition: background var(--transition), border-color var(--transition);
-  text-align: left;
+  cursor: pointer; transition: background var(--transition), color var(--transition);
+  text-align: left; border-radius: 0;
 }
 .popup-customize-btn:hover { background: var(--hover); color: var(--cream); }
-.popup-customize-btn.pfc-open {
-  border-color: var(--accent); color: var(--cream);
-  border-bottom-left-radius: 0; border-bottom-right-radius: 0;
-}
-body.day .popup-customize-btn { border-color: #c8c4be; color: #5a5650; }
-body.day .popup-customize-btn:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
-body.day .popup-customize-btn.pfc-open { border-color: var(--accent); color: #1a1814; }
+.popup-customize-btn.pfc-open { color: var(--cream); background: var(--hover); }
+body.day .popup-customize-btn { color: #6a6560; }
+body.day .popup-customize-btn:hover,
+body.day .popup-customize-btn.pfc-open { background: rgba(0,0,0,0.04); color: #1a1814; }
 
-.pfc-chevron { transition: transform 0.2s; }
+.pfc-chevron { transition: transform 0.2s; margin-left: auto; }
 .pfc-open .pfc-chevron { transform: rotate(180deg); }
 
-/* Acordeón inline dentro del popup */
+/* Acordeón — mismo estilo que layer-edit-accordion */
 .pfc-accordion {
-  border: 0.5px solid var(--accent);
-  border-top: none;
-  border-radius: 0 0 6px 6px;
-  overflow: hidden;
+  padding: 8px 12px 10px 12px;
+  border-top: 0.5px solid var(--border);
+  background: var(--bg);
+  display: flex; flex-direction: column; gap: 2px;
+  max-height: 200px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
+  margin: 0 -12px -10px -12px; /* sangrar hasta los bordes del popup */
 }
-body.day .pfc-accordion { border-color: var(--accent); }
+.pfc-accordion::-webkit-scrollbar { width: 4px; }
+.pfc-accordion::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+body.day .pfc-accordion { background: rgba(0,0,0,0.03); }
 
-.pfc-list {
-  padding: 4px 0; max-height: 180px; overflow-y: auto;
-}
 .pfc-row {
   display: flex; align-items: center; gap: 8px;
-  padding: 5px 10px; cursor: pointer;
+  padding: 4px 2px; cursor: pointer;
+  border-radius: 3px;
   transition: background var(--transition);
 }
 .pfc-row:hover { background: var(--hover); }
 body.day .pfc-row:hover { background: rgba(0,0,0,0.04); }
 .pfc-row input[type=checkbox] { flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
-.pfc-label { font-size: 12px; color: var(--cream); flex: 1; min-width: 0; }
-.pfc-key   { font-family: var(--font-mono); font-size: 10px; color: var(--cream2); flex-shrink: 0; }
-body.day .pfc-label { color: #1a1814; }
-body.day .pfc-key   { color: #5a5650; }
+.pfc-label { font-size: 12px; color: var(--cream2); flex: 1; min-width: 0; font-family: var(--font-sans); }
+.pfc-key   { font-family: var(--font-mono); font-size: 10px; color: var(--cream2); opacity: 0.55; flex-shrink: 0; }
+body.day .pfc-label { color: #6a6560; }
+body.day .pfc-key   { color: #6a6560; }
 
 .pfc-footer {
-  display: flex; gap: 6px; padding: 7px 8px;
+  display: flex; gap: 6px;
+  padding: 8px 12px 10px;
   border-top: 0.5px solid var(--border);
-  background: var(--bg3, var(--bg));
+  background: var(--bg);
+  margin: 0 -12px -10px -12px;
 }
-body.day .pfc-footer { border-color: #c8c4be; background: rgba(0,0,0,0.03); }
+body.day .pfc-footer { border-color: #c8c4be; background: rgba(0,0,0,0.02); }
 .pfc-btn {
   flex: 1; padding: 5px 8px; border-radius: 20px;
   font-family: var(--font-sans); font-size: 11px;
   cursor: pointer; border: 0.5px solid var(--border-md);
 }
-.pfc-reset {
-  background: transparent; color: var(--cream2);
-}
+.pfc-reset { background: transparent; color: var(--cream2); }
 .pfc-reset:hover { background: var(--hover); color: var(--cream); }
-.pfc-apply {
-  background: var(--accent); color: #fff; border-color: var(--accent);
-}
+.pfc-apply { background: var(--accent); color: #fff; border-color: var(--accent); }
 .pfc-apply:hover { opacity: 0.85; }
 body.day .pfc-reset { color: #5a5650; }
 body.day .pfc-reset:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
