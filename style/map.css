@@ -659,6 +659,78 @@ body.day .popup-name { color: #1a1814; }
 body.day .popup-key { color: #5a5650; }
 body.day .popup-val { color: #1a1814; }
 
+/* Botón de personalización de campos en el popup */
+.popup-customize-btn {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 8px; padding: 4px 8px;
+  background: transparent; border: 0.5px solid var(--border-md);
+  border-radius: 20px; color: var(--cream2);
+  font-family: var(--font-sans); font-size: 11px;
+  cursor: pointer; transition: background var(--transition);
+}
+.popup-customize-btn:hover { background: var(--hover); color: var(--cream); }
+body.day .popup-customize-btn { border-color: #c8c4be; color: #5a5650; }
+body.day .popup-customize-btn:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
+
+/* Panel de personalización de campos */
+.popup-field-customizer {
+  background: var(--bg2); border: 0.5px solid var(--border-md);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+  min-width: 200px; max-width: 260px;
+  font-family: var(--font-sans); z-index: 9999;
+}
+body.day .popup-field-customizer { background: #f0ede8; border-color: #c8c4be; }
+
+.pfc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px 6px; border-bottom: 0.5px solid var(--border);
+  font-size: 12px; font-weight: 500; color: var(--cream);
+}
+body.day .pfc-header { color: #1a1814; border-color: #c8c4be; }
+
+.pfc-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--cream2); display: flex; align-items: center; padding: 0;
+}
+.pfc-close:hover { color: var(--cream); }
+
+.pfc-list {
+  padding: 4px 0; max-height: 220px; overflow-y: auto;
+}
+.pfc-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px; cursor: pointer;
+  transition: background var(--transition);
+}
+.pfc-row:hover { background: var(--hover); }
+body.day .pfc-row:hover { background: rgba(0,0,0,0.04); }
+.pfc-row input[type=checkbox] { flex-shrink: 0; accent-color: var(--accent); }
+.pfc-label { font-size: 12px; color: var(--cream); flex: 1; }
+.pfc-key   { font-family: var(--font-mono); font-size: 10px; color: var(--cream2); }
+body.day .pfc-label { color: #1a1814; }
+body.day .pfc-key   { color: #5a5650; }
+
+.pfc-footer {
+  display: flex; gap: 6px; padding: 8px 10px;
+  border-top: 0.5px solid var(--border);
+}
+body.day .pfc-footer { border-color: #c8c4be; }
+.pfc-btn {
+  flex: 1; padding: 5px 8px; border-radius: 20px;
+  font-family: var(--font-sans); font-size: 11px;
+  cursor: pointer; border: 0.5px solid var(--border-md);
+}
+.pfc-reset {
+  background: transparent; color: var(--cream2);
+}
+.pfc-reset:hover { background: var(--hover); color: var(--cream); }
+.pfc-apply {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.pfc-apply:hover { opacity: 0.85; }
+body.day .pfc-reset { color: #5a5650; }
+body.day .pfc-reset:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
+
 /* Leaflet overrides */
 .leaflet-container { background: var(--map-bg) !important; }
 .leaflet-control-attribution {
@@ -668,5 +740,7 @@ body.day .popup-val { color: #1a1814; }
 body.day .leaflet-control-attribution { background: rgba(240,237,232,0.8) !important; color: var(--cream2) !important; }
 
 /* Cursor identify mode: dedo solo cuando el modo consulta está activo */
-.leaflet-container .leaflet-interactive { cursor: default !important; }
+/* Cursor: los features interactivos no cambian el cursor por defecto (Leaflet pone grab en el contenedor) */
+.leaflet-container .leaflet-interactive { cursor: inherit !important; }
+/* Con identify activo: dedo índice sobre features */
 .leaflet-container.identify-active .leaflet-interactive { cursor: pointer !important; }
