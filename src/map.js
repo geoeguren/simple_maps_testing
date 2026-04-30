@@ -701,7 +701,7 @@ window.MAP = (() => {
       const label   = attrDef?.label || k;
       const checked = isActive(k) ? 'checked' : '';
       return `<label class="pfc-row">
-        <input type="checkbox" data-field="${k}" ${checked} />
+        <input type="checkbox" data-field="${k}" data-original="${checked ? '1' : '0'}" ${checked} />
         <span class="pfc-label">${label}</span>
         <span class="pfc-key">${k}</span>
       </label>`;
@@ -717,8 +717,7 @@ window.MAP = (() => {
       </button>
       <div class="pfc-accordion" style="display:none">${checkboxRows}</div>
       <div class="pfc-footer" style="display:none">
-        <button class="pfc-btn pfc-reset">Restablecer</button>
-        <button class="pfc-btn pfc-apply">Aplicar</button>
+        <button class="pfc-btn pfc-apply" disabled>Aplicar</button>
       </div>
     </div>`;
   }
@@ -738,54 +737,72 @@ window.MAP = (() => {
       if (footer) footer.style.display = open ? 'none' : 'flex';
       toggleBtn.classList.toggle('pfc-open', !open);
       if (chevron) chevron.textContent = open ? 'expand_more' : 'expand_less';
-      setTimeout(() => leafletMap?.openedPopup?.()?.update?.(), 0);
-      return;
-    }
-
-    // Restablecer
-    const resetBtn = e.target.closest('.pfc-reset');
-    if (resetBtn && resetBtn.closest('.map-popup')) {
-      const lk = resetBtn.closest('.map-popup')?.dataset.layerKey;
-      if (!lk) return;
-      delete _popupFieldPrefs[lk];
-      _savePopupPrefs();
-      _refreshOpenPopup();
+      // Recalcular tamaño sin mover el popup
+      setTimeout(() => {
+        const lp = leafletMap?.openedPopup?.();
+        if (!lp) return;
+        const _ap = lp.options.autoPan;
+        lp.options.autoPan = false;
+        lp.update();
+        lp.options.autoPan = _ap;
+      }, 0);
       return;
     }
 
     // Aplicar
     const applyBtn = e.target.closest('.pfc-apply');
     if (applyBtn && applyBtn.closest('.map-popup')) {
-      const popup = applyBtn.closest('.map-popup');
-      const lk    = popup?.dataset.layerKey;
+      if (applyBtn.disabled) return;
+      const popup   = applyBtn.closest('.map-popup');
+      const lk      = popup?.dataset.layerKey;
       if (!lk) return;
+      // Leer checkboxes ANTES de que setContent destruya el DOM
       const checked = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]:checked')]
         .map(i => i.dataset.field);
       if (checked.length === 0) return;
       _popupFieldPrefs[lk] = new Set(checked);
       _savePopupPrefs();
-      _refreshOpenPopup();
+      _refreshOpenPopup(false);
     }
   });
 
-  // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo
-  function _refreshOpenPopup() {
+  // Activar botón Aplicar cuando el usuario cambia algún checkbox
+  document.addEventListener('change', e => {
+    const cb = e.target.closest('.pfc-accordion input[type=checkbox]');
+    if (!cb) return;
+    const popup    = cb.closest('.map-popup');
+    const applyBtn = popup?.querySelector('.pfc-apply');
+    if (!applyBtn) return;
+    // Hay cambio si algún checkbox difiere de su estado original
+    const hasChange = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]')]
+      .some(i => (i.checked ? '1' : '0') !== i.dataset.original);
+    applyBtn.disabled = !hasChange;
+  });
+
+  // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo.
+  // keepAccordion=true → deja el acordeón abierto (usado internamente por _refreshOpenPopup)
+  function _refreshOpenPopup(keepAccordion = false) {
     const openPopup = leafletMap?.openedPopup?.();
     if (!openPopup || !_lastIdentifyFeature) return;
     const newContent = buildPopupContent(_lastIdentifyFeature, _lastIdentifyMapKey);
     openPopup.setContent(newContent);
-    // Mantener el acordeón abierto luego del refresh
-    const accordion = openPopup.getElement()?.querySelector('.pfc-accordion');
-    const footer    = openPopup.getElement()?.querySelector('.pfc-footer');
-    const btn       = openPopup.getElement()?.querySelector('.popup-customize-btn');
-    const chevron   = btn?.querySelector('.pfc-chevron');
-    if (accordion) {
-      accordion.style.display = 'block';
-      if (footer) footer.style.display = 'flex';
-      btn?.classList.add('pfc-open');
-      if (chevron) chevron.textContent = 'expand_less';
+    if (keepAccordion) {
+      const accordion = openPopup.getElement()?.querySelector('.pfc-accordion');
+      const footer    = openPopup.getElement()?.querySelector('.pfc-footer');
+      const btn       = openPopup.getElement()?.querySelector('.popup-customize-btn');
+      const chevron   = btn?.querySelector('.pfc-chevron');
+      if (accordion) {
+        accordion.style.display = 'block';
+        if (footer) footer.style.display = 'flex';
+        btn?.classList.add('pfc-open');
+        if (chevron) chevron.textContent = 'expand_less';
+      }
     }
+    // Evitar que Leaflet haga autopan al recalcular posición
+    const _ap = openPopup.options.autoPan;
+    openPopup.options.autoPan = false;
     openPopup.update();
+    openPopup.options.autoPan = _ap;
   }
 
 
@@ -833,32 +850,17 @@ window.MAP = (() => {
       _lastIdentifyFeature = feature;
       _lastIdentifyMapKey  = mapKey;
 
-      const popup = L.popup({
+      // offset positivo en Y: la punta queda debajo del click, el globo crece hacia abajo
+      L.popup({
         className: 'sm-popup',
+        offset: L.point(0, 6),
         autoPan: true,
-        autoPanPaddingTopLeft:     L.point(60, 60),
+        autoPanPaddingTopLeft:     L.point(60, 64),
         autoPanPaddingBottomRight: L.point(60, 20)
       })
         .setLatLng(e.latlng)
         .setContent(buildPopupContent(feature, mapKey))
         .openOn(leafletMap);
-
-      // Después de que Leaflet posicione el popup, verificar que no quede
-      // por debajo de los controles del mapa (topbar ~52px + margen)
-      setTimeout(() => {
-        const popupEl    = popup.getElement();
-        const mapEl      = leafletMap.getContainer();
-        if (!popupEl || !mapEl) return;
-        const popupRect  = popupEl.getBoundingClientRect();
-        const mapRect    = mapEl.getBoundingClientRect();
-        const topbarH    = 52 + 12; // altura topbar + margen
-        const minTop     = mapRect.top + topbarH;
-        if (popupRect.top < minTop) {
-          // Necesita más pan hacia abajo para que el popup suba
-          const delta = minTop - popupRect.top + 8;
-          leafletMap.panBy([0, -delta], { animate: true, duration: 0.2 });
-        }
-      }, 50);
     });
 
     // Cursor: solo cambiar a pointer cuando identify está activo
