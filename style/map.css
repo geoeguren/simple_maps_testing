@@ -466,23 +466,48 @@ body.day .adv-modal-title { color: #1a1814; }
 .adv-modal-close:hover { background: var(--hover); color: var(--cream); }
 .adv-modal-close .material-icons { font-size: 18px; }
 
-.adv-modal-tabs {
-  display: flex; border-bottom: 0.5px solid var(--border);
+.adv-modal-pills {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 10px 14px; border-bottom: 0.5px solid var(--border);
   flex-shrink: 0;
 }
-body.day .adv-modal-tabs { border-color: #c8c4be; }
+body.day .adv-modal-pills { border-color: #c8c4be; }
 
-.adv-tab {
-  flex: 1; padding: 8px 0; background: transparent; border: none;
+.adv-pill {
+  padding: 4px 12px; border-radius: 20px;
+  background: transparent; border: 0.5px solid var(--border-md);
   font-family: var(--font-sans); font-size: 12px; color: var(--cream2);
-  cursor: pointer; border-bottom: 2px solid transparent;
-  transition: color var(--transition), border-color var(--transition);
-  margin-bottom: -1px;
+  cursor: pointer; transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
-.adv-tab.active { color: var(--cream); border-bottom-color: var(--accent); }
-.adv-tab:hover:not(.active) { color: var(--cream); }
-body.day .adv-tab { color: #6a6560; }
-body.day .adv-tab.active { color: #1a1814; }
+.adv-pill:hover:not([disabled]):not(.active) { background: var(--hover); color: var(--cream); }
+.adv-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.adv-pill[disabled] { opacity: 0.35; cursor: default; }
+body.day .adv-pill { color: #6a6560; }
+body.day .adv-pill.active { color: #fff; }
+
+.adv-modal-footer {
+  display: flex; justify-content: flex-end; gap: 6px;
+  padding: 10px 14px; border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+body.day .adv-modal-footer { border-color: #c8c4be; }
+
+.adv-footer-btn {
+  padding: 6px 14px; border-radius: 20px;
+  font-family: var(--font-sans); font-size: 12px; cursor: pointer;
+  border: 0.5px solid var(--border-md);
+  transition: background var(--transition), opacity var(--transition);
+}
+.adv-cancel { background: transparent; color: var(--cream2); }
+.adv-cancel:hover { background: var(--hover); color: var(--cream); }
+.adv-apply  { background: transparent; color: var(--cream2); border-color: var(--border-md); }
+.adv-apply:hover  { background: var(--hover); color: var(--cream); }
+.adv-accept { background: var(--accent); color: #fff; border-color: var(--accent); }
+.adv-accept:hover { opacity: 0.85; }
+body.day .adv-cancel { color: #5a5650; }
+body.day .adv-cancel:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
+body.day .adv-apply  { color: #5a5650; }
+body.day .adv-apply:hover  { background: rgba(0,0,0,0.05); color: #1a1814; }
 
 .adv-modal-body {
   padding: 12px 14px; overflow-y: auto; flex: 1;
