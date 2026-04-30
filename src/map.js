@@ -713,14 +713,12 @@ window.MAP = (() => {
       <button class="popup-customize-btn" title="Personalizar campos">
         <span class="material-icons" style="font-size:13px">tune</span>
         <span class="pfc-btn-label">Campos</span>
-        <span class="material-icons pfc-chevron" style="font-size:14px;margin-left:auto">expand_more</span>
+        <span class="material-icons pfc-chevron" style="font-size:14px">expand_more</span>
       </button>
-      <div class="pfc-accordion" style="display:none">
-        <div class="pfc-list">${checkboxRows}</div>
-        <div class="pfc-footer">
-          <button class="pfc-btn pfc-reset">Restablecer</button>
-          <button class="pfc-btn pfc-apply">Aplicar</button>
-        </div>
+      <div class="pfc-accordion" style="display:none">${checkboxRows}</div>
+      <div class="pfc-footer" style="display:none">
+        <button class="pfc-btn pfc-reset">Restablecer</button>
+        <button class="pfc-btn pfc-apply">Aplicar</button>
       </div>
     </div>`;
   }
@@ -732,13 +730,14 @@ window.MAP = (() => {
     if (toggleBtn) {
       const popup     = toggleBtn.closest('.map-popup');
       const accordion = popup?.querySelector('.pfc-accordion');
+      const footer    = popup?.querySelector('.pfc-footer');
       const chevron   = toggleBtn.querySelector('.pfc-chevron');
       if (!accordion) return;
       const open = accordion.style.display !== 'none';
       accordion.style.display = open ? 'none' : 'block';
+      if (footer) footer.style.display = open ? 'none' : 'flex';
       toggleBtn.classList.toggle('pfc-open', !open);
       if (chevron) chevron.textContent = open ? 'expand_more' : 'expand_less';
-      // Leaflet recalcula el tamaño del popup
       setTimeout(() => leafletMap?.openedPopup?.()?.update?.(), 0);
       return;
     }
@@ -760,7 +759,7 @@ window.MAP = (() => {
       const popup = applyBtn.closest('.map-popup');
       const lk    = popup?.dataset.layerKey;
       if (!lk) return;
-      const checked = [...popup.querySelectorAll('.pfc-list input[type=checkbox]:checked')]
+      const checked = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]:checked')]
         .map(i => i.dataset.field);
       if (checked.length === 0) return;
       _popupFieldPrefs[lk] = new Set(checked);
@@ -777,10 +776,12 @@ window.MAP = (() => {
     openPopup.setContent(newContent);
     // Mantener el acordeón abierto luego del refresh
     const accordion = openPopup.getElement()?.querySelector('.pfc-accordion');
+    const footer    = openPopup.getElement()?.querySelector('.pfc-footer');
     const btn       = openPopup.getElement()?.querySelector('.popup-customize-btn');
     const chevron   = btn?.querySelector('.pfc-chevron');
     if (accordion) {
       accordion.style.display = 'block';
+      if (footer) footer.style.display = 'flex';
       btn?.classList.add('pfc-open');
       if (chevron) chevron.textContent = 'expand_less';
     }
