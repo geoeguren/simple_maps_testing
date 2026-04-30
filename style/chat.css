@@ -129,11 +129,13 @@ body.day .prompt-box.compact { background: var(--bg2); }
   border-bottom: 0.5px solid var(--border);
   height: 52px; box-sizing: border-box;
   flex-shrink: 0;
+  display: flex; align-items: center;
 }
 body.day .chat-header-bar { background: var(--bg); }
 .chat-header-inner {
-  display: flex; align-items: center; justify-content: flex-start;
+  flex: 1; display: flex; align-items: center;
   gap: 6px; padding: 0 20px; height: 100%;
+  min-width: 0;
 }
 .chat-header-title-input {
   font-family: var(--font-sans); font-size: 15px; font-weight: 500;
@@ -144,11 +146,15 @@ body.day .chat-header-bar { background: var(--bg); }
 .chat-header-title-input::placeholder { color: var(--cream2); }
 body.day .chat-header-title-input { color: #1a1814; }
 .chat-header-delete-btn {
-  width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+  width: 36px; height: 36px; border-radius: 6px; flex-shrink: 0;
   background: transparent; border: none; color: var(--cream2);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
+  cursor: pointer; margin-right: 10px;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--transition), background var(--transition), color var(--transition);
+}
+.chat-header-bar:hover .chat-header-delete-btn {
+  opacity: 1; pointer-events: auto;
 }
 .chat-header-delete-btn .material-icons { font-size: 18px; }
 .chat-header-delete-btn:hover { background: rgba(200,80,80,0.12); color: #e06060; }
