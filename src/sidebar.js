@@ -61,6 +61,10 @@ window.SIDEBAR = (() => {
                 data-action="loadchat" data-id="${chat.id}">
           ${esc(chat.titulo || 'Sin título')}
         </button>
+        <input class="sb-chat-rename-input" type="text"
+               value="${esc(chat.titulo || 'Sin título')}"
+               data-id="${chat.id}" data-original="${esc(chat.titulo || 'Sin título')}"
+               autocomplete="off" />
         <button class="sb-chat-delete sb-action" data-action="deletechat"
                 data-id="${chat.id}" data-titulo="${esc(chat.titulo || 'Sin título')}" title="Eliminar chat">
           <span class="material-icons">delete</span>
@@ -109,10 +113,44 @@ window.SIDEBAR = (() => {
         case 'login':      handleLogin(); break;
         case 'userconfig': e.stopPropagation(); SETTINGS.openFromBtn(btn); break;
         case 'loadchat':   loadChat(btn.dataset.id); break;
+        case 'renamechat': renameChatInline(btn.dataset.id, btn.dataset.titulo); break;
         case 'deletechat': confirmDeleteModal(btn.dataset.id, btn.dataset.titulo); break;
       }
     });
 
+    // Doble click en el label del chat → activar input inline
+    document.addEventListener('dblclick', e => {
+      const item = e.target.closest('.sb-chat-item');
+      if (!item) return;
+      const row = item.closest('.sb-chat-row');
+      if (!row) return;
+      activateSidebarRename(row);
+    });
+  }
+
+  function activateSidebarRename(row) {
+    const item  = row.querySelector('.sb-chat-item');
+    const input = row.querySelector('.sb-chat-rename-input');
+    if (!input || !item) return;
+    item.style.display  = 'none';
+    input.style.display = 'block';
+    input.focus();
+    input.select();
+
+    function commitRename() {
+      const newTitulo = input.value.trim();
+      const original  = input.dataset.original || '';
+      item.style.display  = '';
+      input.style.display = 'none';
+      if (!newTitulo || newTitulo === original) { input.value = original; return; }
+      renameChatInline(input.dataset.id, original, newTitulo);
+    }
+
+    input.onblur = commitRename;
+    input.onkeydown = e => {
+      if (e.key === 'Enter')  { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = input.dataset.original || ''; input.blur(); }
+    };
   }
 
   function toggleExpanded() {
@@ -184,29 +222,8 @@ window.SIDEBAR = (() => {
   }
 
   async function confirmDeleteModal(chatId, titulo) {
-    var modal    = document.getElementById('delete-modal');
-    var titleEl  = document.getElementById('delete-modal-title');
-    if (titleEl) titleEl.textContent = '¿Eliminar "' + titulo + '"?';
-
-    if (modal) {
-      modal.classList.add('open');
-      var confirmBtn = document.getElementById('delete-modal-confirm');
-      var cancelBtn  = document.getElementById('delete-modal-cancel');
-      function closeModal() { modal.classList.remove('open'); }
-
-      async function onConfirm() {
-        closeModal();
-        confirmBtn.removeEventListener('click', onConfirm);
-        cancelBtn.removeEventListener('click', onCancel);
-        await deleteChat(chatId);
-      }
-      function onCancel() {
-        closeModal();
-        confirmBtn.removeEventListener('click', onConfirm);
-        cancelBtn.removeEventListener('click', onCancel);
-      }
-      confirmBtn && confirmBtn.addEventListener('click', onConfirm);
-      cancelBtn  && cancelBtn.addEventListener('click', onCancel);
+    if (window.CHAT_HEADER && window.CHAT_HEADER.showDeleteConfirm) {
+      window.CHAT_HEADER.showDeleteConfirm(titulo, () => deleteChat(chatId));
     } else {
       if (confirm('¿Eliminar "' + titulo + '"?')) await deleteChat(chatId);
     }
