@@ -749,12 +749,14 @@ window.MAP = (() => {
       return;
     }
 
-    // Aplicar
+    // Aplicar — el botón disabled no dispara click en todos los browsers,
+    // pero lo chequeamos igual por las dudas
     const applyBtn = e.target.closest('.pfc-apply');
-    if (applyBtn && applyBtn.closest('.map-popup')) {
-      if (applyBtn.disabled) return;
-      const popup   = applyBtn.closest('.map-popup');
-      const lk      = popup?.dataset.layerKey;
+    if (applyBtn) {
+      const popup = applyBtn.closest('.map-popup');
+      if (!popup) return;
+      if (applyBtn.getAttribute('disabled') !== null) return;
+      const lk = popup.dataset.layerKey;
       if (!lk) return;
       // Leer checkboxes ANTES de que setContent destruya el DOM
       const checked = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]:checked')]
@@ -767,16 +769,17 @@ window.MAP = (() => {
   });
 
   // Activar botón Aplicar cuando el usuario cambia algún checkbox
+  // Nota: e.target ES el checkbox (input), no usar closest con selector descendente
   document.addEventListener('change', e => {
-    const cb = e.target.closest('.pfc-accordion input[type=checkbox]');
-    if (!cb) return;
+    const cb = e.target;
+    if (cb.type !== 'checkbox' || !cb.dataset.field) return;
     const popup    = cb.closest('.map-popup');
-    const applyBtn = popup?.querySelector('.pfc-apply');
+    if (!popup) return;
+    const applyBtn = popup.querySelector('.pfc-apply');
     if (!applyBtn) return;
-    // Hay cambio si algún checkbox difiere de su estado original
     const hasChange = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]')]
       .some(i => (i.checked ? '1' : '0') !== i.dataset.original);
-    applyBtn.disabled = !hasChange;
+    applyBtn.toggleAttribute('disabled', !hasChange);
   });
 
   // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo.
