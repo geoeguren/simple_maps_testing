@@ -143,39 +143,17 @@ body.day .chat-header-bar { background: var(--bg); }
 }
 .chat-header-title-input::placeholder { color: var(--cream2); }
 body.day .chat-header-title-input { color: #1a1814; }
-.chat-header-menu-btn {
-  width: 26px; height: 26px; border-radius: 6px;
+.chat-header-delete-btn {
+  width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
   background: transparent; border: none; color: var(--cream2);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0;
+  cursor: pointer;
   transition: background var(--transition), color var(--transition);
 }
-.chat-header-menu-btn:hover { background: var(--cream3); color: var(--cream); }
-.chat-header-menu-btn .material-icons { font-size: 20px; }
-.chat-header-menu-wrap { position: relative; }
-.chat-header-dropdown {
-  display: none; position: fixed; top: 52px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg2); border: 0.5px solid var(--border-md);
-  border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
-  min-width: 160px; overflow: hidden; z-index: 9999; isolation: isolate;
-}
-.chat-header-dropdown.open { display: block; }
-body.day .chat-header-dropdown { background: #f0ede8; border-color: #c8c4be; }
-.chat-header-option {
-  display: flex; align-items: center; gap: 10px;
-  width: 100%; padding: 10px 14px;
-  background: transparent; border: none;
-  font-size: 14px; color: var(--cream2); cursor: pointer;
-  font-family: var(--font-sans);
-  transition: background var(--transition), color var(--transition);
-  text-align: left;
-}
-.chat-header-option:hover { background: var(--cream3); color: var(--cream); }
-.chat-header-option .material-icons { font-size: 18px; }
-.chat-header-option-danger:hover { background: rgba(200,80,80,0.1); color: #e06060; }
-body.day .chat-header-option { color: #5a5650; }
-body.day .chat-header-option:hover { color: #1a1814; background: rgba(0,0,0,0.05); }
+.chat-header-delete-btn .material-icons { font-size: 18px; }
+.chat-header-delete-btn:hover { background: rgba(200,80,80,0.12); color: #e06060; }
+body.day .chat-header-delete-btn { color: #9a9690; }
+body.day .chat-header-delete-btn:hover { background: rgba(200,80,80,0.1); color: #c04040; }
 
 /* Scroll to bottom */
 .btn-scroll-bottom {
