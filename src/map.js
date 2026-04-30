@@ -670,14 +670,15 @@ window.MAP = (() => {
     return priority.length ? priority : allFields.slice(0, 8);
   }
 
-  function buildPopupContent(feature, mapKey) {
-    if (!feature.properties) return '';
+  // buildPopupEl: devuelve un elemento DOM con eventos ya wired.
+  // Leaflet acepta elementos DOM en setContent — así evitamos cualquier problema de timing.
+  function buildPopupEl(feature, mapKey) {
+    if (!feature.properties) return document.createElement('div');
     const props = feature.properties;
 
     const layerKey = activeLayers[mapKey]?.layerKey || mapKey;
     const layerDef = window.LAYERS?.[layerKey] || {};
 
-    // Todos los campos disponibles (sin los técnicos)
     const allFields = Object.keys(props).filter(k =>
       !POPUP_ALWAYS_EXCLUDE.has(k) &&
       !k.endsWith('Type') &&
@@ -695,22 +696,14 @@ window.MAP = (() => {
         return `<tr><td class="popup-key">${label}</td><td class="popup-val">${props[k]}</td></tr>`;
       }).join('');
 
-    // Acordeón de personalización: checkboxes de todos los campos
     const currentPref = _popupFieldPrefs[layerKey];
     const isActive    = k => currentPref ? currentPref.has(k) : POPUP_PRIORITY_FIELDS.has(k);
 
-    const checkboxRows = allFields.map(k => {
-      const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
-      const label   = attrDef?.label || k;
-      const checked = isActive(k) ? 'checked' : '';
-      return `<label class="pfc-row">
-        <input type="checkbox" data-field="${k}" data-original="${checked ? '1' : '0'}" ${checked} />
-        <span class="pfc-label">${label}</span>
-        <span class="pfc-key">${k}</span>
-      </label>`;
-    }).join('');
-
-    return `<div class="map-popup" data-layer-key="${layerKey}">
+    // Construir el elemento DOM directamente
+    const el = document.createElement('div');
+    el.className = 'map-popup';
+    el.dataset.layerKey = layerKey;
+    el.innerHTML = `
       ${name ? `<div class="popup-name">${name}</div>` : ''}
       <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
       <button class="popup-customize-btn" title="Personalizar campos">
@@ -718,68 +711,81 @@ window.MAP = (() => {
         <span class="pfc-btn-label">Campos</span>
         <span class="material-icons pfc-chevron" style="font-size:14px">expand_more</span>
       </button>
-      <div class="pfc-accordion" style="display:none">${checkboxRows}</div>
+      <div class="pfc-accordion" style="display:none"></div>
       <div class="pfc-footer" style="display:none">
         <button class="pfc-btn pfc-apply" disabled>Aplicar</button>
-      </div>
-    </div>`;
-  }
+      </div>`;
 
-  // Los eventos dentro del popup NO llegan al document (Leaflet los detiene).
-  // Se wirean directamente sobre el contenedor del popup en cada apertura.
-  function _wirePopupEvents(popupEl) {
-    const popup = popupEl.querySelector('.map-popup');
-    if (!popup) return;
+    // Agregar checkboxes como elementos DOM con listeners directos
+    const accordion = el.querySelector('.pfc-accordion');
+    const applyBtn  = el.querySelector('.pfc-apply');
 
-    // Detener propagación en todo el popup para que Leaflet no cierre nada
-    L.DomEvent.disableClickPropagation(popup);
+    allFields.forEach(k => {
+      const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
+      const label   = attrDef?.label || k;
+      const active  = isActive(k);
 
-    // Toggle acordeón
-    const toggleBtn = popup.querySelector('.popup-customize-btn');
-    toggleBtn?.addEventListener('click', e => {
-      L.DomEvent.stopPropagation(e);
-      const accordion = popup.querySelector('.pfc-accordion');
-      const footer    = popup.querySelector('.pfc-footer');
-      const chevron   = toggleBtn.querySelector('.pfc-chevron');
-      if (!accordion) return;
-      const open = accordion.style.display !== 'none';
-      accordion.style.display = open ? 'none' : 'block';
-      if (footer) footer.style.display = open ? 'none' : 'flex';
-      toggleBtn.classList.toggle('pfc-open', !open);
-      if (chevron) chevron.textContent = open ? 'expand_more' : 'expand_less';
-      const lp = _currentPopup;
-      if (lp) {
-        const _ap = lp.options.autoPan;
-        lp.options.autoPan = false;
-        lp.update();
-        lp.options.autoPan = _ap;
-      }
-    });
+      const row = document.createElement('label');
+      row.className = 'pfc-row';
 
-    // Cambio en checkboxes → habilitar/deshabilitar Aplicar
-    popup.querySelectorAll('.pfc-accordion input[type=checkbox]').forEach(cb => {
+      const cb = document.createElement('input');
+      cb.type            = 'checkbox';
+      cb.dataset.field   = k;
+      cb.dataset.original = active ? '1' : '0';
+      cb.checked         = active;
+
+      const lblSpan = document.createElement('span');
+      lblSpan.className   = 'pfc-label';
+      lblSpan.textContent = label;
+
+      const keySpan = document.createElement('span');
+      keySpan.className   = 'pfc-key';
+      keySpan.textContent = k;
+
+      // Listener de change directo en el checkbox
       cb.addEventListener('change', () => {
-        const applyBtn  = popup.querySelector('.pfc-apply');
-        if (!applyBtn) return;
-        const hasChange = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]')]
+        const hasChange = [...accordion.querySelectorAll('input[type=checkbox]')]
           .some(i => (i.checked ? '1' : '0') !== i.dataset.original);
         applyBtn.toggleAttribute('disabled', !hasChange);
       });
+
+      row.appendChild(cb);
+      row.appendChild(lblSpan);
+      row.appendChild(keySpan);
+      accordion.appendChild(row);
+    });
+
+    // Toggle acordeón
+    const toggleBtn = el.querySelector('.popup-customize-btn');
+    const footer    = el.querySelector('.pfc-footer');
+    const chevron   = el.querySelector('.pfc-chevron');
+
+    toggleBtn.addEventListener('click', () => {
+      const open = accordion.style.display !== 'none';
+      accordion.style.display = open ? 'none' : 'block';
+      footer.style.display    = open ? 'none' : 'flex';
+      toggleBtn.classList.toggle('pfc-open', !open);
+      chevron.textContent = open ? 'expand_more' : 'expand_less';
+      if (_currentPopup) {
+        const _ap = _currentPopup.options.autoPan;
+        _currentPopup.options.autoPan = false;
+        _currentPopup.update();
+        _currentPopup.options.autoPan = _ap;
+      }
     });
 
     // Aplicar
-    const applyBtn = popup.querySelector('.pfc-apply');
-    applyBtn?.addEventListener('click', () => {
+    applyBtn.addEventListener('click', () => {
       if (applyBtn.hasAttribute('disabled')) return;
-      const lk = popup.dataset.layerKey;
-      if (!lk) return;
-      const checked = [...popup.querySelectorAll('.pfc-accordion input[type=checkbox]:checked')]
+      const checked = [...accordion.querySelectorAll('input[type=checkbox]:checked')]
         .map(i => i.dataset.field);
       if (checked.length === 0) return;
-      _popupFieldPrefs[lk] = new Set(checked);
+      _popupFieldPrefs[layerKey] = new Set(checked);
       _savePopupPrefs();
       _refreshOpenPopup(false);
     });
+
+    return el;
   }
 
   // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo.
@@ -787,13 +793,9 @@ window.MAP = (() => {
   function _refreshOpenPopup(keepAccordion = false) {
     const openPopup = _currentPopup;
     if (!openPopup || !_lastIdentifyFeature) return;
-    const newContent = buildPopupContent(_lastIdentifyFeature, _lastIdentifyMapKey);
+    const newContent = buildPopupEl(_lastIdentifyFeature, _lastIdentifyMapKey);
     openPopup.setContent(newContent);
-    // setContent recrea el DOM — re-wirear eventos tras un tick
-    setTimeout(() => {
-      const wrapper = openPopup.getElement?.();
-      if (wrapper) _wirePopupEvents(wrapper);
-    }, 0);
+
     if (keepAccordion) {
       const accordion = openPopup.getElement()?.querySelector('.pfc-accordion');
       const footer    = openPopup.getElement()?.querySelector('.pfc-footer');
@@ -867,13 +869,9 @@ window.MAP = (() => {
         autoPanPaddingBottomRight: L.point(60, 20)
       })
         .setLatLng(e.latlng)
-        .setContent(buildPopupContent(feature, mapKey))
+        .setContent(buildPopupEl(feature, mapKey))
         .openOn(leafletMap);
-      // setTimeout 0: esperar a que Leaflet inserte el popup en el DOM antes de wirear
-      setTimeout(() => {
-        const _pw = _currentPopup?.getElement?.();
-        if (_pw) _wirePopupEvents(_pw);
-      }, 0);
+
     });
 
     // Cursor: solo cambiar a pointer cuando identify está activo
