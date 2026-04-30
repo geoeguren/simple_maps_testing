@@ -103,6 +103,10 @@ window.CHAT_HEADER = (() => {
         startRename(newName);
       });
     }
+
+    // Botón eliminar en el header
+    document.getElementById('chat-header-delete-btn')
+      ?.addEventListener('click', () => deleteCurrentChat());
   }
 
   return { setChatHeader, startRename, deleteCurrentChat, showDeleteConfirm, wireEvents };
