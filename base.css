@@ -1,0 +1,67 @@
+/* ============================================================
+   BASE — Variables, reset, tema
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #212121;
+  --bg2:      #2a2a2a;
+  --bg3:      #333333;
+  --bg-input: rgba(255,255,255,0.05);
+  --cream:    #E2DDD4;
+  --cream2:   rgba(226,221,212,0.55);
+  --cream3:   rgba(226,221,212,0.10);
+  --accent:   #7a9abf;
+  --border:   rgba(226,221,212,0.10);
+  --border-md:rgba(226,221,212,0.18);
+  --map-bg:   #1a1a1a;
+  --chat-w:   400px;
+  --nav-h:    64px;
+  --radius:   16px;
+  --radius-sm:8px;
+  --font-serif: 'Georgia', serif;
+  --font-mono:  'DM Mono', monospace;
+  --font-sans:  'DM Sans', sans-serif;
+  --shadow-md: 0 4px 24px rgba(0,0,0,.35);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.45);
+  --transition: .18s ease;
+  --sb-w-collapsed: 52px;
+  --sb-w-expanded:  240px;
+}
+
+html, body { height: 100%; overflow: clip; }
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--cream);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+button  { cursor: pointer; border: none; background: none; font-family: inherit; font-size: inherit; color: inherit; }
+input, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+textarea { resize: none; }
+
+/* Modo día */
+body.day {
+  --bg:        #F0EDE8;
+  --bg2:       #E8E4DE;
+  --bg3:       #DDD9D2;
+  --bg-input:  rgba(0,0,0,0.04);
+  --cream:     #1a1814;
+  --cream2:    rgba(26,24,20,0.55);
+  --cream3:    rgba(26,24,20,0.10);
+  --accent:    #2a6496;
+  --border:    rgba(26,24,20,0.12);
+  --border-md: rgba(26,24,20,0.22);
+  --map-bg:    #d8d4cc;
+}
+
+/* Scrollbar global */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* Screens */
+.screen { display: none; width: 100%; height: 100%; }
+.screen.active { display: flex; }
