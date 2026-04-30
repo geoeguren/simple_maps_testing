@@ -924,8 +924,22 @@ window.LAYERS_PANEL = (() => {
         toggleBtn.className = 'adv-cat-toggle';
         toggleBtn.innerHTML = '<span class="material-icons">tune</span>';
 
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'adv-cat-toggle adv-cat-delete';
+        deleteBtn.title = 'Eliminar categoría';
+        deleteBtn.innerHTML = '<span class="material-icons">close</span>';
+        deleteBtn.addEventListener('click', () => {
+          const nl = window.MAP.getActiveLayers()[k];
+          if (!nl?.classification?.colorMap) return;
+          delete nl.classification.colorMap[val];
+          if (nl.classification.styleMap) delete nl.classification.styleMap[val];
+          window.MAP.applyClassificationFromData(k, nl.classification);
+          buildCatItemsAdv();
+        });
+
         header.appendChild(swatch);
         header.appendChild(nameInput);
+        header.appendChild(deleteBtn);
         header.appendChild(toggleBtn);
         item.appendChild(header);
 
