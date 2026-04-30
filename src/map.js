@@ -731,9 +731,13 @@ window.MAP = (() => {
     const popup = popupEl.querySelector('.map-popup');
     if (!popup) return;
 
+    // Detener propagación en todo el popup para que Leaflet no cierre nada
+    L.DomEvent.disableClickPropagation(popup);
+
     // Toggle acordeón
     const toggleBtn = popup.querySelector('.popup-customize-btn');
-    toggleBtn?.addEventListener('click', () => {
+    toggleBtn?.addEventListener('click', e => {
+      L.DomEvent.stopPropagation(e);
       const accordion = popup.querySelector('.pfc-accordion');
       const footer    = popup.querySelector('.pfc-footer');
       const chevron   = toggleBtn.querySelector('.pfc-chevron');
