@@ -24,12 +24,9 @@ window.MAP = (() => {
       attributionControl: true
     });
 
-    leafletMap.on('popupclose', () => clearHighlight());
+    leafletMap.on('popupclose', () => { clearHighlight(); _currentPopup = null; });
 
-    leafletMap.on('popupopen', e => {
-      const wrapper = e.popup?.getElement?.();
-      if (wrapper) _wirePopupEvents(wrapper);
-    });
+
 
     const savedBase = localStorage.getItem('sm_basemap') || 'auto';
     applyBasemap(savedBase);
@@ -580,6 +577,7 @@ window.MAP = (() => {
   let _identifyClickedOnFeature = false;
   let _lastIdentifyFeature      = null;
   let _lastIdentifyMapKey       = null;
+  let _currentPopup             = null;
 
   function setIdentifyMode(active) {
     _identifyMode = active;
@@ -745,7 +743,7 @@ window.MAP = (() => {
       if (footer) footer.style.display = open ? 'none' : 'flex';
       toggleBtn.classList.toggle('pfc-open', !open);
       if (chevron) chevron.textContent = open ? 'expand_more' : 'expand_less';
-      const lp = leafletMap?.openedPopup?.();
+      const lp = _currentPopup;
       if (lp) {
         const _ap = lp.options.autoPan;
         lp.options.autoPan = false;
@@ -783,7 +781,7 @@ window.MAP = (() => {
   // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo.
   // keepAccordion=true → deja el acordeón abierto (usado internamente por _refreshOpenPopup)
   function _refreshOpenPopup(keepAccordion = false) {
-    const openPopup = leafletMap?.openedPopup?.();
+    const openPopup = _currentPopup;
     if (!openPopup || !_lastIdentifyFeature) return;
     const newContent = buildPopupContent(_lastIdentifyFeature, _lastIdentifyMapKey);
     openPopup.setContent(newContent);
@@ -855,7 +853,7 @@ window.MAP = (() => {
       _lastIdentifyMapKey  = mapKey;
 
       // offset positivo en Y: la punta queda debajo del click, el globo crece hacia abajo
-      L.popup({
+      _currentPopup = L.popup({
         className: 'sm-popup',
         offset: L.point(0, 6),
         autoPan: true,
@@ -865,6 +863,9 @@ window.MAP = (() => {
         .setLatLng(e.latlng)
         .setContent(buildPopupContent(feature, mapKey))
         .openOn(leafletMap);
+      // Wirear eventos directamente (popupopen puede no existir en Leaflet 1.9)
+      const _pw = _currentPopup.getElement?.();
+      if (_pw) _wirePopupEvents(_pw);
     });
 
     // Cursor: solo cambiar a pointer cuando identify está activo
