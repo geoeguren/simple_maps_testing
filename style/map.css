@@ -667,6 +667,6 @@ body.day .popup-val { color: #1a1814; }
 .leaflet-control-attribution a { color: var(--accent) !important; }
 body.day .leaflet-control-attribution { background: rgba(240,237,232,0.8) !important; color: var(--cream2) !important; }
 
-/* Cursor identify mode */
-.leaflet-container .leaflet-interactive { cursor: inherit !important; }
-.leaflet-container.identify-active .leaflet-interactive { cursor: crosshair !important; }
+/* Cursor identify mode: dedo solo cuando el modo consulta está activo */
+.leaflet-container .leaflet-interactive { cursor: default !important; }
+.leaflet-container.identify-active .leaflet-interactive { cursor: pointer !important; }
