@@ -793,22 +793,49 @@ window.MAP = (() => {
   function _refreshOpenPopup(keepAccordion = false) {
     const openPopup = _currentPopup;
     if (!openPopup || !_lastIdentifyFeature) return;
-    const newContent = buildPopupEl(_lastIdentifyFeature, _lastIdentifyMapKey);
-    openPopup.setContent(newContent);
 
-    if (keepAccordion) {
-      const accordion = openPopup.getElement()?.querySelector('.pfc-accordion');
-      const footer    = openPopup.getElement()?.querySelector('.pfc-footer');
-      const btn       = openPopup.getElement()?.querySelector('.popup-customize-btn');
-      const chevron   = btn?.querySelector('.pfc-chevron');
-      if (accordion) {
-        accordion.style.display = 'block';
-        if (footer) footer.style.display = 'flex';
-        btn?.classList.add('pfc-open');
-        if (chevron) chevron.textContent = 'expand_less';
-      }
+    // Actualizar solo la tabla de datos visible — sin tocar el DOM del popup completo
+    const wrapper = openPopup.getElement?.();
+    if (!wrapper) return;
+    const popupEl   = wrapper.querySelector('.map-popup');
+    const tableEl   = popupEl?.querySelector('.popup-table');
+    const accordion = popupEl?.querySelector('.pfc-accordion');
+    const footer    = popupEl?.querySelector('.pfc-footer');
+    const toggleBtn = popupEl?.querySelector('.popup-customize-btn');
+    const chevron   = toggleBtn?.querySelector('.pfc-chevron');
+    if (!tableEl) return;
+
+    // Recalcular filas visibles con las preferencias ya guardadas
+    const props     = _lastIdentifyFeature.properties;
+    const layerKey  = activeLayers[_lastIdentifyMapKey]?.layerKey || _lastIdentifyMapKey;
+    const layerDef  = window.LAYERS?.[layerKey] || {};
+    const allFields = Object.keys(props).filter(k =>
+      !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type') &&
+      props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
+    );
+    const visibleFields = _getVisibleFields(layerKey, allFields);
+    tableEl.innerHTML = visibleFields.map(k => {
+      const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
+      const label   = attrDef?.label || k;
+      return `<tr><td class="popup-key">${label}</td><td class="popup-val">${props[k]}</td></tr>`;
+    }).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
+
+    // Actualizar data-original de los checkboxes para reflejar el nuevo estado guardado
+    accordion?.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.dataset.original = cb.checked ? '1' : '0';
+    });
+    // Desactivar Aplicar (ya no hay cambios pendientes)
+    popupEl?.querySelector('.pfc-apply')?.toggleAttribute('disabled', true);
+
+    // Cerrar acordeón salvo que se pida mantenerlo abierto
+    if (!keepAccordion && accordion) {
+      accordion.style.display = 'none';
+      if (footer)    footer.style.display = 'none';
+      if (toggleBtn) toggleBtn.classList.remove('pfc-open');
+      if (chevron)   chevron.textContent  = 'expand_more';
     }
-    // Evitar que Leaflet haga autopan al recalcular posición
+
+    // Recalcular tamaño del popup sin mover
     const _ap = openPopup.options.autoPan;
     openPopup.options.autoPan = false;
     openPopup.update();
