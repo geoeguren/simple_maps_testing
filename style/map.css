@@ -385,19 +385,20 @@ body.day .lea-dash-btn.active { background: var(--accent); color: #fff; }
 .lea-dash-select, .lea-field-select, .lea-palette-select, .lea-method-select {
   flex: 1; background: var(--bg2); border: 0.5px solid var(--border-md);
   border-radius: 4px; color: var(--cream); font-family: var(--font-sans);
-  font-size: 12px; padding: 3px 24px 3px 6px; outline: none; cursor: pointer;
+  font-size: 12px; padding: 5px 24px 5px 8px; outline: none; cursor: pointer;
   appearance: none; -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 7px center;
+  background-position: right 8px center;
+  line-height: 1.4;
 }
 .lea-classify-select:focus, .lea-field-select:focus,
 .lea-palette-select:focus, .lea-method-select:focus { border-color: var(--accent); }
 body.day .lea-classify-select, body.day .lea-field-select,
 body.day .lea-palette-select, body.day .lea-method-select {
   color: #1a1814; background: rgba(0,0,0,0.05);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 7px center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23555'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
 }
 
 /* Leyenda con clasificación */
@@ -567,34 +568,92 @@ body.day .export-option:hover { background: rgba(0,0,0,0.06); }
 body.day .btn-export-text { color: #5a5650; border-color: #c8c4be; }
 body.day .btn-export-text:hover { background: rgba(0,0,0,0.06); color: #1a1814; }
 
-/* Popup de consulta */
+/* ── Popup de consulta ─────────────────────────────────────── */
 .sm-popup .leaflet-popup-content-wrapper {
   background: var(--bg2); border: 0.5px solid var(--border-md);
   border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
   padding: 0;
 }
-.sm-popup .leaflet-popup-tip { background: var(--bg2); }
+/* Sin flecha */
+.sm-popup .leaflet-popup-tip-container { display: none; }
 .sm-popup .leaflet-popup-content { margin: 0; }
 body.day .sm-popup .leaflet-popup-content-wrapper { background: #f0ede8; border-color: #c8c4be; }
-body.day .sm-popup .leaflet-popup-tip { background: #f0ede8; }
 
-.map-popup { padding: 10px 12px; min-width: 180px; max-width: 280px; }
+.map-popup { min-width: 180px; max-width: 280px; }
+
+/* Título — mismo estilo que cabecera de dropdown */
 .popup-name {
   font-family: var(--font-sans); font-size: 13px; font-weight: 600;
-  color: var(--cream); margin-bottom: 6px; padding-bottom: 6px;
+  color: var(--cream); padding: 11px 16px 10px;
   border-bottom: 0.5px solid var(--border);
 }
-body.day .popup-name { color: #1a1814; }
+body.day .popup-name { color: #1a1814; border-color: #c8c4be; }
+
 .popup-table { width: 100%; border-collapse: collapse; }
 .popup-key {
-  font-family: var(--font-mono); font-size: 10px; color: var(--cream2);
-  padding: 2px 8px 2px 0; white-space: nowrap; vertical-align: top;
+  font-family: var(--font-mono); font-size: 11px; color: var(--cream2);
+  padding: 5px 8px 5px 16px; white-space: nowrap; vertical-align: top; width: 40%;
 }
 .popup-val {
-  font-family: var(--font-sans); font-size: 12px; color: var(--cream);
-  padding: 2px 0; word-break: break-word;
+  font-family: var(--font-sans); font-size: 13px; color: var(--cream);
+  padding: 5px 16px 5px 0; word-break: break-word;
 }
-body.day .popup-key { color: #5a5650; }
+body.day .popup-key { color: #6a6560; }
+body.day .popup-val { color: #1a1814; }
+
+/* Botón "Más campos" */
+.popup-customize-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 9px 16px;
+  background: transparent; border: none;
+  border-top: 0.5px solid var(--border);
+  font-family: var(--font-sans); font-size: 13px; color: var(--cream2);
+  cursor: pointer; transition: background var(--transition), color var(--transition);
+}
+.popup-customize-btn:hover { background: var(--cream3); color: var(--cream); }
+body.day .popup-customize-btn { color: #6a6560; border-color: #c8c4be; }
+body.day .popup-customize-btn:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
+
+.pfc-chevron {
+  font-family: 'Material Icons'; font-size: 16px;
+  color: var(--cream2); transition: transform 0.2s; line-height: 1;
+}
+.pfc-open .pfc-chevron { transform: rotate(180deg); }
+
+.pfc-accordion {
+  background: var(--bg); border-top: 0.5px solid var(--border);
+  max-height: 116px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
+}
+.pfc-accordion::-webkit-scrollbar { width: 4px; }
+.pfc-accordion::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+body.day .pfc-accordion { background: rgba(0,0,0,0.02); border-color: #c8c4be; }
+
+.pfc-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 16px; cursor: pointer;
+  transition: background var(--transition);
+}
+.pfc-row:hover { background: var(--cream3); }
+body.day .pfc-row:hover { background: rgba(0,0,0,0.04); }
+.pfc-row input[type=checkbox] { flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+.pfc-label { font-family: var(--font-mono); font-size: 11px; color: var(--cream2); flex: 1; }
+body.day .pfc-label { color: #6a6560; }
+
+.pfc-footer {
+  padding: 8px 16px; border-top: 0.5px solid var(--border);
+  background: var(--bg); display: flex; justify-content: flex-end;
+}
+body.day .pfc-footer { border-color: #c8c4be; background: rgba(0,0,0,0.02); }
+
+.pfc-apply {
+  padding: 6px 18px; border-radius: 30px;
+  background: var(--accent); color: #fff; border: none;
+  font-family: var(--font-sans); font-size: 13px;
+  cursor: pointer; transition: opacity var(--transition);
+}
+.pfc-apply:hover:not([disabled]) { opacity: 0.85; }
+.pfc-apply[disabled] { opacity: 0.35; cursor: default; pointer-events: none; }
 
 /* Styles panel */
 .styles-panel {
