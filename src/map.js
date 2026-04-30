@@ -573,6 +573,8 @@ window.MAP = (() => {
   let _identifyMode             = false;
   let _identifyHighlight        = null;
   let _identifyClickedOnFeature = false;
+  let _lastIdentifyFeature      = null;
+  let _lastIdentifyMapKey       = null;
 
   function setIdentifyMode(active) {
     _identifyMode = active;
@@ -669,11 +671,10 @@ window.MAP = (() => {
     if (!feature.properties) return '';
     const props = feature.properties;
 
-    // Encontrar el layerKey desde mapKey
     const layerKey = activeLayers[mapKey]?.layerKey || mapKey;
     const layerDef = window.LAYERS?.[layerKey] || {};
 
-    // Obtener todos los campos disponibles (excluyendo siempre los técnicos)
+    // Todos los campos disponibles (sin los técnicos)
     const allFields = Object.keys(props).filter(k =>
       !POPUP_ALWAYS_EXCLUDE.has(k) &&
       !k.endsWith('Type') &&
@@ -684,40 +685,18 @@ window.MAP = (() => {
     const visibleFields = _getVisibleFields(layerKey, allFields);
     const name = props.fna || props.nom_pfi || props.nam || '';
 
-    const rows = visibleFields
-      .filter(k => props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== '')
+    const dataRows = visibleFields
       .map(k => {
-        // Usar label legible si está definido en el catálogo
         const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
         const label   = attrDef?.label || k;
         return `<tr><td class="popup-key">${label}</td><td class="popup-val">${props[k]}</td></tr>`;
       }).join('');
 
-    // ID único para el popup de personalización
-    const popupId = 'popup-' + Math.random().toString(36).slice(2, 8);
-
-    return `<div class="map-popup" id="${popupId}" data-layer-key="${layerKey}">
-      ${name ? `<div class="popup-name">${name}</div>` : ''}
-      <table class="popup-table">${rows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
-      <button class="popup-customize-btn" data-popup-id="${popupId}" data-layer-key="${layerKey}"
-              title="Personalizar campos">
-        <span class="material-icons" style="font-size:13px">tune</span>
-        Campos
-      </button>
-    </div>`;
-  }
-
-  function _openFieldCustomizer(layerKey, allFieldsInData, anchorEl) {
-    // Cerrar si ya hay uno abierto
-    document.getElementById('popup-field-customizer')?.remove();
-
-    const layerDef    = window.LAYERS?.[layerKey] || {};
+    // Acordeón de personalización: checkboxes de todos los campos
     const currentPref = _popupFieldPrefs[layerKey];
+    const isActive    = k => currentPref ? currentPref.has(k) : POPUP_PRIORITY_FIELDS.has(k);
 
-    // Calcular qué campos están actualmente activos
-    const isActive = (k) => currentPref ? currentPref.has(k) : POPUP_PRIORITY_FIELDS.has(k);
-
-    const items = allFieldsInData.map(k => {
+    const checkboxRows = allFields.map(k => {
       const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
       const label   = attrDef?.label || k;
       const checked = isActive(k) ? 'checked' : '';
@@ -728,92 +707,85 @@ window.MAP = (() => {
       </label>`;
     }).join('');
 
-    const el = document.createElement('div');
-    el.id        = 'popup-field-customizer';
-    el.className = 'popup-field-customizer';
-    el.innerHTML = `
-      <div class="pfc-header">
-        <span>Campos visibles</span>
-        <button class="pfc-close" id="pfc-close-btn"><span class="material-icons" style="font-size:16px">close</span></button>
+    return `<div class="map-popup" data-layer-key="${layerKey}">
+      ${name ? `<div class="popup-name">${name}</div>` : ''}
+      <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
+      <button class="popup-customize-btn" title="Personalizar campos">
+        <span class="material-icons" style="font-size:13px">tune</span>
+        <span class="pfc-btn-label">Campos</span>
+        <span class="material-icons pfc-chevron" style="font-size:14px;margin-left:auto">expand_more</span>
+      </button>
+      <div class="pfc-accordion" style="display:none">
+        <div class="pfc-list">${checkboxRows}</div>
+        <div class="pfc-footer">
+          <button class="pfc-btn pfc-reset">Restablecer</button>
+          <button class="pfc-btn pfc-apply">Aplicar</button>
+        </div>
       </div>
-      <div class="pfc-list">${items}</div>
-      <div class="pfc-footer">
-        <button class="pfc-btn pfc-reset" id="pfc-reset-btn">Restablecer</button>
-        <button class="pfc-btn pfc-apply" id="pfc-apply-btn">Aplicar</button>
-      </div>`;
-
-    document.body.appendChild(el);
-
-    // Posicionar junto al ancla
-    const rect = anchorEl.getBoundingClientRect();
-    el.style.position = 'fixed';
-    el.style.zIndex   = '9999';
-    el.style.top      = (rect.top - el.offsetHeight - 8) + 'px';
-    el.style.left     = rect.left + 'px';
-    // Reajustar si se sale de pantalla
-    requestAnimationFrame(() => {
-      const er = el.getBoundingClientRect();
-      if (er.top < 8) el.style.top = (rect.bottom + 8) + 'px';
-      if (er.right > window.innerWidth - 8) el.style.left = (window.innerWidth - er.width - 8) + 'px';
-    });
-
-    el.querySelector('#pfc-close-btn').addEventListener('click', () => el.remove());
-
-    el.querySelector('#pfc-reset-btn').addEventListener('click', () => {
-      delete _popupFieldPrefs[layerKey];
-      _savePopupPrefs();
-      el.remove();
-      leafletMap?.closePopup();
-    });
-
-    el.querySelector('#pfc-apply-btn').addEventListener('click', () => {
-      const checked = [...el.querySelectorAll('input[type=checkbox]:checked')].map(i => i.dataset.field);
-      if (checked.length === 0) return; // evitar dejar todo oculto
-      _popupFieldPrefs[layerKey] = new Set(checked);
-      _savePopupPrefs();
-      el.remove();
-      leafletMap?.closePopup();
-    });
-
-    // Click fuera cierra el customizer
-    setTimeout(() => {
-      document.addEventListener('click', function handler(e) {
-        if (!el.contains(e.target) && !e.target.closest('.popup-customize-btn')) {
-          el.remove();
-          document.removeEventListener('click', handler);
-        }
-      });
-    }, 0);
+    </div>`;
   }
 
-  // Wire global para botones de personalización dentro de popups
+  // Wire global delegado para el acordeón dentro del popup
   document.addEventListener('click', e => {
-    const btn = e.target.closest('.popup-customize-btn');
-    if (!btn) return;
-    const layerKey = btn.dataset.layerKey;
-    const popupEl  = document.getElementById(btn.dataset.popupId);
-    if (!layerKey) return;
+    // Toggle acordeón
+    const toggleBtn = e.target.closest('.popup-customize-btn');
+    if (toggleBtn) {
+      const popup     = toggleBtn.closest('.map-popup');
+      const accordion = popup?.querySelector('.pfc-accordion');
+      const chevron   = toggleBtn.querySelector('.pfc-chevron');
+      if (!accordion) return;
+      const open = accordion.style.display !== 'none';
+      accordion.style.display = open ? 'none' : 'block';
+      toggleBtn.classList.toggle('pfc-open', !open);
+      if (chevron) chevron.textContent = open ? 'expand_more' : 'expand_less';
+      // Leaflet recalcula el tamaño del popup
+      setTimeout(() => leafletMap?.openedPopup?.()?.update?.(), 0);
+      return;
+    }
 
-    // Reconstruir lista de campos desde el feature actualmente visible
-    const popup   = leafletMap?.openedPopup?.();
-    // Fallback: reconstruir desde el contenido del DOM
-    const tableEl = popupEl?.querySelector('.popup-table');
-    const propsInPopup = tableEl
-      ? [...tableEl.querySelectorAll('tr')].map(tr => tr.querySelector('[data-field]')?.dataset.field).filter(Boolean)
-      : [];
+    // Restablecer
+    const resetBtn = e.target.closest('.pfc-reset');
+    if (resetBtn && resetBtn.closest('.map-popup')) {
+      const lk = resetBtn.closest('.map-popup')?.dataset.layerKey;
+      if (!lk) return;
+      delete _popupFieldPrefs[lk];
+      _savePopupPrefs();
+      _refreshOpenPopup();
+      return;
+    }
 
-    // Obtener todos los campos del GeoJSON de esa capa para el customizer
-    let allFields = [];
-    Object.entries(activeLayers).forEach(([mk, entry]) => {
-      if (entry.layerKey !== layerKey) return;
-      const sample = entry.geojson?.features?.[0]?.properties || {};
-      allFields = Object.keys(sample).filter(k =>
-        !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type')
-      );
-    });
-
-    _openFieldCustomizer(layerKey, allFields, btn);
+    // Aplicar
+    const applyBtn = e.target.closest('.pfc-apply');
+    if (applyBtn && applyBtn.closest('.map-popup')) {
+      const popup = applyBtn.closest('.map-popup');
+      const lk    = popup?.dataset.layerKey;
+      if (!lk) return;
+      const checked = [...popup.querySelectorAll('.pfc-list input[type=checkbox]:checked')]
+        .map(i => i.dataset.field);
+      if (checked.length === 0) return;
+      _popupFieldPrefs[lk] = new Set(checked);
+      _savePopupPrefs();
+      _refreshOpenPopup();
+    }
   });
+
+  // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo
+  function _refreshOpenPopup() {
+    const openPopup = leafletMap?.openedPopup?.();
+    if (!openPopup || !_lastIdentifyFeature) return;
+    const newContent = buildPopupContent(_lastIdentifyFeature, _lastIdentifyMapKey);
+    openPopup.setContent(newContent);
+    // Mantener el acordeón abierto luego del refresh
+    const accordion = openPopup.getElement()?.querySelector('.pfc-accordion');
+    const btn       = openPopup.getElement()?.querySelector('.popup-customize-btn');
+    const chevron   = btn?.querySelector('.pfc-chevron');
+    if (accordion) {
+      accordion.style.display = 'block';
+      btn?.classList.add('pfc-open');
+      if (chevron) chevron.textContent = 'expand_less';
+    }
+    openPopup.update();
+  }
 
 
   function clearHighlight() {
@@ -857,10 +829,35 @@ window.MAP = (() => {
       });
 
       highlightFeature(feature, e.latlng);
-      L.popup({ className: 'sm-popup' })
+      _lastIdentifyFeature = feature;
+      _lastIdentifyMapKey  = mapKey;
+
+      const popup = L.popup({
+        className: 'sm-popup',
+        autoPan: true,
+        autoPanPaddingTopLeft:     L.point(60, 60),
+        autoPanPaddingBottomRight: L.point(60, 20)
+      })
         .setLatLng(e.latlng)
         .setContent(buildPopupContent(feature, mapKey))
         .openOn(leafletMap);
+
+      // Después de que Leaflet posicione el popup, verificar que no quede
+      // por debajo de los controles del mapa (topbar ~52px + margen)
+      setTimeout(() => {
+        const popupEl    = popup.getElement();
+        const mapEl      = leafletMap.getContainer();
+        if (!popupEl || !mapEl) return;
+        const popupRect  = popupEl.getBoundingClientRect();
+        const mapRect    = mapEl.getBoundingClientRect();
+        const topbarH    = 52 + 12; // altura topbar + margen
+        const minTop     = mapRect.top + topbarH;
+        if (popupRect.top < minTop) {
+          // Necesita más pan hacia abajo para que el popup suba
+          const delta = minTop - popupRect.top + 8;
+          leafletMap.panBy([0, -delta], { animate: true, duration: 0.2 });
+        }
+      }, 50);
     });
 
     // Cursor: solo cambiar a pointer cuando identify está activo
