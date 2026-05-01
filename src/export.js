@@ -123,20 +123,21 @@ window.EXPORT = (() => {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, H);
 
-    // ── Título ────────────────────────────────────────────────
+    // ── Título centrado ───────────────────────────────────────
     const titulo = document.getElementById('map-title')?.value || 'Mapa';
-    ctx.fillStyle = '#1a1814';
-    ctx.font = 'bold 42px sans-serif';
+    ctx.fillStyle  = '#1a1814';
+    ctx.font       = 'bold 42px sans-serif';
+    ctx.textAlign  = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText(titulo, PAD, PAD);
+    ctx.fillText(titulo, W / 2, PAD);
+    ctx.textAlign = 'left';
 
-    // ── Mapa ──────────────────────────────────────────────────
-    const titleH   = 42 + 20;           // alto del título + margen
-    const footerH  = 180;               // espacio del footer
+    // ── Mapa (más alto: footer más compacto) ──────────────────
+    const titleH  = 42 + 24;    // título + margen
+    const footerH = 140;        // footer más compacto
     const mapAreaH = H - PAD - titleH - footerH - PAD;
     const mapAreaW = W - PAD * 2;
 
-    // Escalar el canvas del mapa para que entre en el área
     const scale = Math.min(mapAreaW / mapCanvas.width, mapAreaH / mapCanvas.height);
     const mw    = mapCanvas.width  * scale;
     const mh    = mapCanvas.height * scale;
@@ -150,54 +151,154 @@ window.EXPORT = (() => {
     ctx.lineWidth   = 1;
     ctx.strokeRect(mx, my, mw, mh);
 
+    // ── Flecha norte (esquina superior derecha del mapa) ──────
+    drawNorthArrow(ctx, mx + mw - 56, my + 16);
+
     // ── Footer ────────────────────────────────────────────────
-    const fy = my + mh + 24;
+    const fy = my + mh + 20;
 
     // Separador
     ctx.strokeStyle = '#dddddd';
     ctx.lineWidth   = 1;
     ctx.beginPath();
-    ctx.moveTo(PAD, fy - 12);
-    ctx.lineTo(W - PAD, fy - 12);
+    ctx.moveTo(PAD, fy - 8);
+    ctx.lineTo(W - PAD, fy - 8);
     ctx.stroke();
 
-    // Referencias (izquierda)
-    const activeLayers = window.MAP.getActiveLayers();
-    ctx.font = 'bold 18px sans-serif';
-    ctx.fillStyle = '#555555';
-    ctx.fillText('Referencias', PAD, fy);
+    // Columna izquierda: Referencias
+    const colLeft  = PAD;
+    const colRight = W / 2 + 20;
 
-    let refY = fy + 26;
+    const activeLayers = window.MAP.getActiveLayers();
+    ctx.font      = 'bold 17px sans-serif';
+    ctx.fillStyle = '#555555';
+    ctx.textBaseline = 'top';
+    ctx.fillText('Referencias', colLeft, fy);
+
+    let refY = fy + 24;
     Object.values(activeLayers).reverse().forEach(layer => {
+      if (layer.visible === false) return;
       const color = layer.style?.fillColor || layer.style?.color || '#888';
-      ctx.fillStyle = color;
-      ctx.fillRect(PAD, refY, 14, 14);
+      ctx.fillStyle   = color;
+      ctx.fillRect(colLeft, refY, 13, 13);
       ctx.strokeStyle = layer.style?.color || color;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(PAD, refY, 14, 14);
-      ctx.fillStyle = '#333333';
-      ctx.font = '16px sans-serif';
-      ctx.fillText(layer.titulo || '', PAD + 22, refY + 1);
-      refY += 22;
+      ctx.lineWidth   = 1;
+      ctx.strokeRect(colLeft, refY, 13, 13);
+      ctx.fillStyle  = '#333333';
+      ctx.font       = '15px sans-serif';
+      ctx.fillText(layer.titulo || '', colLeft + 20, refY);
+      refY += 20;
     });
 
-    // Escala numérica (centro)
-    const scale_m = getMapScale(window.MAP.getInstance());
+    // Columna derecha: escala gráfica + numérica + proyección + fuente
+    const scale_m  = getMapScale(window.MAP.getInstance());
     const scaleStr = formatScale(scale_m);
-    ctx.font = '16px sans-serif';
+
+    // Escala gráfica
+    const barY     = fy;
+    const barWidth = 200;
+    const barH     = 10;
+    const niceKm   = niceScaleKm(scale_m, mw, mapCanvas.width);
+    const barPx    = kmToPixelsOnOutput(niceKm, scale_m, mw, mapCanvas.width);
+
+    // Barra de escala gráfica
+    ctx.fillStyle   = '#333333';
+    ctx.fillRect(colRight, barY + 6, barPx, barH);
+    // Ticks
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(colRight + barPx / 2, barY + 6);
+    ctx.lineTo(colRight + barPx / 2, barY + 6 + barH);
+    ctx.stroke();
+    // Borde de la barra
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth   = 1;
+    ctx.strokeRect(colRight, barY + 6, barPx, barH);
+    // Etiquetas de la barra
+    ctx.fillStyle    = '#333333';
+    ctx.font         = '13px sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('0', colRight, barY + 6 + barH + 3);
+    ctx.fillText(`${niceKm / 2} km`, colRight + barPx / 2, barY + 6 + barH + 3);
+    ctx.fillText(`${niceKm} km`, colRight + barPx, barY + 6 + barH + 3);
+    ctx.textAlign = 'left';
+
+    // Escala numérica (sin prefijo)
+    ctx.font      = '15px sans-serif';
     ctx.fillStyle = '#555555';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Escala aproximada: 1:${scaleStr}`, W / 2, fy + 10);
+    ctx.textBaseline = 'top';
+    ctx.fillText(`1:${scaleStr}`, colRight, fy + 40);
 
-    // Proyección y fuentes (derecha)
-    ctx.textAlign = 'right';
-    ctx.font = '15px sans-serif';
-    ctx.fillStyle = '#777777';
-    ctx.fillText('Proyección: EPSG 4326 (WGS 84)', W - PAD, fy);
-    ctx.fillText('Fuentes: Instituto Geográfico Nacional (IGN)', W - PAD, fy + 22);
+    // Proyección (sin prefijo)
+    ctx.fillText('EPSG 4326 (WGS 84)', colRight, fy + 60);
 
-    ctx.textAlign = 'left'; // reset
+    // Fuente (sin aclaraciones entre paréntesis)
+    ctx.fillText('Fuente: Instituto Geográfico Nacional', colRight, fy + 80);
+
+    ctx.textAlign = 'left';
     return c;
+  }
+
+  // ── Flecha de norte ───────────────────────────────────────────
+
+  function drawNorthArrow(ctx, x, y) {
+    // Icono N con flecha simple: círculo + letra N + flecha arriba
+    const R = 22;
+    ctx.save();
+    ctx.translate(x + R, y + R);
+
+    // Fondo semitransparente
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath();
+    ctx.arc(0, 0, R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.lineWidth   = 1;
+    ctx.stroke();
+
+    // Flecha hacia arriba (norte)
+    ctx.fillStyle = '#1a1814';
+    ctx.beginPath();
+    ctx.moveTo(0, -R + 5);          // punta
+    ctx.lineTo(-5, -R + 15);        // lado izq
+    ctx.lineTo(-1.5, -R + 13);
+    ctx.lineTo(-1.5, 2);            // base izq
+    ctx.lineTo(1.5, 2);             // base der
+    ctx.lineTo(1.5, -R + 13);
+    ctx.lineTo(5, -R + 15);         // lado der
+    ctx.closePath();
+    ctx.fill();
+
+    // Letra N
+    ctx.fillStyle    = '#1a1814';
+    ctx.font         = 'bold 12px sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('N', 0, 10);
+
+    ctx.restore();
+  }
+
+  // ── Escala gráfica helpers ────────────────────────────────────
+
+  function niceScaleKm(scale_m, outputMapPx, sourceMapPx) {
+    // Cuántos km representa la barra de 200px en el output
+    const ratio    = sourceMapPx / outputMapPx;
+    const mPer200px = scale_m / 3779 * 200 * ratio;
+    const km        = mPer200px / 1000;
+    // Redondear a número bonito
+    const mag   = Math.pow(10, Math.floor(Math.log10(km)));
+    const norms = [1, 2, 5, 10];
+    let nice = norms.map(n => n * mag).find(n => n >= km / 2) || km;
+    return Math.round(nice * 10) / 10;
+  }
+
+  function kmToPixelsOnOutput(km, scale_m, outputMapPx, sourceMapPx) {
+    const ratio    = outputMapPx / sourceMapPx;
+    const mPer1px  = scale_m / 3779;
+    return (km * 1000) / mPer1px * ratio;
   }
 
   // ── Cálculo de escala ─────────────────────────────────────────
