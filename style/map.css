@@ -598,9 +598,9 @@ body.day .popup-header { border-color: #c8c4be; }
 body.day .popup-name { color: #1a1814; }
 
 .popup-close-btn {
-  width: 28px; height: 28px; flex-shrink: 0;
+  width: 26px; height: 26px; flex-shrink: 0;
   background: transparent; border: none; cursor: pointer;
-  color: var(--cream2); border-radius: 50%;
+  color: var(--cream2); border-radius: 4px;
   display: flex; align-items: center; justify-content: center;
   transition: background var(--transition), color var(--transition);
 }
