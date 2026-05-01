@@ -29,7 +29,7 @@ window.CHAT_HEADER = (() => {
       .catch(() => {
         const title = document.getElementById('chat-header-title');
         if (title) title.value = title.dataset.original || '';
-        window.TOAST.error('Error al renombrar.');
+        window.TOAST.error('Error al renombrar el chat.');
       });
   }
 
@@ -44,7 +44,7 @@ window.CHAT_HEADER = (() => {
         window.SIDEBAR.refreshChats();
         window.APP.newMap();
         window.TOAST.success('Chat eliminado.');
-      } catch { window.TOAST.error('Error al eliminar.'); }
+      } catch { window.TOAST.error('Error al eliminar el chat.'); }
     });
   }
 
