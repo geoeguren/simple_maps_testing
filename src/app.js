@@ -143,9 +143,7 @@ window.APP = (() => {
   function wireHomeEvents() {
     document.getElementById('btn-send-initial')
       ?.addEventListener('click', sendInitialPrompt);
-    document.querySelectorAll('.ex-chip').forEach(chip => {
-      chip.addEventListener('click', () => goToWork(chip.dataset.prompt));
-    });
+
   }
 
   function sendInitialPrompt() {
