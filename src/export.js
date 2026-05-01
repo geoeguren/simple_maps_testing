@@ -27,7 +27,7 @@ window.EXPORT = (() => {
 
     const blob = new Blob([JSON.stringify(fc, null, 2)], { type: 'application/geo+json' });
     downloadBlob(blob, `${sanitizeFilename(fc.name)}.geojson`);
-    window.TOAST.success('GeoJSON exportado.');
+    window.TOAST.success('Capa vectorial (geojson) exportada.');
     return Promise.resolve();
   }
 
@@ -48,7 +48,7 @@ window.EXPORT = (() => {
           if (!blob) { reject(new Error('Canvas vacío')); return; }
           const title = document.getElementById('map-title')?.value || 'simple-maps';
           downloadBlob(blob, `${sanitizeFilename(title)}.jpg`);
-          window.TOAST.success('Imagen exportada.');
+          window.TOAST.success('Imagen (jpeg) exportada.');
           resolve();
         }, 'image/jpeg', 0.93);
       });
@@ -333,7 +333,7 @@ window.EXPORT = (() => {
     const mapInst = window.MAP.getInstance();
     if (!mapInst) { window.TOAST.warning('No hay mapa activo.'); return; }
 
-    window.TOAST.loading('Generando PDF…');
+    window.TOAST.loading('Generando archivo portable…');
 
     try {
       // Cargar jsPDF dinámicamente si no está disponible
@@ -454,11 +454,11 @@ window.EXPORT = (() => {
       // ── Guardar ───────────────────────────────────────────────
       const filename = sanitizeFilename(titulo || 'mapa') + '.pdf';
       doc.save(filename);
-      window.TOAST.success('PDF exportado.');
+      window.TOAST.success('Archivo portable (pdf) exportado.');
 
     } catch (err) {
       console.error('[EXPORT] Error PDF:', err);
-      window.TOAST.error('Error al generar PDF: ' + err.message);
+      window.TOAST.error('Error al generar archivo portable: ' + err.message);
       throw err;
     }
   }
@@ -688,7 +688,7 @@ window.EXPORT = (() => {
         console.error('[EXPORT] Error generando HTML:', err);
         const pre = modal.querySelector('#html-code-pre');
         if (pre) pre.textContent = '// Error al generar el código: ' + err.message;
-        window.TOAST.error('Error al generar el código.');
+        window.TOAST.error('Error al generar el código html.');
       }
     }
 
@@ -702,7 +702,7 @@ window.EXPORT = (() => {
       if (!code) return;
       const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
       downloadBlob(blob, sanitizeFilename(titulo) + '.html');
-      window.TOAST.success('HTML descargado.');
+      window.TOAST.success('Archivo html descargado.');
     });
   }
 
