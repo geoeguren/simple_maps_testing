@@ -287,6 +287,22 @@ body.day .adv-ramp-option:hover { background: rgba(0,0,0,0.05); }
 }
 body.day .adv-ramp-option-label { color: #6a6560; }
 
+/* Campo/opción csel — mismas dimensiones que ramp, opciones de texto */
+.adv-field-csel .adv-field-trigger {
+  min-height: 32px;
+}
+.adv-field-selected {
+  font-family: var(--font-mono); font-size: 12px; color: var(--cream);
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+body.day .adv-field-selected { color: #1a1814; }
+
+.adv-field-disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+.adv-field-badge {
+  font-family: var(--font-mono); font-size: 10px; color: var(--cream2);
+  background: var(--cream3); border-radius: 3px; padding: 1px 4px; flex-shrink: 0;
+}
+
 /* Items de categorías / gradaciones */
 .adv-cat-items, .adv-grad-items {
   display: flex; flex-direction: column; gap: 2px;
