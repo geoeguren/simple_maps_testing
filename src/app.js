@@ -231,7 +231,7 @@ window.APP = (() => {
       if (user && chatId && currentPlan) {
         window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
           .then(() => window.TOAST.success('Nombre guardado.'))
-          .catch(() => window.TOAST.error('Error al guardar nombre.'));
+          .catch(() => window.TOAST.error('Error al guardar el nombre.'));
         window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
       }
     });
@@ -245,7 +245,7 @@ window.APP = (() => {
         .then(() => { if (toastMsg) window.TOAST.success(toastMsg); })
         .catch(e => {
           console.warn('[APP] Error al persistir:', e);
-          window.TOAST.warning('No se pudo guardar. Revisá tu conexión.');
+          window.TOAST.warning('No se pudo guardar. Revisá tu conexión a internet.');
         });
       window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
     }
@@ -304,7 +304,7 @@ window.APP = (() => {
         if (user && chatId) {
           window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
             .then(() => window.TOAST.success('Nombre guardado.'))
-            .catch(() => window.TOAST.error('Error al guardar nombre.'));
+            .catch(() => window.TOAST.error('Error al guardar el nombre.'));
           window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
         }
       });
@@ -415,7 +415,7 @@ window.APP = (() => {
         _persistPlan();
         return;
       }
-      window.TOAST.error('El plan de mapa no tiene capas.');
+      window.TOAST.error('El mapa no tiene capas.');
       return;
     }
 
