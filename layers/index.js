@@ -1,0 +1,30 @@
+/**
+ * layers/index.js — Punto de entrada del catálogo de capas
+ *
+ * Único archivo de capas que carga index.html (con type="module").
+ * Para agregar un país nuevo:
+ *   1. Crear layers/[pais]/index.js con sus capas
+ *   2. Importarlo acá y agregarlo a window.LAYERS
+ *   3. index.html no cambia nunca
+ */
+
+import { AR_LAYERS, AR_GEO_MAPS } from './ar/index.js';
+// Futuro:
+// import { CL_LAYERS, CL_GEO_MAPS } from './cl/index.js';
+
+window.LAYERS = {
+  ...AR_LAYERS,
+  // Futuro: ...CL_LAYERS,
+};
+
+window.PROVINCIAS_MAP = AR_GEO_MAPS.provincias;
+
+window.GEO_MAPS = {
+  ar: AR_GEO_MAPS,
+  // Futuro: cl: CL_GEO_MAPS,
+};
+
+console.log(
+  '[layers] Catálogo cargado: ' + Object.keys(window.LAYERS).length + ' capas' +
+  ' de ' + Object.keys(window.SOURCES || {}).length + ' fuentes'
+);
