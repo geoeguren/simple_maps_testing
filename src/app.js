@@ -158,6 +158,46 @@ window.APP = (() => {
       }
     });
 
+    // Función interna para persistir currentPlan en Firestore
+    function _persistPlan(toastMsg) {
+      const user   = window.AUTH?.currentUser();
+      const chatId = window.CHAT?.getChatId?.();
+      if (!user || !chatId || !currentPlan) return;
+      window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
+        .then(() => { if (toastMsg) window.TOAST.show(toastMsg); })
+        .catch(e => console.warn('[APP] Error al persistir:', e));
+      window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
+    }
+
+    // Persistir preferencias del popup en Firestore
+    window.MAP.onPopupPrefsSave((prefs) => {
+      const user   = window.AUTH?.currentUser();
+      const chatId = window.CHAT?.getChatId?.();
+      if (!user || !chatId) return;
+      window.FB.updateChat(user.uid, chatId, { popupPrefs: prefs })
+        .catch(e => console.warn('[APP] Error al persistir popup prefs:', e));
+      window.SIDEBAR.updateCachedChat(chatId, { popupPrefs: prefs });
+    });
+
+    // Persistir visibilidad cuando se toggle desde el panel de capas
+    window.MAP.onLayerVisibilityChange((key, visible) => {
+      if (currentPlan?.instrucciones) {
+        const inst = currentPlan.instrucciones.find(c => c.mapKey === key);
+        if (inst) inst.visible = visible;
+      }
+      _persistPlan();
+    });
+
+    // Persistir orden cuando se arrastra una capa
+    window.MAP.onLayerOrderChange(() => {
+      if (!currentPlan?.instrucciones) return;
+      const activeKeys = Object.keys(window.MAP.getActiveLayers());
+      currentPlan.instrucciones.sort((a, b) =>
+        activeKeys.indexOf(a.mapKey) - activeKeys.indexOf(b.mapKey)
+      );
+      _persistPlan();
+    });
+
     // Título del mapa
     const mapTitleInput = document.getElementById('map-title');
     if (mapTitleInput) {
@@ -320,7 +360,9 @@ window.APP = (() => {
         const mapKey = `${inst.layerKey}_${i}`;
         inst.mapKey  = mapKey;
         const style  = inst.style ? { ...inst.style } : { ...layerDef.defaultStyle };
-        window.MAP.addLayer(mapKey, inst.layerKey, geojson, style, inst.descripcion || layerDef.titulo);
+        window.MAP.addLayer(mapKey, inst.layerKey, geojson, style, inst.titulo || inst.descripcion || layerDef.titulo);
+        // Restaurar visibilidad si fue ocultada
+        if (inst.visible === false) window.MAP.restoreLayerVisible(mapKey, false);
         // Restaurar clasificación si existe
         if (inst.classification?.field && inst.classification?.type) {
           const cl = inst.classification;
@@ -394,11 +436,7 @@ window.APP = (() => {
     // Persistir en Firestore
     const user   = window.AUTH?.currentUser();
     const chatId = window.CHAT?.getChatId?.();
-    if (user && chatId && currentPlan) {
-      window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
-        .catch(e => console.warn('[APP] Error al persistir estilo:', e));
-      window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
-    }
+    _persistPlan();
   }
 
   // ── Aplicar clasificación desde chat ─────────────────────────
@@ -421,11 +459,7 @@ window.APP = (() => {
     if (!changed) return;
     const user   = window.AUTH?.currentUser();
     const chatId = window.CHAT?.getChatId?.();
-    if (user && chatId && currentPlan) {
-      window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
-        .catch(e => console.warn('[APP] Error al persistir clasificación:', e));
-      window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
-    }
+    _persistPlan();
   }
 
   async function restoreChat(chat) {
@@ -454,6 +488,8 @@ window.APP = (() => {
     }
 
     if (chat.lastMap) {
+      // Restaurar preferencias de campos del popup desde Firestore
+      if (chat.popupPrefs) window.MAP.setPopupPrefs(chat.popupPrefs);
       window.UI.showMapReady(chat.lastMap);
       // Renderizar el mapa automáticamente al restaurar, no solo mostrar la tarjeta
       await renderMap(chat.lastMap);
