@@ -317,6 +317,15 @@ body.day .adv-body-note { color: #6a6560; }
 }
 body.day .adv-body-label { color: #6a6560; }
 
+/* Parámetros globales — separados visualmente del campo y la rampa */
+.adv-global-wrap {
+  border-top: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+  padding: 2px 0;
+  margin: 0;
+}
+body.day .adv-global-wrap { border-color: #c8c4be; }
+
 /* Selector de rampa — mismo sistema que lea-csel */
 .adv-ramp-csel { position: relative; width: 100%; }
 
