@@ -839,6 +839,9 @@ window.LAYERS_PANEL = (() => {
         // Helper para leer el campo seleccionado
         const getField = () => fieldCsel.getValue();
 
+        // Parámetros globales
+        buildGlobalControls(bodyEl, geom);
+
         // Rampa
         const rampRow = document.createElement('div');
         rampRow.className = 'adv-body-row';
@@ -850,7 +853,6 @@ window.LAYERS_PANEL = (() => {
         rampRow.appendChild(rampLabel);
         rampRow.appendChild(rampCsel);
         bodyEl.appendChild(rampRow);
-
 
         const itemsWrap = document.createElement('div');
         itemsWrap.className = 'adv-cat-items';
@@ -908,6 +910,8 @@ window.LAYERS_PANEL = (() => {
           <div class="lea-slider-wrap"><input class="lea-range-input adv-classes" type="range" min="3" max="8" step="1" value="${initClasses}" /><span class="lea-val">${initClasses}</span></div>`;
         bodyEl.appendChild(classesRow);
 
+        // Parámetros globales
+        buildGlobalControls(bodyEl, geom);
 
         // Rampa
         const rampRow = document.createElement('div');
@@ -954,6 +958,122 @@ window.LAYERS_PANEL = (() => {
         paletteColors: window.PALETTES[palette]
       });
       buildCatItemsAdv();
+    }
+
+    // ── Controles globales (aplican a todas las categorías/grados) ──
+
+    function updateGlobalStyle(changes) {
+      const nl = window.MAP.getActiveLayers()[k];
+      if (!nl) return;
+      // Aplicar al estilo base
+      nl.style = { ...(nl.style || {}), ...changes };
+      // Propagar a cada styleMap existente
+      if (nl.classification?.styleMap) {
+        Object.keys(nl.classification.styleMap).forEach(val => {
+          nl.classification.styleMap[val] = { ...nl.classification.styleMap[val], ...changes };
+        });
+      }
+      window.MAP.applyClassificationFromData(k, nl.classification);
+    }
+
+    function buildGlobalControls(container, geom) {
+      const nl     = window.MAP.getActiveLayers()[k];
+      const s      = nl?.style || {};
+
+      const wrap = document.createElement('div');
+      wrap.className = 'adv-global-wrap';
+
+      function addRow(label, controlHTML, prop, isPercent) {
+        const row = document.createElement('div');
+        row.className = 'adv-body-row';
+        row.innerHTML = `<span class="adv-body-label">${label}</span>${controlHTML}`;
+        wrap.appendChild(row);
+
+        // Wiring de sliders
+        row.querySelectorAll('.lea-range-input').forEach(inp => {
+          wireSliderTouch(inp);
+          inp.addEventListener('input', e => {
+            const v    = parseFloat(e.target.value);
+            const valEl = e.target.closest('.lea-slider-wrap')?.querySelector('.lea-val');
+            if (valEl) valEl.textContent = isPercent ? Math.round(v * 100) + '%' : v;
+            updateGlobalStyle({ [prop]: v });
+          });
+        });
+
+        // Wiring de color pickers
+        row.querySelectorAll('.lea-color-pick').forEach(pick => {
+          pick.addEventListener('input', e => {
+            const p2 = e.target.dataset.prop;
+            e.target.closest('label').style.background = e.target.value;
+            const hex = row.querySelector(`.lea-hex-input[data-prop="${p2}"]`);
+            if (hex) hex.value = e.target.value.toUpperCase();
+            updateGlobalStyle({ [p2]: e.target.value });
+          });
+        });
+        row.querySelectorAll('.lea-hex-input').forEach(inp => {
+          inp.addEventListener('change', e => {
+            let v = e.target.value.trim();
+            if (!v.startsWith('#')) v = '#' + v;
+            v = v.slice(0, 7).toUpperCase();
+            if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+              e.target.value = v;
+              const p2   = e.target.dataset.prop;
+              const pick = row.querySelector(`.lea-color-pick[data-prop="${p2}"]`);
+              if (pick) { pick.value = v; pick.closest('label').style.background = v; }
+              updateGlobalStyle({ [p2]: v });
+            }
+          });
+        });
+      }
+
+      if (geom === 'point') {
+        const r  = s.radius ?? 5;
+        const w  = s.weight ?? 1.5;
+        const fo = s.fillOpacity ?? 0.85;
+        addRow('Tamaño',
+          `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="radius" type="range" min="1" max="25" step="0.5" value="${r}" /><span class="lea-val">${r}</span></div>`,
+          'radius', false);
+        addRow('Grosor del borde',
+          `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${w}" /><span class="lea-val">${w}</span></div>`,
+          'weight', false);
+        addRow('Opacidad',
+          `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${fo}" /><span class="lea-val">${Math.round(fo * 100)}%</span></div>`,
+          'fillOpacity', true);
+
+      } else if (geom === 'line') {
+        const w    = s.weight ?? 2;
+        const op   = s.opacity ?? 1;
+        const dash = nl?.style?.dashArray || 'none';
+        const dashId = `adv-global-dash-${k}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+        addRow('Grosor',
+          `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${w}" /><span class="lea-val">${w}</span></div>`,
+          'weight', false);
+        addRow('Opacidad',
+          `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${op}" /><span class="lea-val">${Math.round(op * 100)}%</span></div>`,
+          'opacity', true);
+        // Patrón de línea — usa buildDashSelect
+        const dashRow = document.createElement('div');
+        dashRow.className = 'adv-body-row';
+        dashRow.innerHTML = `<span class="adv-body-label">Patrón de línea</span>`;
+        const dashSel = buildDashSelect(dash, dashId);
+        dashRow.appendChild(dashSel);
+        wrap.appendChild(dashRow);
+        wireCsel(dashRow, dashId, dashVal => {
+          updateGlobalStyle({ dashArray: dashVal === 'none' ? null : dashVal });
+        });
+
+      } else if (geom === 'polygon') {
+        const w  = s.weight ?? 1.5;
+        const fo = s.fillOpacity ?? 0.5;
+        addRow('Grosor del borde',
+          `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${w}" /><span class="lea-val">${w}</span></div>`,
+          'weight', false);
+        addRow('Opacidad',
+          `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${fo}" /><span class="lea-val">${Math.round(fo * 100)}%</span></div>`,
+          'fillOpacity', true);
+      }
+
+      container.appendChild(wrap);
     }
 
     // ── Items editables ──────────────────────────────────────────
@@ -1140,19 +1260,15 @@ window.LAYERS_PANEL = (() => {
     function buildDetailHTML(geom, s, val) {
       let rows = '';
       if (geom === 'point') {
-        rows += leaRow('Tamaño', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="radius" type="range" min="1" max="25" step="0.5" value="${s.radius??5}" /><span class="lea-val">${s.radius??5}</span></div>`);
-        rows += leaRow('Color del borde',  colorPickerHTML('color', toHex(s.color)));
-        rows += leaRow('Grosor del borde', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
-        rows += leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${s.fillOpacity??0.85}" /><span class="lea-val">${Math.round((s.fillOpacity??0.85)*100)}%</span></div>`);
-      } else if (geom === 'polygon') {
-        rows += leaRow('Color del relleno', colorPickerHTML('fillColor', toHex(s.fillColor)));
         rows += leaRow('Color del borde',   colorPickerHTML('color',     toHex(s.color)));
-        rows += leaRow('Grosor del borde',  `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
-        rows += leaRow('Opacidad',`<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${s.fillOpacity??0.5}" /><span class="lea-val">${Math.round((s.fillOpacity??0.5)*100)}%</span></div>`);
+        rows += leaRow('Color del relleno', colorPickerHTML('fillColor', toHex(s.fillColor || s.color)));
+      } else if (geom === 'polygon') {
+        rows += leaRow('Color del borde',   colorPickerHTML('color',     toHex(s.color)));
+        rows += leaRow('Color del relleno', colorPickerHTML('fillColor', toHex(s.fillColor || s.color)));
       } else {
-        rows += leaRow('Color',   colorPickerHTML('color', toHex(s.color)));
-        rows += leaRow('Grosor',  `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??2}" /><span class="lea-val">${s.weight??2}</span></div>`);
-        rows += leaRow('Opacidad',`<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${s.opacity??1}" /><span class="lea-val">${Math.round((s.opacity??1)*100)}%</span></div>`);
+        rows += leaRow('Color', colorPickerHTML('color', toHex(s.color)));
+        const dashId = `adv-detail-dash-${val}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+        rows += leaRow('Patrón de línea', buildDashSelect(s.dashArray || 'none', dashId));
       }
       return rows;
     }
@@ -1160,17 +1276,8 @@ window.LAYERS_PANEL = (() => {
     function wireDetailControls(detail, val, initStyle) {
       if (detail.dataset.wired) return;
       detail.dataset.wired = '1';
-      detail.querySelectorAll('.lea-range-input').forEach(inp => {
-        wireSliderTouch(inp);
-        inp.addEventListener('input', e => {
-          const prop  = e.target.dataset.prop;
-          const v     = parseFloat(e.target.value);
-          const valEl = e.target.closest('.lea-slider-wrap')?.querySelector('.lea-val');
-          if (valEl) valEl.textContent = (prop==='fillOpacity'||prop==='opacity') ? Math.round(v*100)+'%' : v;
-          deselectRamp();
-          updateCatValStyle(val, {[prop]: v});
-        });
-      });
+
+      // Color pickers
       detail.querySelectorAll('.lea-color-pick').forEach(pick => {
         pick.addEventListener('input', e => {
           const prop = e.target.dataset.prop;
@@ -1195,6 +1302,12 @@ window.LAYERS_PANEL = (() => {
             updateCatValStyle(val, {[prop]: v});
           }
         });
+      });
+
+      // Patrón de línea (solo geom line)
+      const dashId = `adv-detail-dash-${val}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      wireCsel(detail, dashId, dashVal => {
+        updateCatValStyle(val, { dashArray: dashVal === 'none' ? null : dashVal });
       });
     }
 
