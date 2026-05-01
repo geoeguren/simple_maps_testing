@@ -263,6 +263,7 @@ window.MAP = (() => {
         layer.leafletLayer.bringToFront();
       }
     });
+    if (_layerOrderCallback) _layerOrderCallback();
   }
 
   function fitBounds() {
@@ -587,9 +588,13 @@ window.MAP = (() => {
 
   // ── Renombrar capa desde leyenda ──────────────────────────────
 
-  let _layerRenameCallback = null;
+  let _layerRenameCallback     = null;
+  let _layerVisibilityCallback = null;
+  let _layerOrderCallback      = null;
 
-  function onLayerRename(cb) { _layerRenameCallback = cb; }
+  function onLayerRename(cb)           { _layerRenameCallback     = cb; }
+  function onLayerVisibilityChange(cb) { _layerVisibilityCallback = cb; }
+  function onLayerOrderChange(cb)      { _layerOrderCallback      = cb; }
 
   function _onLegendRename(input) {
     const key      = input.dataset.key;
@@ -1003,6 +1008,7 @@ window.MAP = (() => {
       if (layer.leafletLayer) leafletMap.removeLayer(layer.leafletLayer);
     }
     updateLegend();
+    if (_layerVisibilityCallback) _layerVisibilityCallback(key, layer.visible !== false);
   }
 
   return {
