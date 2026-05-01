@@ -291,6 +291,30 @@ window.MAP = (() => {
       <rect x="1" y="1" width="12" height="12" rx="2" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${stroke}" stroke-width="${weight}" stroke-opacity="${opacity}"/></svg>`;
   }
 
+  // Restaurar visible desde instrucciones guardadas (llamado desde app.js tras addLayer)
+  function restoreLayerVisible(key, visible) {
+    const layer = activeLayers[key];
+    if (!layer) return;
+    if (visible === false && layer.visible !== false) {
+      layer.visible = false;
+      if (layer.leafletLayer) leafletMap.removeLayer(layer.leafletLayer);
+    }
+  }
+
+  // Popup prefs: setear desde Firestore (reemplaza localStorage)
+  function setPopupPrefs(prefs) {
+    Object.keys(_popupFieldPrefs).forEach(k => delete _popupFieldPrefs[k]);
+    Object.entries(prefs).forEach(([lk, fields]) => {
+      _popupFieldPrefs[lk] = new Set(fields);
+    });
+  }
+
+  function getPopupPrefs() {
+    const out = {};
+    Object.entries(_popupFieldPrefs).forEach(([lk, set]) => { out[lk] = [...set]; });
+    return out;
+  }
+
   function updateLegend() {
     const el = document.getElementById('map-legend');
     if (!el) return;
@@ -666,11 +690,15 @@ window.MAP = (() => {
     } catch {}
   }
 
+  let _popupPrefsSaveCallback = null;
+  function onPopupPrefsSave(cb) { _popupPrefsSaveCallback = cb; }
+
   function _savePopupPrefs() {
     try {
       const out = {};
       Object.entries(_popupFieldPrefs).forEach(([lk, set]) => { out[lk] = [...set]; });
       localStorage.setItem(POPUP_PREFS_KEY, JSON.stringify(out));
+      if (_popupPrefsSaveCallback) _popupPrefsSaveCallback(out);
     } catch {}
   }
 
@@ -1002,6 +1030,12 @@ window.MAP = (() => {
     clearClassification,
     setLayerLabels,
     onLayerRename,
+    onLayerVisibilityChange,
+    onLayerOrderChange,
+    onPopupPrefsSave,
+    restoreLayerVisible,
+    setPopupPrefs,
+    getPopupPrefs,
     renameLayer,
     getActiveLayers: () => activeLayers,
     getInstance:     () => leafletMap
