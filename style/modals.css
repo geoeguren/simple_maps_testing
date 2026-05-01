@@ -401,13 +401,14 @@ body.day .adv-field-selected { color: #1a1814; }
 
 .adv-cat-item {
   border: 0.5px solid var(--border);
-  border-radius: 4px; overflow: hidden;
+  border-radius: 4px;
 }
 body.day .adv-cat-item { border-color: #c8c4be; }
 
 .adv-cat-header {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 8px;
+  border-radius: 4px 4px 0 0;
 }
 
 .adv-cat-swatch {
