@@ -617,21 +617,17 @@ window.APP = (() => {
     _persistPlan('Cambios guardados.');
   }
 
-  let _isRestoringChat = false;
+  let _restoreChatToken = 0;
 
   async function restoreChat(chat) {
-    if (_isRestoringChat) {
-      console.warn('[APP] restoreChat ignorado — ya hay una restauración en curso');
-      return;
-    }
-    _isRestoringChat = true;
+    // Cada llamada genera un token único. Si durante la ejecución
+    // llega una nueva llamada, el token cambia y la anterior se cancela.
+    const token = ++_restoreChatToken;
 
-    try {
     document.getElementById('screen-home')?.classList.remove('active');
     document.getElementById('screen-work')?.classList.add('active');
     window.MAP_CONTROLS.setMapVisible(false);
 
-    // Limpiar el mapa antes de cargar el nuevo chat — evita mezclar capas
     window.MAP.clearAll();
     window.MAP.updateLegend();
     currentPlan = null;
@@ -644,7 +640,7 @@ window.APP = (() => {
     for (const m of (chat.messages || [])) {
       const meta = m.time ? { time: new Date(m.time), model: m.model || null } : null;
       if (m.role === 'user') {
-        const el = window.UI.addMessage('user', m.content, meta);
+        window.UI.addMessage('user', m.content, meta);
       } else {
         const displayText = m.content
           .replace(/```map[\s\S]*?```/g, '')
@@ -659,16 +655,20 @@ window.APP = (() => {
     if (chat.lastMap) {
       if (chat.popupPrefs) window.MAP.setPopupPrefs(chat.popupPrefs);
       window.UI.showMapReady(chat.lastMap);
+      // Verificar token antes de renderizar — si llegó otra llamada, cancelar
+      if (token !== _restoreChatToken) {
+        console.warn('[APP] restoreChat cancelado — llegó una llamada más reciente');
+        return;
+      }
       await renderMap(chat.lastMap);
     }
+
+    // Verificar token al final también
+    if (token !== _restoreChatToken) return;
 
     window.SIDEBAR.setChatId(chat.id);
     window.CHAT_HEADER.setChatHeader(chat.titulo);
     setTimeout(() => document.getElementById('chat-input')?.focus(), 200);
-
-    } finally {
-      _isRestoringChat = false;
-    }
   }
 
   // ── Nuevo mapa ────────────────────────────────────────────────
