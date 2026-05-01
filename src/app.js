@@ -532,10 +532,6 @@ window.APP = (() => {
     if (!changed) return;
 
     window.MAP.updateLegend();
-
-    // Persistir en Firestore
-    const user   = window.AUTH?.currentUser();
-    const chatId = window.CHAT?.getChatId?.();
     _persistPlan('Cambios guardados.');
   }
 
@@ -557,8 +553,6 @@ window.APP = (() => {
       changed = true;
     }
     if (!changed) return;
-    const user   = window.AUTH?.currentUser();
-    const chatId = window.CHAT?.getChatId?.();
     _persistPlan('Cambios guardados.');
   }
 
