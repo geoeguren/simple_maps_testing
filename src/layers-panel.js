@@ -133,7 +133,7 @@ window.LAYERS_PANEL = (() => {
       rows += leaRow('Grosor', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" ${p} type="range" min="0" max="10" step="0.5" value="${w}" /><span class="lea-val">${w}</span></div>`);
       rows += leaRow('Color', colorPickerHTML('color', toH(s.color), p));
       rows += leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="opacity" ${p} type="range" min="0" max="1" step="0.05" value="${s.opacity ?? 1}" /><span class="lea-val">${Math.round((s.opacity ?? 1)*100)}%</span></div>`);
-      if (mapKey) rows += leaRow('Patrón de linea', buildDashSelect(dash, `lea-dash-${mapKey}`));
+      if (mapKey) rows += leaRow('Patrón de línea', buildDashSelect(dash, `lea-dash-${mapKey}`));
     }
     if (geom === 'point' || geom === 'polygon') {
       const w  = s.weight ?? 1.5;
@@ -277,9 +277,9 @@ window.LAYERS_PANEL = (() => {
     acc.innerHTML =
       `<div class="lea-mode-content" id="lea-content-${k}"></div>` +
       `<div class="lea-sep"></div>` +
-      `<button class="lea-advanced-btn" data-key="${k}">Edición avanzada</button>` +
+      `<button class="lea-delete-btn" data-key="${k}"><span class="material-icons">delete</span>Eliminar capa</button>` +
       `<div class="lea-sep"></div>` +
-      `<button class="lea-delete-btn" data-key="${k}"><span class="material-icons">delete</span>Eliminar capa</button>`;
+      `<button class="lea-advanced-btn" data-key="${k}">Edición avanzada</button>`;
 
     const row = sec.querySelector(`.layers-data-row[data-key="${k}"]`);
     row?.insertAdjacentElement('afterend', acc);
@@ -435,7 +435,7 @@ window.LAYERS_PANEL = (() => {
             <div class="lea-cat-controls">
               <div class="lea-cat-ctrl-row">${leaRow('Grosor', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight ?? 2}" /><span class="lea-val">${s.weight ?? 2}</span></div>`)}</div>
               <div class="lea-cat-ctrl-row">${leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${fo}" /><span class="lea-val">${Math.round(fo*100)}%</span></div>`)}</div>
-              <div class="lea-cat-ctrl-row">${leaRow('Patrón de linea', buildDashSelect(dash, dashId))}</div>
+              <div class="lea-cat-ctrl-row">${leaRow('Patrón de línea', buildDashSelect(dash, dashId))}</div>
             </div>`;
         }
 
