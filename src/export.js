@@ -507,12 +507,12 @@ window.EXPORT = (() => {
     modal.className = 'adv-modal';
 
     // Opciones de mapa base
-    const basemapOpts = [
-      { key: 'gray',      label: 'Gris (ArcGIS)' },
-      { key: 'dark',      label: 'Oscuro (ArcGIS)' },
-      { key: 'satellite', label: 'Satelital (ArcGIS)' },
-      { key: 'none',      label: 'Sin mapa base' },
-    ].map(b => `<option value="${b.key}" ${b.key === curBase ? 'selected' : ''}>${b.label}</option>`).join('');
+    const basemapDefs = [
+      { key: 'gray',      label: 'gris (arcgis)' },
+      { key: 'dark',      label: 'oscuro (arcgis)' },
+      { key: 'satellite', label: 'satelital (arcgis)' },
+      { key: 'none',      label: 'sin mapa base' },
+    ];
 
     // Filas de capas
     const layerRows = Object.entries(activeLayers).map(([key, l]) => `
@@ -524,7 +524,7 @@ window.EXPORT = (() => {
     modal.innerHTML = `
       <div class="adv-modal-header">
         <span class="adv-modal-title">Exportar HTML</span>
-        <button class="adv-modal-close" id="html-modal-close"><span class="material-icons">close</span></button>
+        <button class="popup-close-btn" id="html-modal-close"><span class="material-icons">close</span></button>
       </div>
       <div class="adv-modal-body" style="gap:0">
 
@@ -535,7 +535,15 @@ window.EXPORT = (() => {
 
         <div class="adv-body-row">
           <span class="adv-body-label">Mapa base</span>
-          <select id="html-basemap" class="lea-field-select">${basemapOpts}</select>
+          <div class="adv-ramp-csel adv-field-csel" id="html-basemap-csel">
+            <div class="adv-ramp-trigger adv-field-trigger" id="html-basemap-trigger">
+              <span class="adv-field-selected" id="html-basemap-val">${basemapDefs.find(b=>b.key===curBase)?.label||basemapDefs[0].label}</span>
+              <span class="adv-ramp-arrow">▾</span>
+            </div>
+            <div class="adv-ramp-dropdown hidden" id="html-basemap-dd">
+              ${basemapDefs.map(b=>`<div class="adv-ramp-option adv-field-option${b.key===curBase?' selected':''}" data-key="${b.key}"><span class="adv-ramp-option-label">${b.label}</span></div>`).join('')}
+            </div>
+          </div>
         </div>
 
         <div class="adv-body-row" style="gap:8px">
@@ -585,23 +593,53 @@ window.EXPORT = (() => {
       </div>
       <div class="adv-modal-footer" style="justify-content:flex-end;gap:8px">
         <button class="adv-footer-btn adv-cancel" id="html-cancel-btn">Cerrar</button>
-        <button class="adv-footer-btn adv-accept" id="html-download-btn">
-          <span class="material-icons" style="font-size:15px;vertical-align:middle;margin-right:4px">download</span>
-          Descargar HTML
-        </button>
+        <button class="adv-footer-btn adv-accept" id="html-download-btn">Descargar</button>
       </div>`;
 
     document.body.appendChild(modal);
 
     function closeModal() { modal.remove(); backdrop.remove(); }
     modal.querySelector('#html-modal-close').addEventListener('click', closeModal);
+
+    // Wire basemap csel
+    let _selectedBase = curBase;
+    const bTrigger = modal.querySelector('#html-basemap-trigger');
+    const bDd      = modal.querySelector('#html-basemap-dd');
+    const bArrow   = bTrigger?.querySelector('.adv-ramp-arrow');
+    const bVal     = modal.querySelector('#html-basemap-val');
+    bTrigger?.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = !bDd.classList.contains('hidden');
+      bDd.classList.toggle('hidden', isOpen);
+      if (bArrow) bArrow.classList.toggle('open', !isOpen);
+    });
+    bDd?.querySelectorAll('.adv-field-option').forEach(opt => {
+      opt.addEventListener('click', e => {
+        e.stopPropagation();
+        bDd.querySelectorAll('.adv-field-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        _selectedBase = opt.dataset.key;
+        if (bVal) bVal.textContent = opt.querySelector('.adv-ramp-option-label').textContent;
+        bDd.classList.add('hidden');
+        if (bArrow) bArrow.classList.remove('open');
+        buildAndShow();
+      });
+    });
+    setTimeout(() => {
+      document.addEventListener('click', function bHandler(e) {
+        if (!modal.querySelector('#html-basemap-csel')?.contains(e.target)) {
+          bDd?.classList.add('hidden');
+          bArrow?.classList.remove('open');
+        }
+      }, { passive: true });
+    }, 0);
     modal.querySelector('#html-cancel-btn').addEventListener('click', closeModal);
     backdrop.addEventListener('click', closeModal);
 
     // Generar código al cambiar opciones
     function buildAndShow() {
       const selectedKeys = [...modal.querySelectorAll('.html-layer-row input:checked')].map(i => i.dataset.key);
-      const baseKey      = modal.querySelector('#html-basemap').value;
+      const baseKey      = _selectedBase;
       const showLegend   = modal.querySelector('#html-legend').checked;
       const collapsedDef = modal.querySelector('#html-legend-collapsed').checked;
       const showNorth    = modal.querySelector('#html-north').checked;
