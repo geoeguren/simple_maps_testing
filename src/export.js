@@ -555,12 +555,11 @@ window.EXPORT = (() => {
 
         <div class="adv-body-row" style="gap:8px">
           <span class="adv-body-label">Interfaz</span>
-          <label class="pfc-row" style="padding:3px 0">
+          <label class="pfc-row" style="padding:5px 0">
             <input type="checkbox" id="html-legend" checked />
             <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Mostrar leyenda</span>
           </label>
-
-          <label class="pfc-row" style="padding:3px 0">
+          <label class="pfc-row" style="padding:5px 0">
             <input type="checkbox" id="html-zoom" checked />
             <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Permitir zoom</span>
           </label>
@@ -765,12 +764,12 @@ window.EXPORT = (() => {
     .legend-label{font-size:12px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #legend-footer{padding:6px 12px 8px;border-top:0.5px solid rgba(0,0,0,0.06);font-size:10px;color:#999;line-height:1.5}
     /* Controles de zoom — arriba a la derecha, debajo de la leyenda */
-    #zoom-controls{position:absolute;top:12px;right:56px;z-index:1000;display:flex;flex-direction:column;gap:4px}
+    #zoom-controls{position:absolute;top:12px;left:12px;z-index:1000;display:flex;flex-direction:column;gap:4px}
     .z-btn{width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
     .z-btn:hover{background:#fff;color:#1a1814}
     .z-btn .material-icons{font-size:18px}
     /* Botón consultar — abajo a la izquierda */
-    #btn-identify{position:absolute;bottom:24px;left:12px;z-index:1000;width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
+    #btn-identify{position:absolute;top:128px;left:12px;z-index:1000;width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
     #btn-identify:hover{background:#fff;color:#1a1814}
     #btn-identify.active{background:#444;color:#e2ddd4;border-color:#555}
     #btn-identify .material-icons{font-size:18px}
