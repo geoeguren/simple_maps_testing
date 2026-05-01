@@ -1,9 +1,12 @@
 /**
- * wfs.js — Fetcher WFS del IGN con caché en localStorage y reintentos
+ * wfs.js — Fetcher WFS genérico con caché en localStorage y reintentos
+ *
+ * Soporta múltiples servidores WFS — la URL base se pasa como parámetro
+ * en cada llamada, leída de window.SOURCES según la fuente de cada capa.
  *
  * Estrategia de caché:
  *   - TTL por defecto: 24 horas
- *   - Clave: typename + filtro CQL (si aplica)
+ *   - Clave: wfsBase + typename + filtro CQL
  *   - Si el WFS falla, intenta devolver la caché aunque esté vencida
  *
  * Reintentos:
@@ -13,31 +16,29 @@
 
 window.WFS = (() => {
 
-  const BASE_URL    = 'https://wms.ign.gob.ar/geoserver/ows';
-  const CACHE_TTL    = 24 * 60 * 60 * 1000; // 24 h en ms
-  const CACHE_PREFIX = 'sm_wfs_';
-  const MAX_RETRIES  = 3;
-  const TIMEOUT_MS   = 45000;
-  // Límite de tamaño total de caché WFS (~8 MB para dejar margen al resto de localStorage)
+  const CACHE_TTL       = 24 * 60 * 60 * 1000; // 24 h en ms
+  const CACHE_PREFIX    = 'sm_wfs_';
+  const MAX_RETRIES     = 3;
+  const TIMEOUT_MS      = 45000;
   const CACHE_MAX_BYTES = 8 * 1024 * 1024;
 
   // ── Helpers de caché ──────────────────────────────────────────
 
-  // Hash djb2 simple: convierte el filtro CQL en una clave alfanumérica corta.
-  // No necesitamos que sea reversible — solo que sea única y estable para la misma entrada.
-  // Reemplaza el anterior btoa(unescape(encodeURIComponent())) que usaba unescape(), deprecated desde ES5.
+  // Hash djb2: clave única y estable para typename + filtro + servidor
   function hashFilter(str) {
     let h = 5381;
     for (let i = 0; i < str.length; i++) {
       h = ((h << 5) + h) ^ str.charCodeAt(i);
-      h = h >>> 0; // mantener como uint32
+      h = h >>> 0;
     }
-    return h.toString(36); // base36: más corto que decimal, solo alfanumérico
+    return h.toString(36);
   }
 
-  function cacheKey(typename, cqlFilter) {
-    const f = cqlFilter ? '_' + hashFilter(cqlFilter) : '';
-    return CACHE_PREFIX + typename.replace(':', '_') + f;
+  function cacheKey(wfsBase, typename, cqlFilter) {
+    // Incluir el servidor en la clave para que distintos WFS no colisionen
+    const serverHash = hashFilter(wfsBase);
+    const filterPart = cqlFilter ? '_' + hashFilter(cqlFilter) : '';
+    return CACHE_PREFIX + serverHash + '_' + typename.replace(':', '_') + filterPart;
   }
 
   function cacheGet(key) {
@@ -62,7 +63,6 @@ window.WFS = (() => {
   function cleanOldCache() {
     const keys = Object.keys(localStorage).filter(k => k.startsWith(CACHE_PREFIX));
 
-    // 1. Eliminar entradas vencidas
     keys.forEach(k => {
       try {
         const { ts } = JSON.parse(localStorage.getItem(k));
@@ -70,7 +70,6 @@ window.WFS = (() => {
       } catch { localStorage.removeItem(k); }
     });
 
-    // 2. Si el total sigue superando el límite, eliminar las más antiguas primero
     const remaining = Object.keys(localStorage)
       .filter(k => k.startsWith(CACHE_PREFIX))
       .map(k => {
@@ -78,7 +77,7 @@ window.WFS = (() => {
         catch { return null; }
       })
       .filter(Boolean)
-      .sort((a, b) => a.ts - b.ts); // más antiguos primero
+      .sort((a, b) => a.ts - b.ts);
 
     let totalBytes = remaining.reduce((acc, e) => acc + e.size, 0);
     for (const entry of remaining) {
@@ -90,10 +89,10 @@ window.WFS = (() => {
 
   // ── Constructor de URL WFS ────────────────────────────────────
 
-  function buildUrl(typename, cqlFilter, maxFeatures) {
+  function buildUrl(wfsBase, typename, wfsVersion, cqlFilter, maxFeatures) {
     const params = new URLSearchParams({
       service:      'WFS',
-      version:      '1.1.0',
+      version:      wfsVersion || '1.1.0',
       request:      'GetFeature',
       typename,
       outputFormat: 'application/json',
@@ -101,7 +100,7 @@ window.WFS = (() => {
     });
     if (maxFeatures) params.set('maxFeatures', maxFeatures);
     if (cqlFilter)   params.set('CQL_FILTER', cqlFilter);
-    return `${BASE_URL}?${params.toString()}`;
+    return `${wfsBase}?${params.toString()}`;
   }
 
   // ── Fetch con reintentos ──────────────────────────────────────
@@ -110,7 +109,6 @@ window.WFS = (() => {
     try {
       const resp = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
 
-      // 503 y 502 son errores del servidor IGN — reintentamos
       if (resp.status === 503 || resp.status === 502) {
         throw new Error(`HTTP ${resp.status}`);
       }
@@ -121,11 +119,10 @@ window.WFS = (() => {
       return geojson;
 
     } catch (err) {
-      // ¿Error sin reintentos? (ej: 400, 404)
       if (err.message.includes('sin reintentos')) throw err;
 
       if (intento < MAX_RETRIES) {
-        const espera = Math.pow(2, intento) * 1000; // 2s, 4s, 8s
+        const espera = Math.pow(2, intento) * 1000;
         console.warn(`[WFS] Intento ${intento} falló (${err.message}). Reintentando en ${espera/1000}s...`);
         await new Promise(r => setTimeout(r, espera));
         return fetchConReintentos(url, intento + 1);
@@ -140,13 +137,24 @@ window.WFS = (() => {
   /**
    * fetch(typename, options)
    * options:
+   *   wfsBase      {string}  URL base del servidor WFS — requerido, viene de window.SOURCES
+   *   wfsVersion   {string}  versión del protocolo WFS (default: '1.1.0')
    *   cqlFilter    {string}  filtro CQL
    *   maxFeatures  {number}  límite de features
    *   forceRefresh {boolean} ignorar caché
    */
   async function fetchLayer(typename, options = {}) {
-    const { cqlFilter, maxFeatures, forceRefresh } = options;
-    const key = cacheKey(typename, cqlFilter);
+    const {
+      wfsBase,
+      wfsVersion   = '1.1.0',
+      cqlFilter,
+      maxFeatures,
+      forceRefresh
+    } = options;
+
+    if (!wfsBase) throw new Error(`[WFS] wfsBase requerido para "${typename}". Verificá que la capa tenga "source" y que esté definido en window.SOURCES.`);
+
+    const key = cacheKey(wfsBase, typename, cqlFilter);
 
     // 1. Caché fresca
     if (!forceRefresh) {
@@ -158,8 +166,8 @@ window.WFS = (() => {
     }
 
     // 2. Fetch con reintentos
-    const url = buildUrl(typename, cqlFilter, maxFeatures);
-    console.log(`[WFS] Fetching: ${typename}${cqlFilter ? ' | ' + cqlFilter : ''}`);
+    const url = buildUrl(wfsBase, typename, wfsVersion, cqlFilter, maxFeatures);
+    console.log(`[WFS] Fetching: ${typename}${cqlFilter ? ' | ' + cqlFilter : ''} (${wfsBase})`);
 
     try {
       const geojson = await fetchConReintentos(url);
@@ -178,7 +186,7 @@ window.WFS = (() => {
         return stale.data;
       }
 
-      throw new Error(`No se pudo obtener "${typename}" (${err.message}). El servidor del IGN puede estar caído, intentá en unos minutos.`);
+      throw new Error(`No se pudo obtener "${typename}" (${err.message}). El servidor puede estar caído, intentá en unos minutos.`);
     }
   }
 
