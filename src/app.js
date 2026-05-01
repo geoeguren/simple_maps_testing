@@ -451,6 +451,17 @@ window.APP = (() => {
     for (let i = 0; i < plan.instrucciones.length; i++) {
       const inst = plan.instrucciones[i];
       try {
+        // Sanear layerKey: en versiones anteriores podía persistirse con el sufijo
+        // del mapKey (ej: "pasos_frontera_1" en lugar de "pasos_frontera").
+        // Si la clave no existe en LAYERS pero sí existe sin el sufijo _N, corregirla.
+        if (!window.LAYERS[inst.layerKey]) {
+          const clean = inst.layerKey.replace(/_\d+$/, '');
+          if (window.LAYERS[clean]) {
+            console.warn(`[APP] layerKey "${inst.layerKey}" corregido a "${clean}"`);
+            inst.layerKey = clean;
+          }
+        }
+
         const layerDef = window.LAYERS[inst.layerKey];
         if (!layerDef) throw new Error(`Capa desconocida: ${inst.layerKey}`);
         const geojson = await window.CLIP.ejecutar(inst);
