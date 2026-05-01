@@ -124,7 +124,20 @@ O para graduado:
 type puede ser "categorized" o "graduated". palette: qualitative, blues, greens, oranges, purples, redblue, browngreen.
 method (solo graduated): jenks, equal, quantile.
 
-No apresures el bloque map — primero asegurate de entender bien el pedido. Si hay ambigüedad, preguntá.`;
+No apresures el bloque map — primero asegurate de entender bien el pedido. Si hay ambigüedad, preguntá.
+
+EXPORTACIÓN DE MAPAS:
+Cuando el usuario pida exportar a un formato específico, respondé con texto breve + bloque export:
+\`\`\`export
+{"format":"pdf"}
+\`\`\`
+Formatos válidos: "pdf", "jpeg", "geojson", "html"
+Ejemplos: "exportar en pdf", "quiero la imagen", "bajar el geojson", "exportar como html"
+
+Cuando el usuario pida exportar sin especificar el formato, respondé con texto + bloque export-choice (sin contenido):
+\`\`\`export-choice
+\`\`\`
+Ejemplo: "quiero exportar el mapa", "cómo descargo esto", "exportar"`;
 }
 
 // ── Streaming con OpenAI-compatible API (Cerebras/Groq) ───────────
