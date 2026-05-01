@@ -1,23 +1,35 @@
 /**
  * clip.js — Ejecutor de instrucciones WFS
  *
- * Recibe una instrucción { layerKey, filtro, descripcion } ya armada por Gemini
+ * Recibe una instrucción { layerKey, filtro, descripcion } ya armada por el LLM
  * y devuelve un GeoJSON listo para renderizar.
  *
- * Estrategias de recorte (definidas en layers.js):
+ * Lee la fuente de cada capa desde layerDef.source → window.SOURCES,
+ * de modo que wfs.js no necesita saber a qué servidor apuntar.
+ *
+ * Estrategias de recorte (definidas en layers/):
  *   null        → fetch directo con filtro CQL (o sin filtro)
  *   'attribute' → filtro CQL (ya viene en inst.filtro, se usa tal cual)
- *   'spatial'   → el filtro CQL puede venir vacío o parcial;
- *                 si además hay una provincia en el filtro, se hace recorte espacial
- *
- * Para capas con clipStrategy:'spatial', si el filtro incluye una provincia
- * extraemos el polígono provincial y recortamos geométricamente.
- * Si no hay provincia en el filtro, se usa el filtro CQL puro (más rápido).
+ *   'spatial'   → si hay una unidad administrativa en el filtro, recorte geométrico;
+ *                 si no, fetch directo
  */
 
 window.CLIP = (() => {
 
   const EDGE_FN_URL = '/api/clip';
+
+  /**
+   * Resuelve la fuente de una capa desde window.SOURCES.
+   * Retorna el objeto fuente o un fallback al IGN si no está definido.
+   */
+  function resolverFuente(layerDef) {
+    const sourceKey = layerDef.source;
+    const source    = sourceKey && window.SOURCES?.[sourceKey];
+    if (!source) {
+      throw new Error(`[CLIP] Fuente "${sourceKey}" no encontrada en window.SOURCES. Verificá que esté definida en layers/sources.js.`);
+    }
+    return source;
+  }
 
   /**
    * ejecutar(instruccion)
@@ -29,25 +41,34 @@ window.CLIP = (() => {
     const layerDef = window.LAYERS[layerKey];
     if (!layerDef) throw new Error(`Capa desconocida: ${layerKey}`);
 
+    const source    = resolverFuente(layerDef);
     const cqlFilter = (filtro || '').trim();
+
+    // Opciones base para WFS.fetch — incluyen el servidor correcto para esta capa
+    const wfsOpts = {
+      wfsBase:    source.wfsBase,
+      wfsVersion: source.wfsVersion || '1.1.0',
+    };
 
     // ── Capas con recorte espacial ────────────────────────────
     if (layerDef.clipStrategy === 'spatial') {
-      // Intentar extraer provincia del filtro CQL para recorte geométrico
       const provincia = extraerProvinciaDelFiltro(cqlFilter);
 
       if (provincia) {
-        // Recorte espacial: bbox con el polígono de la provincia
-        const provFilter  = `strToLowerCase(nam)='${normalizar(provincia)}'`;
-        const provGeoJSON = await WFS.fetch('ign:provincia', { cqlFilter: provFilter });
+        // Buscar el polígono de recorte usando la capa y campo definidos en la fuente
+        const provFilter  = `strToLowerCase(${source.clipField})='${normalizar(provincia)}'`;
+        const provGeoJSON = await window.WFS.fetch(source.clipLayer, {
+          ...wfsOpts,
+          cqlFilter: provFilter
+        });
 
         if (!provGeoJSON.features?.length) {
-          throw new Error(`No se encontró la provincia: "${provincia}"`);
+          throw new Error(`No se encontró la unidad administrativa: "${provincia}"`);
         }
 
-        // Filtro sin la condición de provincia (para no duplicar)
         const filtroSinProv = removerCondicionProvincia(cqlFilter);
-        const layerGeoJSON  = await WFS.fetch(layerDef.typename, {
+        const layerGeoJSON  = await window.WFS.fetch(layerDef.typename, {
+          ...wfsOpts,
           cqlFilter: filtroSinProv || undefined
         });
 
@@ -59,12 +80,18 @@ window.CLIP = (() => {
         }
       }
 
-      // Sin provincia → fetch directo con el filtro CQL tal cual
-      return WFS.fetch(layerDef.typename, { cqlFilter: cqlFilter || undefined });
+      // Sin provincia → fetch directo
+      return window.WFS.fetch(layerDef.typename, {
+        ...wfsOpts,
+        cqlFilter: cqlFilter || undefined
+      });
     }
 
     // ── Capas con filtro por atributo o sin estrategia ────────
-    return WFS.fetch(layerDef.typename, { cqlFilter: cqlFilter || undefined });
+    return window.WFS.fetch(layerDef.typename, {
+      ...wfsOpts,
+      cqlFilter: cqlFilter || undefined
+    });
   }
 
   // ── Edge Function ─────────────────────────────────────────────
@@ -108,16 +135,10 @@ window.CLIP = (() => {
 
   // ── Helpers para analizar el filtro CQL ──────────────────────
 
-  /**
-   * Intenta extraer el nombre de provincia de un filtro CQL.
-   * Busca patrones como: strToLowerCase(nam)='santa cruz'
-   * o strToLowerCase(nom_pcia)='buenos aires'
-   */
   function extraerProvinciaDelFiltro(cql) {
     if (!cql) return null;
     const camposProv = ['nam', 'nom_pcia', 'prov', 'provincia'];
     for (const campo of camposProv) {
-      // Patrón: strToLowerCase(campo)='valor' o campo='valor'
       const re = new RegExp(
         `(?:strToLowerCase\\(${campo}\\)|${campo})\\s*(?:LIKE\\s*'%([^%']+)%'|=\\s*'([^']+)')`,
         'i'
@@ -128,10 +149,6 @@ window.CLIP = (() => {
     return null;
   }
 
-  /**
-   * Remueve la condición de provincia del CQL para evitar duplicar el filtro
-   * cuando ya se hace recorte espacial.
-   */
   function removerCondicionProvincia(cql) {
     if (!cql) return '';
     const camposProv = ['nam', 'nom_pcia', 'prov', 'provincia'];
