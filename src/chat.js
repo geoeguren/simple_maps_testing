@@ -1,376 +1,641 @@
-/* ============================================================
-   CHAT — Panel, mensajes, input, header
-   ============================================================ */
+/**
+ * chat.js — Chat con streaming de tokens y persistencia en Firestore
+ */
 
-/* chat.css v2 */
-#screen-work { display: flex; flex-direction: row; height: 100vh; }
+window.CHAT = (() => {
 
-.chat-panel {
-  flex: 1; min-width: 0; height: 100%;
-  display: flex; flex-direction: column;
-  background: var(--bg); border-right: none; overflow: visible;
-  position: relative;
-}
-.chat-panel.with-map {
-  width: var(--chat-w); min-width: 280px; max-width: 600px;
-  border-right: 0.5px solid var(--border);
-}
-body.day .chat-panel { background: var(--bg); border-right-color: var(--border); }
+  let history       = [];
+  let currentChatId = null;
+  let isStreaming   = false;
+  let _lastModel         = null;
+  let _pendingChatTitle  = null;
 
-/* Mensajes */
-.chat-messages {
-  flex: 1; overflow-y: auto;
-  padding: 24px 20px 16px;
-  display: flex; flex-direction: column; gap: 14px;
-  scroll-behavior: smooth;
-  position: relative; z-index: 1;
-}
-.chat-panel:not(.with-map) .chat-messages {
-  padding-left: max(24px, calc((100% - 680px) / 2));
-  padding-right: max(24px, calc((100% - 680px) / 2));
-  transition: padding .22s ease;
-}
-.chat-messages::-webkit-scrollbar { width: 3px; }
-.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  // ── Sanitizar historial para el LLM ──────────────────────────
+  //
+  // Los mensajes del asistente se guardan con los bloques de código
+  // (```map, ```style, etc.) incluidos — necesarios para Firestore y
+  // para restaurar el estado. Pero enviárselos al LLM consume tokens
+  // innecesarios y puede confundirlo en conversaciones largas.
+  // Esta función devuelve una copia del historial con esos bloques
+  // eliminados solo de los mensajes del asistente.
 
-.msg {
-  max-width: 80%; line-height: 1.7; font-size: 16px;
-  animation: msgIn .2s ease;
-}
-@keyframes msgIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  function sanitizeHistoryForLLM(messages) {
+    return messages.map(m => {
+      if (m.role !== 'assistant') return m;
+      const clean = m.content
+        .replace(/```map[\s\S]*?```/g, '')
+        .replace(/```style[\s\S]*?```/g, '')
+        .replace(/```classify[\s\S]*?```/g, '')
+        .replace(/```chat-title[\s\S]*?```/g, '')
+        .replace(/```export-choice[\s\S]*?```/g, '')
+        .replace(/```export[\s\S]*?```/g, '')
+        .trim();
+      return { ...m, content: clean };
+    });
+  }
 
-.msg.assistant {
-  background: transparent !important; border: none !important;
-  align-self: flex-start; color: var(--cream);
-  padding: 2px 0; max-width: 90%;
-}
-body.day .msg.assistant { color: #1a1814; }
+  // ── Enviar mensaje ────────────────────────────────────────────
 
-/* Tarjeta de error de capa — misma estructura que msg-map-card */
-.msg-error-card {
-  width: 100%;
-  background: rgba(180, 60, 60, 0.06);
-  border: 0.5px solid rgba(200, 80, 80, 0.25);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  display: flex; align-items: center; gap: 14px;
-  box-sizing: border-box;
-}
-body.day .msg-error-card {
-  background: rgba(180, 60, 60, 0.04);
-  border-color: rgba(180, 60, 60, 0.18);
-}
+  async function send(userText) {
+    if (isStreaming) return;
 
-.error-card-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+    // Requerir sesión iniciada
+    if (!window.AUTH?.currentUser()) {
+      TOAST.info('Iniciá sesión para chatear.');
+      // Abrir el dropdown de settings desde el avatar
+      const userBtn = document.getElementById('sb-user-row-btn');
+      if (userBtn) SETTINGS.openFromBtn(userBtn);
+      return;
+    }
 
-.error-card-icon {
-  font-size: 24px !important;
-  color: #c07070;
-  flex-shrink: 0;
-}
-body.day .error-card-icon { color: #a04040; }
+    history.push({ role: 'user', content: userText, time: new Date().toISOString() });
+    UI.addMessage('user', userText, { time: new Date() });
+    UI.showThinking();
+    isStreaming = true;
+    UI.setSendEnabled(false);
 
-.error-card-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    try {
+      const activeLayers = window.MAP?.getActiveLayers?.() || {};
+      const activeLayersSummary = Object.entries(activeLayers).map(([k, v]) => 
+        `${k}: ${v.titulo} (${v.geomType})`
+      ).join(', ');
 
-.error-card-title {
-  font-size: 15px; font-weight: 600;
-  color: #d08080;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-body.day .error-card-title { color: #a04040; }
+      const resp = await fetch('/api/llm', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          messages: sanitizeHistoryForLLM(history),
+          layers:   window.LAYERS,
+          sources:  window.SOURCES,
+          userLang: navigator.language || null,
+          model:    window.SETTINGS?.get('model') || 'auto',
+          tone:     window.SETTINGS?.get('tone')  || 'default',
+          activeMap: Object.keys(activeLayers).length ? {
+            titulo:  window.APP?.getCurrentPlan?.()?.titulo || '',
+            capas:   activeLayersSummary
+          } : null
+        })
+      });
 
-.error-card-desc {
-  font-size: 13px; color: var(--cream2); line-height: 1.4;
-}
-body.day .error-card-desc { color: #6a6560; }
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-.error-card-btn {
-  flex-shrink: 0; padding: 0 12px; height: 30px;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: #c07070;
-  border: 0.5px solid rgba(200, 80, 80, 0.35);
-  font-size: 11px; font-family: var(--font-sans);
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-  white-space: nowrap;
-}
-.error-card-btn:hover { background: rgba(200, 80, 80, 0.1); color: #e06060; }
-body.day .error-card-btn { color: #a04040; border-color: rgba(160, 60, 60, 0.3); }
-body.day .error-card-btn:hover { background: rgba(180, 60, 60, 0.08); }
+      UI.hideThinking();
+      const msgEl = UI.addMessage('assistant', '');
 
-/* ── Markdown en mensajes del asistente ──────────────────────── */
-.msg.assistant p  { margin: 0 0 .6rem; line-height: 1.65; }
-.msg.assistant p:last-child { margin-bottom: 0; }
-.msg.assistant ul,
-.msg.assistant ol { margin: 0 0 .6rem; padding-left: 1.4rem; }
-.msg.assistant li { margin-bottom: .2rem; line-height: 1.6; }
-.msg.assistant h1,
-.msg.assistant h2,
-.msg.assistant h3 {
-  font-weight: 600; margin: .8rem 0 .3rem; line-height: 1.3;
-}
-.msg.assistant h1 { font-size: 16px; }
-.msg.assistant h2 { font-size: 15px; }
-.msg.assistant h3 { font-size: 14px; }
-.msg.assistant strong { font-weight: 600; }
-.msg.assistant em { font-style: italic; }
-.msg.assistant code {
-  font-family: var(--font-mono); font-size: 12px;
-  background: var(--bg3); border: 0.5px solid var(--border-md);
-  border-radius: 3px; padding: 1px 5px;
-}
-body.day .msg.assistant code { background: rgba(0,0,0,0.06); }
-.msg.assistant pre {
-  background: var(--bg3); border: 0.5px solid var(--border-md);
-  border-radius: 6px; padding: 10px 14px;
-  overflow-x: auto; margin: .5rem 0 .7rem;
-}
-.msg.assistant pre code {
-  background: none; border: none; padding: 0;
-  font-size: 12px; line-height: 1.6;
-}
-body.day .msg.assistant pre { background: rgba(0,0,0,0.05); }
-.msg.assistant blockquote {
-  border-left: 2px solid var(--border-md);
-  margin: 0 0 .6rem; padding: 2px 0 2px 12px;
-  color: var(--cream2);
-}
-.msg.assistant hr {
-  border: none; border-top: 0.5px solid var(--border-md); margin: .8rem 0;
-}
-.msg.assistant a { color: var(--accent); text-decoration: none; }
-.msg.assistant a:hover { text-decoration: underline; }
+      const reader  = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer    = '';
+      let fullText  = '';
 
-/* Confirmación de exportación */
-.msg-export-confirm {
-  font-size: 13px; color: var(--cream2); padding: 4px 0;
-}
-body.day .msg-export-confirm { color: #6a6560; }
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-.msg.user {
-  background: var(--bg2); border: none; color: var(--cream);
-  align-self: flex-end; padding: 10px 16px; border-radius: 14px;
-}
-body.day .msg.user { background: #e0dcd6; color: #1a1814; }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
 
-.msg.thinking {
-  background: transparent !important; border: none !important;
-  align-self: flex-start; color: var(--cream2);
-  font-size: 15px; padding: 2px 0;
-}
-.msg.thinking::after {
-  content: '';
-  display: inline-block;
-  width: 5px; height: 5px; margin-left: 6px;
-  border-radius: 50%; background: var(--accent);
-  animation: blink 1.2s infinite; vertical-align: middle;
-}
-@keyframes blink {
-  0%, 100% { opacity: .2; }
-  50%       { opacity: 1; }
-}
-body.day .msg.thinking { background: var(--bg2); border-color: var(--border); }
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (!data) continue;
 
-/* Tarjeta de mapa listo */
-.msg-map-card {
-  width: 100%; background: var(--bg2);
-  border: 0.5px solid var(--border-md); border-radius: var(--radius);
-  padding: 14px 16px; display: flex; align-items: center; gap: 14px;
-  box-sizing: border-box;
-}
-.map-card-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-.map-card-icon { font-size: 28px !important; color: var(--cream2); flex-shrink: 0; }
-.map-card-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.map-card-title {
-  font-size: 15px; font-weight: 600; color: var(--cream);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-body.day .map-card-title { color: #1a1814; }
-.map-card-layers { font-size: 13px; color: var(--cream2); white-space: pre-line; line-height: 1.5; }
-.map-card-btn {
-  flex-shrink: 0; padding: 0 12px; height: 30px;
-  border-radius: var(--radius-sm);
-  background: transparent; color: var(--cream2);
-  border: 0.5px solid var(--border-md);
-  font-size: 11px; font-family: var(--font-sans);
-  letter-spacing: 0.04em;
-  cursor: pointer; transition: background var(--transition), color var(--transition);
-  white-space: nowrap;
-}
-.map-card-btn:hover { background: var(--cream3); color: var(--cream); }
-body.day .map-card-btn { color: #5a5650; border-color: #c8c4be; }
-body.day .map-card-btn:hover { background: rgba(0,0,0,0.06); color: #1a1814; }
+          try {
+            const json = JSON.parse(data);
 
-/* Input area */
-.chat-input-area {
-  padding: 16px 16px 0; border-top: none; flex-shrink: 0;
-  width: 100%; transition: padding .22s ease;
-}
-.chat-panel:not(.with-map) .chat-input-area {
-  padding-left: max(24px, calc((100% - 680px) / 2));
-  padding-right: max(24px, calc((100% - 680px) / 2));
-  max-width: none; margin: 0;
-}
-body.day .chat-input-area { border-top-color: var(--border); }
-body.day .prompt-box.compact { background: var(--bg2); }
+            if (json.error) {
+              UI.setMessageText(msgEl, json.error);
+              throw new Error(json.error);
+            }
 
-.chat-legend {
-  text-align: center; font-size: 13.5px; color: var(--cream2);
-  padding: 10px 16px 20px; letter-spacing: 0.01em;
-  max-width: 680px; width: 100%; margin: 0 auto;
-}
+            if (json.token) {
+              fullText += json.token;
+              // Eliminar bloques completos y también bloques incompletos (abiertos)
+              const display = fullText
+                .replace(/```map[\s\S]*?```/g, '')
+                .replace(/```chat-title[\s\S]*?```/g, '')
+                .replace(/```style[\s\S]*?```/g, '')
+                .replace(/```classify[\s\S]*?```/g, '')
+                .replace(/```export-choice[\s\S]*?```/g, '')
+                .replace(/```export[\s\S]*?```/g, '')
+                .replace(/```export-choice`{0,2}/g, '')  // bloque vacío o mal cerrado
+                .replace(/```\w*[\s\S]*$/g, '')  // bloque abierto sin cerrar
+                .trimEnd();
+              UI.setMessageText(msgEl, display || '');
 
-/* Header bar */
-.chat-header-bar {
-  position: sticky; top: 0; z-index: 10;
-  background: var(--bg);
-  border-bottom: 0.5px solid var(--border);
-  height: 52px; box-sizing: border-box;
-  flex-shrink: 0;
-  display: flex; align-items: center;
-}
-body.day .chat-header-bar { background: var(--bg); }
-.chat-header-inner {
-  flex: 1; display: flex; align-items: center;
-  gap: 6px; padding: 0 20px; height: 100%;
-  min-width: 0;
-}
-.chat-header-title-input {
-  font-family: var(--font-sans); font-size: 15px; font-weight: 500;
-  color: var(--cream); background: transparent; border: none; outline: none;
-  min-width: 120px; max-width: 400px; width: 100%;
-  cursor: text;
-}
-.chat-header-title-input::placeholder { color: var(--cream2); }
-body.day .chat-header-title-input { color: #1a1814; }
-.chat-header-delete-btn {
-  width: 36px; height: 36px; border-radius: 6px; flex-shrink: 0;
-  background: transparent; border: none; color: var(--cream2);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; margin-right: 10px;
-  opacity: 0; pointer-events: none;
-  transition: opacity var(--transition), background var(--transition), color var(--transition);
-}
-.chat-header-bar:hover .chat-header-delete-btn {
-  opacity: 1; pointer-events: auto;
-}
-.chat-header-delete-btn .material-icons { font-size: 18px; }
-.chat-header-delete-btn:hover { background: rgba(200,80,80,0.12); color: #e06060; }
-body.day .chat-header-delete-btn { color: #9a9690; }
-body.day .chat-header-delete-btn:hover { background: rgba(200,80,80,0.1); color: #c04040; }
+            }
 
-/* Scroll to bottom */
-.btn-scroll-bottom {
-  position: absolute; bottom: 130px; left: 50%;
-  transform: translateX(-50%);
-  width: 36px; height: 36px; border-radius: 50%;
-  background: #3a3a3a; border: none;
-  color: #b0aba4; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  transition: background var(--transition), color var(--transition); z-index: 50;
-  opacity: 0; pointer-events: none;
-}
-body.day .btn-scroll-bottom { background: rgba(0,0,0,0.22); color: #6a6560; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-.btn-scroll-bottom.visible { opacity: 1; pointer-events: auto; }
-.btn-scroll-bottom:hover { background: #555; color: #e2ddd4; }
-body.day .btn-scroll-bottom:hover { background: rgba(0,0,0,0.32); color: #1a1814; }
-.btn-scroll-bottom .material-icons { font-size: 18px; }
+            if (json.done) {
+              _lastModel = json.model || null;
+              fullText = json.fullText || fullText;
+              const mapPlan      = extractMapPlan(fullText);
+              const stylePlan    = extractStylePlan(fullText);
+              const classifyPlan = extractClassifyPlan(fullText);
+              const chatTitle    = extractChatTitle(fullText);
+              if (chatTitle) _pendingChatTitle = chatTitle;
+              const displayText = fullText
+                .replace(/```map[\s\S]*?```/g, '')
+                .replace(/```style[\s\S]*?```/g, '')
+                .replace(/```classify[\s\S]*?```/g, '')
+                .replace(/```chat-title[\s\S]*?```/g, '')
+                .replace(/```export-choice[\s\S]*?```/g, '')
+                .replace(/```export[\s\S]*?```/g, '')
+                .replace(/```export-choice`{0,2}/g, '')  // bloque vacío o mal cerrado
+                .trim();
 
-/* ── Metadata de mensajes ────────────────────────────────── */
-.msg-meta {
-  font-size: 11px;
-  color: var(--cream2);
-  margin-top: 5px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.02em;
-  opacity: 0.35;
-  transition: opacity .15s ease;
-  pointer-events: none;
-}
-.msg-user-wrap:hover .msg-meta,
-.msg.assistant:hover .msg-meta,
-.msg-user-wrap:hover .msg-meta-user {
-  opacity: 0.75;
-}
-.msg.user .msg-meta { text-align: right; }
-.msg.assistant .msg-meta { text-align: left; }
+              UI.setMessageText(msgEl, displayText || '');
+              const msgTime = new Date();
+              UI.setMessageMeta(msgEl, { time: msgTime, model: _lastModel });
+              history.push({ role: 'assistant', content: fullText, time: msgTime.toISOString(), model: _lastModel });
 
-/* ── Wrapper mensaje usuario ─────────────────────────────── */
-.msg-user-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  align-self: flex-end;
-  max-width: 80%;
-}
-.msg-user-wrap .msg.user {
-  align-self: unset;
-  max-width: 100%;
-}
-.msg-meta-user {
-  text-align: right;
-  padding-right: 2px;
-}
+              // classifyPlan se aplica siempre que venga (no depende del mapa)
+              if (classifyPlan?.length) window.APP?.applyClassifyPlan?.(classifyPlan);
 
-/* ── Expandir mensaje largo ──────────────────────────────── */
-.msg.user { position: relative; }
+              const exportPlan  = extractExportPlan(fullText);
+              const exportChoice = extractExportChoice(fullText);
+              if (exportPlan) {
+                const fmt = exportPlan.format;
+                if      (fmt === 'pdf')     window.EXPORT?.toPDF?.();
+                else if (fmt === 'jpeg')    window.EXPORT?.toJPEG?.();
+                else if (fmt === 'geojson') window.EXPORT?.toGeoJSON?.();
+                else if (fmt === 'html')    window.EXPORT?.toHTML?.();
+              } else if (exportChoice) {
+                UI.showExportChoice(msgEl);
+              }
 
-.msg-expand-btn {
-  display: inline-block;
-  border: none; cursor: pointer;
-  font-size: 11px; font-family: var(--font-mono);
-  letter-spacing: 0.02em;
-  color: var(--cream2);
-  opacity: 0.7;
-  transition: opacity var(--transition);
-  text-align: left; padding: 0;
-  background: transparent;
-}
-.msg-expand-btn:hover { opacity: 1; }
-body.day .msg-expand-btn { color: #5a5650; }
+              if (mapPlan) {
+                if (mapPlan[0]?.error) {
+                  UI.addMessage('assistant', mapPlan[0].error);
+                } else {
+                  const plan = {
+                    titulo:        chatTitle || generarTitulo(userText),
+                    instrucciones: mapPlan
+                  };
 
-/* Colapsado: wrapper con gradiente y botón en flujo normal */
-.msg-collapse-wrap { position: relative; }
-.msg-collapse-content { display: block; }
-.msg-collapse-fade {
-  height: 40px; margin-top: -40px;
-  background: linear-gradient(to bottom, transparent 0%, var(--bg2) 75%);
-  pointer-events: none;
-}
-body.day .msg-collapse-fade {
-  background: linear-gradient(to bottom, transparent 0%, #e0dcd6 75%);
-}
-.msg-expand-collapsed,
-.msg-expand-expanded {
-  display: block; margin-top: 6px;
-}
+                  // Si viene style junto al map, guardarlo en las instrucciones
+                  // para que renderMap lo aplique después de cargar las capas
+                  if (stylePlan?.length) {
+                    plan.instrucciones = plan.instrucciones.map(inst => {
+                      const s = stylePlan.find(st => st.layerKey === inst.layerKey);
+                      if (s) {
+                        const { layerKey: _lk, ...styleChanges } = s;
+                        return { ...inst, style: styleChanges };
+                      }
+                      return inst;
+                    });
+                  }
 
-/* Export choice card */
-.msg-export-choice {
-  width: 100%; display: flex; flex-direction: column;
-  gap: 4px; box-sizing: border-box;
-}
-.export-choice-btn {
-  display: flex; align-items: baseline; gap: 8px;
-  padding: 8px 12px; cursor: pointer;
-  background: var(--bg2); border: 0.5px solid var(--border-md);
-  border-radius: var(--radius-sm);
-  transition: background var(--transition), border-color var(--transition);
-  text-align: left;
-}
-.export-choice-btn:hover { background: var(--cream3); border-color: var(--border-md); }
-body.day .export-choice-btn { background: rgba(0,0,0,0.02); }
-body.day .export-choice-btn:hover { background: rgba(0,0,0,0.05); }
+                  UI.showMapReady(plan);
+                  const mapPanel = document.getElementById('map-panel');
+                  if (mapPanel && mapPanel.style.display !== 'none') {
+                    await window.APP.renderMap(plan);
+                  }
+                  await saveToFirestore(userText, plan);
+                  return;
+                }
+              }
 
-.export-choice-label {
-  font-size: 13px; font-weight: 500; color: var(--cream);
-}
-.export-choice-sub { font-size: 11px; color: var(--cream2); font-family: var(--font-mono); }
-body.day .export-choice-label { color: #1a1814; }
-body.day .export-choice-sub { color: #6a6560; }
+              // stylePlan sin mapPlan = cambio de estilo sobre capas existentes
+              if (stylePlan?.length) window.APP?.applyStylePlan?.(stylePlan);
+
+              await saveToFirestore(userText, null);
+            }
+          } catch (e) {
+            if (e.message !== data) console.warn('[CHAT] Parse error:', e.message);
+          }
+        }
+      }
+
+    } catch (err) {
+      UI.hideThinking();
+      UI.addMessage('assistant', `Hubo un error: ${err.message}. Intentá de nuevo.`);
+      console.error('[CHAT]', err);
+      history.pop();
+    } finally {
+      isStreaming = false;
+      UI.setSendEnabled(true);
+    }
+  }
+
+  // ── Guardar en Firestore ──────────────────────────────────────
+
+  async function saveToFirestore(userText, mapPlan) {
+    try {
+      const user = window.AUTH?.currentUser();
+      if (!user) return;
+
+      // Usar título sugerido por el LLM, o el texto del usuario como fallback
+      const titulo = _pendingChatTitle
+        || (userText.length > 50 ? userText.slice(0, 50) + '\u2026' : userText);
+      _pendingChatTitle = null;
+
+      if (!currentChatId) {
+        currentChatId = await window.FB.createChat(user.uid, titulo);
+        SIDEBAR.setChatId(currentChatId);
+        window.history.replaceState(null, '', `/#chat=${currentChatId}`);
+        SIDEBAR.refreshChats();
+        // Mostrar título en la barra superior
+        if (window.APP?.setChatHeader) window.APP.setChatHeader(titulo);
+      }
+
+      const data = { messages: history };
+      // Usar currentPlan de APP si existe (preserva título y nombres editados por el usuario)
+      const planToSave = mapPlan
+        ? (window.APP?.getCurrentPlan?.() || mapPlan)
+        : null;
+      if (planToSave) data.lastMap = planToSave;
+
+      await window.FB.updateChat(user.uid, currentChatId, data);
+    } catch (err) {
+      console.warn('[CHAT] No se pudo guardar:', err.message);
+    }
+  }
+
+  // ── Restaurar chat desde Firestore ────────────────────────────
+
+  function restore(chat) {
+    history       = chat.messages || [];
+    currentChatId = chat.id;
+    window.history.replaceState(null, '', `/#chat=${chat.id}`);
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+
+  function extractMapPlan(text) {
+    const match = text.match(/```map\s*([\s\S]*?)```/);
+    if (!match) return null;
+    try {
+      const parsed = JSON.parse(match[1].trim());
+      return Array.isArray(parsed) ? parsed : null;
+    } catch { return null; }
+  }
+
+  function extractChatTitle(text) {
+    const match = text.match(/```chat-title\s*([\s\S]*?)```/);
+    return match ? match[1].trim() : null;
+  }
+
+  function extractStylePlan(text) {
+    const match = text.match(/```style\s*([\s\S]*?)```/);
+    if (!match) return null;
+    try {
+      const parsed = JSON.parse(match[1].trim());
+      return Array.isArray(parsed) ? parsed : null;
+    } catch { return null; }
+  }
+
+  function extractClassifyPlan(text) {
+    const match = text.match(/```classify\s*([\s\S]*?)```/);
+    if (!match) return null;
+    try {
+      const parsed = JSON.parse(match[1].trim());
+      return Array.isArray(parsed) ? parsed : null;
+    } catch { return null; }
+  }
+
+  function extractExportPlan(text) {
+    const match = text.match(/```export\s*([\s\S]*?)```/);
+    if (!match) return null;
+    try { return JSON.parse(match[1].trim()); } catch { return null; }
+  }
+
+  function extractExportChoice(text) {
+    return /```export-choice[\s\S]*?```/.test(text);
+  }
+
+  function generarTitulo(texto) {
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+  }
+
+  function reset() {
+    history       = [];
+    currentChatId = null;
+    window.history.replaceState?.(null, '', '/');
+  }
+
+  function getChatId()  { return currentChatId; }
+  function getHistory() { return history; }
+
+  return { send, reset, restore, getChatId, getHistory };
+
+})();
+
+// ── UI ────────────────────────────────────────────────────────────
+
+window.UI = (() => {
+
+  const $msgs = () => document.getElementById('chat-messages');
+  let thinkingEl = null;
+
+  function addMessage(role, text, meta) {
+    if (role === 'user') {
+      // Wrapper for bubble + meta outside
+      const wrap = document.createElement('div');
+      wrap.className = 'msg-user-wrap';
+
+      const el = document.createElement('div');
+      el.className = 'msg user';
+      if (text) setMessageText(el, text, true);
+      wrap.appendChild(el);
+      // meta SOLO afuera del globo, nunca adentro
+      if (meta?.time) {
+        const m = document.createElement('div');
+        m.className = 'msg-meta msg-meta-user';
+        m.textContent = formatTime(meta.time);
+        wrap.appendChild(m);
+      }
+      $msgs().appendChild(wrap);
+      scrollBottom();
+      return wrap; // return wrap so setMessageMeta can append to it
+    }
+
+    const el = document.createElement('div');
+    el.className = `msg ${role}`;
+    if (text) setMessageText(el, text);
+    if (meta?.time) {
+      const m = document.createElement('div');
+      m.className = 'msg-meta';
+      const modelNames = { cerebras: 'qwen-3-235b', groq: 'llama-3.3-70b-versatile', gemini: 'gemini-2.5-flash' };
+      const parts = [formatTime(meta.time)];
+      if (meta.model) parts.push(modelNames[meta.model] || meta.model);
+      m.textContent = parts.join(' · ');
+      el.appendChild(m);
+    }
+    $msgs().appendChild(el);
+    scrollBottom();
+    return el;
+  }
+
+  function setMessageText(el, text, collapse) {
+    const isUser = el.classList.contains('user') ||
+                   el.closest?.('.msg-user-wrap') !== null;
+
+    const escape = s => s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+
+    const fullHTML = isUser ? escape(text) : renderMarkdown(text);
+
+    if (!collapse) {
+      el.innerHTML = fullHTML;
+      scrollBottom();
+      return;
+    }
+
+    // Estimar líneas: contar saltos explícitos + líneas visuales por longitud
+    // Ancho del bubble aprox 400px, font-size 16px → ~28 chars por línea
+    const CHARS_PER_LINE = 28;
+    const MAX_LINES      = 9;
+    const lines = text.split('\n');
+    let totalLines = 0;
+    for (const line of lines) {
+      totalLines += Math.max(1, Math.ceil((line.length || 1) / CHARS_PER_LINE));
+      if (totalLines > MAX_LINES) break;
+    }
+    const needsCollapse = totalLines > MAX_LINES;
+
+    el.innerHTML = fullHTML;
+
+    if (!needsCollapse) {
+      scrollBottom();
+      return;
+    }
+
+    // Calcular previewHTML: primeras MAX_LINES líneas visuales
+    let previewLines = [];
+    let count = 0;
+    for (const line of lines) {
+      const visual = Math.max(1, Math.ceil((line.length || 1) / CHARS_PER_LINE));
+      if (count + visual > MAX_LINES) {
+        // Cortar la línea parcialmente si hace falta
+        const remaining = MAX_LINES - count;
+        const chars = remaining * CHARS_PER_LINE;
+        previewLines.push(line.slice(0, chars) + (line.length > chars ? '…' : ''));
+        break;
+      }
+      previewLines.push(line);
+      count += visual;
+      if (count >= MAX_LINES) break;
+    }
+    const previewHTML = escape(previewLines.join('\n'));
+
+    function renderCollapsed() {
+      el.innerHTML = '';
+      el.style.position = '';
+      el.style.maxHeight = '';
+      el.style.overflow  = '';
+
+      const wrap = document.createElement('div');
+      wrap.className = 'msg-collapse-wrap';
+
+      const content = document.createElement('div');
+      content.className = 'msg-collapse-content';
+      content.innerHTML = previewHTML;
+
+      const fade = document.createElement('div');
+      fade.className = 'msg-collapse-fade';
+
+      const btn = document.createElement('button');
+      btn.className = 'msg-expand-btn msg-expand-collapsed';
+      btn.textContent = 'Mostrar más';
+      btn.addEventListener('click', renderExpanded);
+
+      wrap.appendChild(content);
+      wrap.appendChild(fade);
+      wrap.appendChild(btn);
+      el.appendChild(wrap);
+    }
+
+    function renderExpanded() {
+      el.innerHTML = '';
+      el.style.position = '';
+      const content = document.createElement('span');
+      content.innerHTML = fullHTML;
+      const btn = document.createElement('button');
+      btn.className = 'msg-expand-btn msg-expand-expanded';
+      btn.textContent = 'Mostrar menos';
+      btn.addEventListener('click', renderCollapsed);
+      el.appendChild(content);
+      el.appendChild(btn);
+    }
+
+    renderCollapsed();
+    scrollBottom();
+  }
+
+    function formatTime(date) {
+    return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + 
+           ' ' + date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+  }
+
+  function setSendEnabled(enabled) {
+    document.querySelectorAll('.prompt-send').forEach(b => { b.disabled = !enabled; });
+  }
+
+  function scrollBottom() {
+    const msgs  = document.getElementById('chat-messages');
+    const panel = document.getElementById('chat-panel');
+    if (msgs)  msgs.scrollTop  = msgs.scrollHeight;
+    if (panel) panel.scrollTop = panel.scrollHeight;
+  }
+
+  function setMessageMeta(el, meta) {
+    const container = el;
+    let m = container.querySelector('.msg-meta');
+    if (!m) {
+      m = document.createElement('div');
+      m.className = container.classList.contains('msg-user-wrap')
+        ? 'msg-meta msg-meta-user'
+        : 'msg-meta';
+      container.appendChild(m);
+    }
+    const modelNames = {
+      cerebras: 'qwen-3-235b',
+      groq:     'llama-3.3-70b-versatile',
+      gemini:   'gemini-2.5-flash'
+    };
+    const parts = [formatTime(meta.time)];
+    if (meta.model) parts.push(modelNames[meta.model] || meta.model);
+    m.textContent = parts.join(' · ');
+  }
+
+  function showThinking() {
+    hideThinking();
+    thinkingEl = document.createElement('div');
+    thinkingEl.className = 'msg thinking';
+    $msgs()?.appendChild(thinkingEl);
+    scrollBottom();
+  }
+
+  function hideThinking() {
+    thinkingEl?.remove();
+    thinkingEl = null;
+  }
+
+  function showErrorCard(titulo, layerKey) {
+    const el = document.createElement('div');
+    el.className = 'msg-error-card';
+    el.innerHTML = `
+      <div class="error-card-left">
+        <span class="material-icons error-card-icon">cloud_off</span>
+        <div class="error-card-info">
+          <span class="error-card-title">${titulo}</span>
+          <span class="error-card-desc">El servidor no respondió después de varios intentos.</span>
+        </div>
+      </div>
+      <button class="error-card-btn" data-layer="${layerKey || ''}">
+        REINTENTAR
+      </button>
+    `;
+    el.querySelector('.error-card-btn').addEventListener('click', () => {
+      const input = document.getElementById('chat-input');
+      if (input) {
+        input.value = `Intentá cargar ${titulo} de nuevo`;
+        input.focus();
+        input.dispatchEvent(new Event('input'));
+      }
+    });
+    $msgs()?.appendChild(el);
+    scrollBottom();
+  }
+    const capas = (plan.instrucciones || [])
+      .filter(i => i.descripcion)
+      .map(i => i.descripcion)
+      .join('\n');
+
+    const el = document.createElement('div');
+    el.className = 'msg-map-card';
+    el.innerHTML = `
+      <div class="map-card-left">
+        <span class="material-icons map-card-icon">map</span>
+        <div class="map-card-info">
+          <span class="map-card-title">${plan.titulo || 'Mapa'}</span>
+          <span class="map-card-layers">${capas}</span>
+        </div>
+      </div>
+      <button class="map-card-btn" data-plan='${JSON.stringify(plan).replace(/'/g, "&#39;")}'>
+        VER
+      </button>
+    `;
+    el.querySelector('.map-card-btn').addEventListener('click', e => {
+      const p = JSON.parse(e.currentTarget.dataset.plan.replace(/&#39;/g, "'"));
+      window.APP.renderMap(p);
+    });
+    $msgs()?.appendChild(el);
+    scrollBottom();
+  }
+
+  // ── Markdown ──────────────────────────────────────────────────
+  function renderMarkdown(text) {
+    if (typeof marked === 'undefined') {
+      // Fallback si marked no cargó: solo escapar y saltos de línea
+      return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
+    }
+    marked.setOptions({
+      breaks: true,    // \n → <br> dentro de párrafos
+      gfm: true,
+      mangle: false,
+      headerIds: false
+    });
+    return marked.parse(text);
+  }
+
+  function showExportChoice(msgEl) {
+    const card = document.createElement('div');
+    card.className = 'msg-export-choice';
+
+    const labels = {
+      geojson: 'Capa vectorial',
+      jpeg:    'Imagen',
+      pdf:     'Archivo portable',
+      html:    'Embebido',
+    };
+
+    const exports = [
+      { key: 'geojson', label: 'Capa vectorial', sub: 'geojson' },
+      { key: 'jpeg',    label: 'Imagen',          sub: 'jpeg'    },
+      { key: 'pdf',     label: 'Archivo portable', sub: 'pdf'    },
+      { key: 'html',    label: 'Embebido',         sub: 'html'   },
+    ];
+
+    card.innerHTML = exports.map(e => `
+      <button class="export-choice-btn" data-fmt="${e.key}">
+        <span class="export-choice-label">${e.label}</span>
+        <span class="export-choice-sub">${e.sub}</span>
+      </button>`).join('');
+
+    card.querySelectorAll('.export-choice-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const fmt = btn.dataset.fmt;
+
+        const confirm = document.createElement('div');
+        confirm.className = 'msg assistant msg-export-confirm';
+        confirm.textContent = `Exportando como ${labels[fmt] || fmt}…`;
+        card.replaceWith(confirm);
+
+        try {
+          if      (fmt === 'pdf')     await window.EXPORT?.toPDF?.();
+          else if (fmt === 'jpeg')    await window.EXPORT?.toJPEG?.();
+          else if (fmt === 'geojson') await window.EXPORT?.toGeoJSON?.();
+          else if (fmt === 'html')  { window.EXPORT?.toHTML?.(); return; } // modal: no confirmar
+
+          confirm.textContent = `${labels[fmt]} exportado.`;
+        } catch {
+          confirm.textContent = `Error al exportar ${labels[fmt].toLowerCase()}.`;
+          confirm.style.color = 'var(--color-error, #c08080)';
+        }
+      });
+    });
+
+    if (msgEl) msgEl.after(card);
+    else $msgs()?.appendChild(card);
+    scrollBottom();
+  }
+
+  return { addMessage, setMessageText, setMessageMeta, showThinking, hideThinking, showMapReady, showErrorCard, showExportChoice, setSendEnabled };
+
+})();
