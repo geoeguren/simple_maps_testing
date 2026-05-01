@@ -617,7 +617,16 @@ window.APP = (() => {
     _persistPlan('Cambios guardados.');
   }
 
+  let _isRestoringChat = false;
+
   async function restoreChat(chat) {
+    if (_isRestoringChat) {
+      console.warn('[APP] restoreChat ignorado — ya hay una restauración en curso');
+      return;
+    }
+    _isRestoringChat = true;
+
+    try {
     document.getElementById('screen-home')?.classList.remove('active');
     document.getElementById('screen-work')?.classList.add('active');
     window.MAP_CONTROLS.setMapVisible(false);
@@ -648,16 +657,18 @@ window.APP = (() => {
     }
 
     if (chat.lastMap) {
-      // Restaurar preferencias de campos del popup desde Firestore
       if (chat.popupPrefs) window.MAP.setPopupPrefs(chat.popupPrefs);
       window.UI.showMapReady(chat.lastMap);
-      // Renderizar el mapa automáticamente al restaurar, no solo mostrar la tarjeta
       await renderMap(chat.lastMap);
     }
 
     window.SIDEBAR.setChatId(chat.id);
     window.CHAT_HEADER.setChatHeader(chat.titulo);
     setTimeout(() => document.getElementById('chat-input')?.focus(), 200);
+
+    } finally {
+      _isRestoringChat = false;
+    }
   }
 
   // ── Nuevo mapa ────────────────────────────────────────────────
