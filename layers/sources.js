@@ -2,14 +2,14 @@
  * sources.js — Registro de fuentes de datos geoespaciales
  *
  * Cada fuente define un organismo o servicio WFS.
- * Las capas en src/layers/[pais]/[organismo]/ referencian su fuente
+ * Las capas en layers/[pais]/[organismo].js referencian su fuente
  * por clave (ej: 'ign_ar') para que wfs.js y clip.js sepan
  * a qué servidor ir y cómo hacer recortes espaciales.
  *
  * Para agregar una fuente nueva:
  *   1. Agregar su entrada acá
- *   2. Crear src/layers/[pais]/[organismo]/index.js con las capas
- *   3. Importarlo en src/layers/[pais]/index.js
+ *   2. Crear layers/[pais]/[organismo].js con las capas
+ *   3. Importarlo en layers/[pais]/index.js
  *   4. No tocar nada más
  */
 
