@@ -125,52 +125,52 @@ body.day .delete-confirm-divider { background: #c8c4be; }
 
 /* ── Variantes semánticas ─────────────────────────────────────── */
 
-/* success — verde */
+/* success — verde apagado */
 .toast--success {
-  background: #1a2e20;
-  border-color: #2d6a3f;
-  color: #4caf6e;
+  background: #222b24;
+  border-color: rgba(120,170,120,0.35);
+  color: #9abf9a;
 }
 body.day .toast--success {
-  background: #edf7f0;
-  border-color: #2d6a3f;
-  color: #1e5230;
+  background: #f0f4f0;
+  border-color: rgba(60,110,60,0.30);
+  color: #3a6e3a;
 }
 
-/* info — azul */
+/* info — azul desaturado */
 .toast--info {
-  background: #172030;
-  border-color: #2a5a8a;
-  color: #5a9fd4;
+  background: #202530;
+  border-color: rgba(100,140,190,0.35);
+  color: #8aabcf;
 }
 body.day .toast--info {
-  background: #eaf2fa;
-  border-color: #2a5a8a;
-  color: #1a4a78;
+  background: #eff3f8;
+  border-color: rgba(50,90,150,0.28);
+  color: #2a5280;
 }
 
-/* warning — amarillo */
+/* warning — ámbar cálido */
 .toast--warning {
-  background: #2a2010;
-  border-color: #8a6420;
-  color: #d4a840;
+  background: #2a2518;
+  border-color: rgba(180,140,60,0.35);
+  color: #c8a85a;
 }
 body.day .toast--warning {
-  background: #fdf6e3;
-  border-color: #8a6420;
-  color: #5a3e0a;
+  background: #faf6ec;
+  border-color: rgba(140,100,20,0.30);
+  color: #7a5c10;
 }
 
-/* error — rojo */
+/* error — rojo muy apagado */
 .toast--error {
-  background: #2a1414;
-  border-color: #8a2a2a;
-  color: #d46060;
+  background: #2a1e1e;
+  border-color: rgba(180,90,90,0.35);
+  color: #c08080;
 }
 body.day .toast--error {
-  background: #fdf0f0;
-  border-color: #8a2a2a;
-  color: #7a1a1a;
+  background: #faf0f0;
+  border-color: rgba(150,60,60,0.28);
+  color: #882222;
 }
 
 /* loading — neutral, sin color */
