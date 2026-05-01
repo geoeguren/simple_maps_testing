@@ -96,6 +96,7 @@ REGLAS DE FILTROS CQL:
 - Combinado: strToLowerCase(pvecino)='chile' AND strToLowerCase(prov)='santa cruz'
 - Numéricos sin strToLowerCase
 - Si no corresponde a ninguna capa: [{"error":"No tengo datos para esa consulta"}]
+- Si el usuario pide limpiar o vaciar el mapa: []
 
 REGLA DE RECORTE GEOGRÁFICO:
 Algunas capas tienen campos propios para filtrar por área (provincia, departamento, etc.) — usá filtro CQL.
