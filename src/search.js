@@ -12,7 +12,7 @@ window.SEARCH = (() => {
   function open() {
     const user = window.AUTH?.currentUser();
     if (!user) {
-      TOAST.show('Iniciá sesión para buscar en tus chats');
+      TOAST.info('Iniciá sesión para buscar en tus chats.');
       return;
     }
 
