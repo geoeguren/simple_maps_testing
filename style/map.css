@@ -86,7 +86,7 @@ body.day .btn-icon:hover { background: var(--cream3); color: var(--cream); }
 .export-dropdown.open { display: block; }
 .export-option {
   display: block; width: 100%; text-align: left;
-  padding: 7px 14px; font-size: 12px;
+  padding: 10px 16px; font-size: 14px; letter-spacing: 0.04em;
   color: var(--cream2); transition: all var(--transition);
 }
 .export-option:hover { background: var(--cream3); color: var(--cream); }
@@ -558,20 +558,20 @@ body.day .layer-row-name { color: #1a1814; }
 body.day .export-dropdown { background: #f0ede8; border-color: #c8c4be; }
 .export-dropdown.open { display: block; }
 .export-option {
-  display: block;
-  width: 100%; padding: 7px 14px;
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 16px;
   background: transparent; border: none;
-  color: var(--cream); font-family: var(--font-sans); font-size: 12px;
+  color: var(--cream); font-family: var(--font-sans); font-size: 13px;
   cursor: pointer; transition: background var(--transition);
-  text-align: left; white-space: nowrap;
+  text-align: left;
 }
 .export-option:hover { background: var(--cream3); }
 body.day .export-option { color: #1a1814; }
 body.day .export-option:hover { background: rgba(0,0,0,0.06); }
 
 .btn-export-text {
-  display: flex; align-items: center;
-  height: 28px; padding: 0 10px;
+  display: flex; align-items: center; gap: 4px;
+  height: 30px; padding: 0 10px;
   background: transparent; border: 0.5px solid var(--border-md);
   border-radius: var(--radius-sm); color: var(--cream2);
   font-family: var(--font-sans); font-size: 12px; cursor: pointer;
@@ -579,6 +579,8 @@ body.day .export-option:hover { background: rgba(0,0,0,0.06); }
   white-space: nowrap;
 }
 .btn-export-text:hover { background: var(--cream3); color: var(--cream); }
+.btn-export-text .material-icons { font-size: 16px; transition: transform .2s ease; }
+.btn-export-text.open .material-icons { transform: rotate(180deg); }
 body.day .btn-export-text { color: #5a5650; border-color: #c8c4be; }
 body.day .btn-export-text:hover { background: rgba(0,0,0,0.06); color: #1a1814; }
 
@@ -734,6 +736,7 @@ body.day .style-row select { background: var(--bg); color: var(--cream); border-
 .classify-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
 .classify-item input[type="color"] { width: 24px; height: 22px; }
 .classify-item-label { font-size: 12px; color: var(--cream); flex: 1; }
+.export-option .material-icons { font-size: 16px; color: var(--cream2); }
 .leaflet-control-attribution {
   font-size: 10px !important; background: rgba(10,22,40,0.7) !important; color: var(--cream2) !important;
 }
