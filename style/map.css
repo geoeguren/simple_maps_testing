@@ -31,31 +31,6 @@ body.day .map-title-input { color: #1a1814; }
 .map-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
 /* Botones */
-.btn-primary {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 30px;
-  border: 0.5px solid rgba(226,221,212,0.4);
-  background: transparent; color: var(--cream);
-  font-family: var(--font-sans); font-size: 13px; font-weight: 400;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  transition: all var(--transition);
-}
-.btn-primary:hover { background: rgba(226,221,212,0.08); border-color: rgba(226,221,212,0.7); }
-body.day .btn-primary { border-color: rgba(26,24,20,0.35); color: #1a1814; }
-body.day .btn-primary:hover { background: rgba(26,24,20,0.07); }
-
-.btn-secondary {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px; border-radius: 30px;
-  border: 0.5px solid var(--border-md); background: transparent;
-  color: var(--cream2); font-family: var(--font-sans);
-  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-  transition: all var(--transition);
-}
-.btn-secondary:hover { border-color: rgba(226,221,212,0.5); color: var(--cream); }
-.btn-secondary.small { font-size: 10px; padding: 6px 12px; }
-body.day .btn-secondary { border-color: var(--border-md); color: var(--cream2); }
-body.day .btn-secondary:hover { color: var(--cream); border-color: var(--border-md); }
 
 .btn-icon {
   width: 32px; height: 32px; border-radius: var(--radius-sm);
