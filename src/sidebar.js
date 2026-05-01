@@ -163,7 +163,7 @@ window.SIDEBAR = (() => {
 
   function handleLogin() {
     window.AUTH.loginWithGoogle().catch(function(err) {
-      TOAST.show('Error al iniciar sesión');
+      TOAST.error('Error al iniciar sesión.');
       console.error('[SIDEBAR] Login error:', err.code, err.message);
     });
   }
@@ -215,9 +215,8 @@ window.SIDEBAR = (() => {
       if (chat) chat.titulo = newTitulo.trim();
       render();
       if (chatId === currentChatId) window.APP && window.APP.setChatHeader(newTitulo.trim());
-      TOAST.show('Chat renombrado');
     } catch (e) {
-      TOAST.show('Error al renombrar');
+      TOAST.error('Error al renombrar.');
     }
   }
 
@@ -240,9 +239,9 @@ window.SIDEBAR = (() => {
         window.APP && window.APP.newMap();
       }
       render();
-      TOAST.show('Chat eliminado');
+      TOAST.success('Chat eliminado.');
     } catch (e) {
-      TOAST.show('Error al eliminar');
+      TOAST.error('Error al eliminar.');
     }
   }
 
