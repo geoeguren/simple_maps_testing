@@ -277,9 +277,9 @@ window.LAYERS_PANEL = (() => {
     acc.innerHTML =
       `<div class="lea-mode-content" id="lea-content-${k}"></div>` +
       `<div class="lea-sep"></div>` +
-      `<button class="lea-delete-btn" data-key="${k}"><span class="material-icons">delete</span>Eliminar capa</button>` +
+      `<button class="lea-advanced-btn" data-key="${k}">Edición avanzada</button>` +
       `<div class="lea-sep"></div>` +
-      `<button class="lea-advanced-btn" data-key="${k}">Edición avanzada</button>`;
+      `<button class="lea-delete-btn" data-key="${k}"><span class="material-icons">delete</span>Eliminar capa</button>`;
 
     const row = sec.querySelector(`.layers-data-row[data-key="${k}"]`);
     row?.insertAdjacentElement('afterend', acc);
@@ -445,8 +445,8 @@ window.LAYERS_PANEL = (() => {
               <input class="lea-color-pick lea-cat-pick" type="color" value="${color}" data-val="${val}" />
             </label>
             <span class="lea-cat-label">${val}</span>
-            <button class="lea-cat-toggle" data-val="${val}" title="Editar estilo"><span class="material-icons" style="font-size:14px;pointer-events:none">tune</span></button>
             <button class="lea-cat-remove" data-val="${val}" title="Eliminar">✕</button>
+            <button class="lea-cat-toggle" data-val="${val}" title="Editar estilo"><span class="material-icons" style="font-size:14px;pointer-events:none">tune</span></button>
           </div>
           <div class="lea-cat-detail hidden">${extraControls}</div>`;
 
@@ -1037,8 +1037,8 @@ window.LAYERS_PANEL = (() => {
 
         header.appendChild(swatch);
         header.appendChild(nameInput);
-        header.appendChild(deleteBtn);
         header.appendChild(toggleBtn);
+        header.appendChild(deleteBtn);
         item.appendChild(header);
 
         // Detalle colapsable
