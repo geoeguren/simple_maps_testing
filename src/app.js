@@ -10,16 +10,94 @@
 // ── Toast ─────────────────────────────────────────────────────────
 
 window.TOAST = (() => {
-  let timer;
-  function show(msg, duration = 3000) {
+  let timer = null;
+
+  // Duraciones por tipo (ms). 0 = sin auto-cierre.
+  const DURATIONS = {
+    success: 3000,
+    info:    4000,
+    warning: 5000,
+    error:   0,
+    loading: 0
+  };
+
+  // Tipos que muestran botón X
+  const HAS_CLOSE = new Set(['warning', 'error']);
+
+  // Clases semánticas válidas
+  const TYPES = new Set(['success', 'info', 'warning', 'error', 'loading']);
+
+  function _getTopOffset() {
+    // Si el mapa está visible, anclar al topbar del mapa.
+    // Si no, anclar al topbar del chat.
+    const mapPanel = document.getElementById('map-panel');
+    const mapVisible = mapPanel && mapPanel.style.display !== 'none';
+    if (mapVisible) {
+      const topbar = document.getElementById('map-topbar');
+      if (topbar) return topbar.getBoundingClientRect().bottom + 12;
+    }
+    const chatHeader = document.getElementById('chat-header-bar');
+    if (chatHeader && chatHeader.style.display !== 'none') {
+      return chatHeader.getBoundingClientRect().bottom + 12;
+    }
+    return 64; // fallback
+  }
+
+  function hide() {
     const el = document.getElementById('toast');
     if (!el) return;
-    el.textContent = msg;
-    el.classList.add('show');
     clearTimeout(timer);
-    timer = setTimeout(() => el.classList.remove('show'), duration);
+    timer = null;
+    el.classList.remove('show');
   }
-  return { show };
+
+  /**
+   * show(msg, type, duration)
+   *   msg      — texto del toast
+   *   type     — 'success' | 'info' | 'warning' | 'error' | 'loading'
+   *   duration — ms de override (0 = sin auto-cierre). Si omitido, usa el default del tipo.
+   */
+  function show(msg, type = 'info', duration) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+
+    // Normalizar tipo
+    if (!TYPES.has(type)) type = 'info';
+
+    // Limpiar clases anteriores
+    TYPES.forEach(t => el.classList.remove('toast--' + t));
+    el.classList.add('toast--' + type);
+
+    // Posición dinámica
+    el.style.top = _getTopOffset() + 'px';
+
+    // Contenido
+    const closeBtn = HAS_CLOSE.has(type)
+      ? `<button class="toast-close" aria-label="Cerrar">✕</button>`
+      : '';
+    el.innerHTML = `<span class="toast-msg">${msg}</span>${closeBtn}`;
+
+    // Botón de cierre
+    el.querySelector('.toast-close')?.addEventListener('click', hide);
+
+    // Mostrar
+    clearTimeout(timer);
+    el.classList.add('show');
+
+    const ms = duration !== undefined ? duration : DURATIONS[type];
+    if (ms > 0) {
+      timer = setTimeout(hide, ms);
+    }
+  }
+
+  // Shorthand helpers
+  function success(msg, duration) { show(msg, 'success', duration); }
+  function info(msg, duration)    { show(msg, 'info',    duration); }
+  function warning(msg, duration) { show(msg, 'warning', duration); }
+  function error(msg, duration)   { show(msg, 'error',   duration); }
+  function loading(msg)           { show(msg, 'loading'); }
+
+  return { show, hide, success, info, warning, error, loading };
 })();
 
 // ── Tema ──────────────────────────────────────────────────────────
@@ -152,8 +230,8 @@ window.APP = (() => {
       const chatId = window.CHAT?.getChatId?.();
       if (user && chatId && currentPlan) {
         window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
-          .then(() => window.TOAST.show('Nombre guardado'))
-          .catch(() => window.TOAST.show('Error al guardar nombre'));
+          .then(() => window.TOAST.success('Nombre guardado.'))
+          .catch(() => window.TOAST.error('Error al guardar nombre.'));
         window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
       }
     });
@@ -164,7 +242,7 @@ window.APP = (() => {
       const chatId = window.CHAT?.getChatId?.();
       if (!user || !chatId || !currentPlan) return;
       window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
-        .then(() => { if (toastMsg) window.TOAST.show(toastMsg); })
+        .then(() => { if (toastMsg) window.TOAST.success(toastMsg); })
         .catch(e => console.warn('[APP] Error al persistir:', e));
       window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
     }
@@ -222,8 +300,8 @@ window.APP = (() => {
         const chatId = window.CHAT?.getChatId?.();
         if (user && chatId) {
           window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
-            .then(() => window.TOAST.show('Nombre guardado'))
-            .catch(() => window.TOAST.show('Error al guardar nombre'));
+            .then(() => window.TOAST.success('Nombre guardado.'))
+            .catch(() => window.TOAST.error('Error al guardar nombre.'));
           window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
         }
       });
@@ -326,7 +404,7 @@ window.APP = (() => {
 
   async function renderMap(plan) {
     if (!plan?.instrucciones?.length) {
-      window.TOAST.show('El plan de mapa no tiene capas');
+      window.TOAST.error('El plan de mapa no tiene capas.');
       return;
     }
 
@@ -408,8 +486,7 @@ window.APP = (() => {
       `;
     }
 
-    if (errors.length) window.TOAST.show(errors.length === 1 ? errors[0] : `${errors.length} capas tuvieron problemas`, 5000);
-    else if (Object.keys(activeLayers).length > 0) window.TOAST.show('Mapa generado');
+    if (errors.length) window.TOAST.warning(errors.length === 1 ? errors[0] + '.' : `${errors.length} capas tuvieron problemas.`);
 
     refreshBtn?.classList.remove('spinning');
   }
@@ -448,7 +525,7 @@ window.APP = (() => {
     // Persistir en Firestore
     const user   = window.AUTH?.currentUser();
     const chatId = window.CHAT?.getChatId?.();
-    _persistPlan();
+    _persistPlan('Cambios guardados.');
   }
 
   // ── Aplicar clasificación desde chat ─────────────────────────
@@ -471,7 +548,7 @@ window.APP = (() => {
     if (!changed) return;
     const user   = window.AUTH?.currentUser();
     const chatId = window.CHAT?.getChatId?.();
-    _persistPlan();
+    _persistPlan('Cambios guardados.');
   }
 
   async function restoreChat(chat) {
@@ -587,7 +664,7 @@ window.APP = (() => {
 
   function initAuth() {
     const authError = window.AUTH.handleAuthError();
-    if (authError) window.TOAST.show('Error de autenticación: ' + authError, 5000);
+    if (authError) window.TOAST.error('Error de autenticación: ' + authError);
 
     const newSession = window.AUTH.handleCallback();
     if (newSession) console.log('[APP] Login OK:', newSession.email);
