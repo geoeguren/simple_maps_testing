@@ -9,6 +9,10 @@
 
 window.AUTH = (() => {
 
+  // CLIENT_ID es el OAuth Client ID de Google.
+  // Es público por diseño del protocolo OAuth 2.0: el browser siempre lo ve
+  // en la URL de redirección. NO es un secreto — no moverlo a variables de entorno.
+  // El secreto real (CLIENT_SECRET) vive solo en el servidor (api/auth/callback.js).
   const CLIENT_ID   = '657210135728-if0b3haekjs84rk507udvo9qus25udfo.apps.googleusercontent.com';
   const REDIRECT    = 'https://simple-maps.vercel.app/api/auth/callback';
   const SESSION_KEY = 'sm_session';
