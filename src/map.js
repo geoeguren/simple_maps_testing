@@ -826,6 +826,14 @@ window.MAP = (() => {
       dropdown.classList.toggle('hidden', isOpen);
       chevron.textContent = isOpen ? '▾' : '▲';
       trigger.classList.toggle('pfc-open', !isOpen);
+      if (!isOpen) {
+        // Position the fixed dropdown above the trigger
+        const rect = trigger.getBoundingClientRect();
+        dropdown.style.left  = rect.left + 'px';
+        dropdown.style.width = rect.width + 'px';
+        dropdown.style.bottom = (window.innerHeight - rect.top + 3) + 'px';
+        dropdown.style.top = 'auto';
+      }
     });
 
     return el;
