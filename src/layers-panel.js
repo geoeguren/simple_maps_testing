@@ -210,12 +210,18 @@ window.LAYERS_PANEL = (() => {
     trigger.addEventListener('click', e => {
       e.stopPropagation();
       const isOpen = !dropdown.classList.contains('hidden');
-      // Cerrar todos los dropdowns abiertos en el acordeón
-      el.closest('.layer-edit-accordion')?.querySelectorAll('.lea-csel-dropdown').forEach(d => {
-        d.classList.add('hidden');
-        d.closest('.lea-csel')?.querySelector('.lea-csel-arrow')?.classList.remove('open');
+      // Cerrar todos los dropdowns abiertos en el contenedor más cercano
+      const scope = el.closest('.layer-edit-accordion') || el.closest('.adv-modal-body') || el.closest('.adv-global-wrap') || document;
+      scope.querySelectorAll('.lea-csel-dropdown').forEach(d => {
+        if (d !== dropdown) {
+          d.classList.add('hidden');
+          d.closest('.lea-csel')?.querySelector('.lea-csel-arrow')?.classList.remove('open');
+        }
       });
-      if (!isOpen) {
+      if (isOpen) {
+        dropdown.classList.add('hidden');
+        el.querySelector('.lea-csel-arrow')?.classList.remove('open');
+      } else {
         dropdown.classList.remove('hidden');
         el.querySelector('.lea-csel-arrow').classList.add('open');
       }
@@ -1167,7 +1173,9 @@ window.LAYERS_PANEL = (() => {
         detail.className = 'adv-cat-detail hidden';
         const baseStyle = nl.style || {};
         const valStyle  = cl.styleMap?.[val] || {};
-        const s         = { ...baseStyle, ...valStyle, color, fillColor: color };
+        const fill      = valStyle.fillColor || color;
+        const border    = valStyle.color || (geom !== 'line' ? (window.MAP.darkenHex?.(fill) || fill) : fill);
+        const s         = { ...baseStyle, ...valStyle, color: border, fillColor: fill };
         detail.innerHTML = buildDetailHTML(geom, s, val);
         item.appendChild(detail);
         itemsEl.appendChild(item);
