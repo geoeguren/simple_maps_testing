@@ -610,7 +610,7 @@ window.LAYERS_PANEL = (() => {
     modal.innerHTML = `
       <div class="adv-modal-header">
         <span class="adv-modal-title">Edición avanzada — ${esc(l.titulo || k)}</span>
-        <button class="adv-modal-close" id="adv-close-btn"><span class="material-icons">close</span></button>
+        <button class="popup-close-btn" id="adv-close-btn"><span class="material-icons">close</span></button>
       </div>
       <div class="adv-modal-pills">${pills}</div>
       <div class="adv-modal-body" id="adv-modal-body"></div>
