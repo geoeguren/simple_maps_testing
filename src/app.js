@@ -243,7 +243,10 @@ window.APP = (() => {
       if (!user || !chatId || !currentPlan) return;
       window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
         .then(() => { if (toastMsg) window.TOAST.success(toastMsg); })
-        .catch(e => console.warn('[APP] Error al persistir:', e));
+        .catch(e => {
+          console.warn('[APP] Error al persistir:', e);
+          window.TOAST.warning('No se pudo guardar. Revisá tu conexión.');
+        });
       window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
     }
 
