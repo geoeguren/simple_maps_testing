@@ -501,19 +501,16 @@ window.UI = (() => {
     card.className = 'msg-export-choice';
 
     const exports = [
-      { key: 'geojson', icon: 'polyline',       label: 'Capa vectorial',    sub: 'GeoJSON' },
-      { key: 'jpeg',    icon: 'image',           label: 'Imagen',            sub: 'JPEG' },
-      { key: 'pdf',     icon: 'picture_as_pdf',  label: 'Archivo portable',  sub: 'PDF' },
-      { key: 'html',    icon: 'code',            label: 'Embebido',          sub: 'HTML' },
+      { key: 'geojson', label: 'Capa vectorial', sub: 'geojson' },
+      { key: 'jpeg',    label: 'Imagen',          sub: 'jpeg'    },
+      { key: 'pdf',     label: 'Archivo portable', sub: 'pdf'    },
+      { key: 'html',    label: 'Embebido',         sub: 'html'   },
     ];
 
     card.innerHTML = exports.map(e => `
       <button class="export-choice-btn" data-fmt="${e.key}">
-        <span class="material-icons export-choice-icon">${e.icon}</span>
-        <span class="export-choice-text">
-          <span class="export-choice-label">${e.label}</span>
-          <span class="export-choice-sub">${e.sub}</span>
-        </span>
+        <span class="export-choice-label">${e.label}</span>
+        <span class="export-choice-sub">${e.sub}</span>
       </button>`).join('');
 
     card.querySelectorAll('.export-choice-btn').forEach(btn => {
