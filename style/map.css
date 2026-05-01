@@ -196,11 +196,11 @@ body.day .layer-name-input { color: #1a1814; }
 
 /* Botón editar capa */
 .layer-edit-btn {
-  width: 20px; height: 20px; flex-shrink: 0;
+  width: 22px; height: 22px; flex-shrink: 0;
   background: transparent; border: none;
   color: var(--cream2); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 3px;
+  border-radius: 4px;
   transition: background var(--transition), color var(--transition);
 }
 .layer-edit-btn:hover,
@@ -311,13 +311,14 @@ body.day .lea-cat-label { color: #1a1814; }
 .lea-cat-remove {
   background: transparent; border: none; color: var(--cream2);
   cursor: pointer; font-size: 11px; padding: 0 2px; opacity: 0.5;
-  transition: opacity var(--transition);
+  border-radius: 4px;
+  transition: opacity var(--transition), background var(--transition), color var(--transition);
 }
-.lea-cat-remove:hover { opacity: 1; color: #e06060; }
+.lea-cat-remove:hover { opacity: 1; color: #e06060; background: rgba(200,80,80,0.12); }
 .lea-cat-toggle {
   background: transparent; border: none; color: var(--cream2); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px; border-radius: 3px;
+  width: 22px; height: 22px; border-radius: 4px;
   transition: background var(--transition), color var(--transition);
   flex-shrink: 0;
 }
@@ -615,9 +616,9 @@ body.day .popup-header { border-color: #c8c4be; }
 body.day .popup-name { color: #1a1814; }
 
 .popup-close-btn {
-  width: 26px; height: 26px; flex-shrink: 0;
+  width: 28px; height: 28px; flex-shrink: 0;
   background: transparent; border: none; cursor: pointer;
-  color: var(--cream2); border-radius: 4px;
+  color: var(--cream2); border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
   transition: background var(--transition), color var(--transition);
 }
