@@ -546,12 +546,39 @@ window.EXPORT = (() => {
     // Campos excluidos del popup (técnicos / sin valor para el usuario)
     const EXCL_FIELDS = new Set(['gid','fdc','sag','entidad','objeto','gna']);
 
+    // ── Límite de complejidad geométrica ──────────────────────
+    // Las capas que superan este umbral se deshabilitan en la exportación HTML
+    // porque incluir su GeoJSON inline hace el archivo demasiado pesado para el browser.
+    // Métrica: vértices totales (coordenadas individuales en toda la capa).
+    // Ajustar este valor según feedback real de uso.
+    const HTML_EXPORT_MAX_VERTICES = 50_000;
+
+    function countVertices(geojson) {
+      return (geojson?.features || []).reduce((sum, f) => {
+        // Contar pares de coordenadas: cada "[número," dentro de coordinates es un vértice
+        const raw = JSON.stringify(f.geometry?.coordinates || []);
+        return sum + (raw.match(/\[[-\d]/g) || []).length;
+      }, 0);
+    }
+
+    // Pre-calcular complejidad por capa (una sola vez al abrir el modal)
+    const layerComplexity = new Map(
+      layerEntries.map(([key, l]) => [key, countVertices(l.geojson)])
+    );
+    const anyTooComplex = layerEntries.some(([key]) => layerComplexity.get(key) > HTML_EXPORT_MAX_VERTICES);
+
     // Construir HTML del selector de capas (dropdown con checkboxes)
-    const layerCheckboxesHTML = layerEntries.map(([key, l]) => `
-      <label class="html-csel-chk-row">
-        <input type="checkbox" class="html-layer-chk" data-key="${escHtml(key)}" />
+    const layerCheckboxesHTML = layerEntries.map(([key, l]) => {
+      const tooComplex = layerComplexity.get(key) > HTML_EXPORT_MAX_VERTICES;
+      return `
+      <label class="html-csel-chk-row${tooComplex ? ' html-layer-too-complex' : ''}"
+             title="${tooComplex ? 'Geometría demasiado compleja para embeber' : ''}">
+        <input type="checkbox" class="html-layer-chk" data-key="${escHtml(key)}"
+               ${tooComplex ? 'disabled' : ''} />
         <span class="html-csel-chk-label">${escHtml(l.titulo || key)}</span>
-      </label>`).join('');
+        ${tooComplex ? '<span class="html-layer-complex-icon material-icons" title="Geometría demasiado compleja">block</span>' : ''}
+      </label>`;
+    }).join('');
 
     // Construir HTML de los selectores de campos por capa
     const identifySelectorsHTML = layerEntries.map(([key, l]) => {
@@ -606,9 +633,11 @@ window.EXPORT = (() => {
         </div>
 
         <!-- Capas — selector con checkboxes internos -->
-        <div class="adv-body-row">
-          <span class="adv-body-label">Capas</span>
-          <div class="adv-ramp-csel adv-field-csel html-layers-csel" id="html-layers-csel">
+        <div class="adv-body-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+          <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+            <span class="adv-body-label">Capas</span>
+          </div>
+          <div class="adv-ramp-csel adv-field-csel html-layers-csel" id="html-layers-csel" style="width:100%">
             <div class="adv-ramp-trigger adv-field-trigger" id="html-layers-trigger">
               <span class="adv-field-selected" id="html-layers-summary">Ninguna seleccionada</span>
               <span class="adv-ramp-arrow">▾</span>
@@ -617,6 +646,7 @@ window.EXPORT = (() => {
               ${layerCheckboxesHTML}
             </div>
           </div>
+          ${anyTooComplex ? `<span class="html-complex-hint"><span class="material-icons" style="font-size:13px;vertical-align:-2px">block</span> Algunas capas no pueden embeberse por su complejidad geométrica.</span>` : ''}
         </div>
 
         <!-- Consulta de elementos — un selector de campos por capa -->
