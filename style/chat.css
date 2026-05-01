@@ -49,6 +49,27 @@ body.day .chat-panel { background: var(--bg); border-right-color: var(--border);
 }
 body.day .msg.assistant { color: #1a1814; }
 
+/* Mensaje de error de sistema — capa que no pudo cargarse */
+.msg.system-error {
+  align-self: flex-start;
+  max-width: 90%;
+  padding: 9px 13px;
+  background: rgba(180, 60, 60, 0.08);
+  border: 0.5px solid rgba(200, 80, 80, 0.28);
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.55;
+  color: #d08080;
+}
+body.day .msg.system-error {
+  background: rgba(180, 60, 60, 0.06);
+  border-color: rgba(180, 60, 60, 0.22);
+  color: #a04040;
+}
+.msg.system-error strong { font-weight: 600; color: #e09090; }
+body.day .msg.system-error strong { color: #b05050; }
+
 /* ── Markdown en mensajes del asistente ──────────────────────── */
 .msg.assistant p  { margin: 0 0 .6rem; line-height: 1.65; }
 .msg.assistant p:last-child { margin-bottom: 0; }
