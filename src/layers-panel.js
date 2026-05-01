@@ -11,6 +11,35 @@ window.LAYERS_PANEL = (() => {
 
   // ── Helpers ───────────────────────────────────────────────────
 
+  /**
+   * wireSliderTouch(inp)
+   * Permite deslizar un <input type="range"> en móvil sin que el touch
+   * propague y arrastre el acordeón que lo contiene.
+   * CSS ya pone touch-action:none en .lea-range-input; aquí manejamos
+   * el movimiento manualmente para actualizar el valor y disparar 'input'.
+   */
+  function wireSliderTouch(inp) {
+    inp.addEventListener('touchstart', e => {
+      e.stopPropagation();
+    }, { passive: true });
+
+    inp.addEventListener('touchmove', e => {
+      e.stopPropagation();
+      const touch = e.touches[0];
+      const rect  = inp.getBoundingClientRect();
+      const min   = parseFloat(inp.min)  || 0;
+      const max   = parseFloat(inp.max)  || 1;
+      const step  = parseFloat(inp.step) || 0.01;
+      const ratio = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+      let val = min + ratio * (max - min);
+      // Redondear al step más cercano
+      val = Math.round(val / step) * step;
+      val = Math.max(min, Math.min(max, parseFloat(val.toFixed(10))));
+      inp.value = val;
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+    }, { passive: true });
+  }
+
   // Escapar HTML para prevenir XSS en templates con innerHTML
   function esc(str) {
     return String(str ?? '')
@@ -271,6 +300,7 @@ window.LAYERS_PANEL = (() => {
 
     function wireStyleControls(container, mapKey, geom, sec) {
       container.querySelectorAll('.lea-range-input').forEach(inp => {
+        wireSliderTouch(inp);
         inp.addEventListener('input', e => {
           const val   = parseFloat(e.target.value);
           const prop  = e.target.dataset.prop;
@@ -457,6 +487,7 @@ window.LAYERS_PANEL = (() => {
 
         // Controles de estilo por valor
         item.querySelectorAll('.lea-range-input').forEach(inp => {
+          wireSliderTouch(inp);
           inp.addEventListener('input', e => {
             const prop  = e.target.dataset.prop;
             const v     = parseFloat(e.target.value);
@@ -894,6 +925,8 @@ window.LAYERS_PANEL = (() => {
         itemsWrap.className = 'adv-grad-items';
         bodyEl.appendChild(itemsWrap);
 
+        const classesInp = bodyEl.querySelector('.adv-classes');
+        if (classesInp) wireSliderTouch(classesInp);
         bodyEl.querySelector('.adv-classes')?.addEventListener('input', e => {
           const valEl = e.target.closest('.lea-slider-wrap')?.querySelector('.lea-val');
           if (valEl) valEl.textContent = e.target.value;
@@ -1108,12 +1141,12 @@ window.LAYERS_PANEL = (() => {
       if (geom === 'point') {
         rows += leaRow('Tamaño', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="radius" type="range" min="1" max="25" step="0.5" value="${s.radius??5}" /><span class="lea-val">${s.radius??5}</span></div>`);
         rows += leaRow('Color del borde',  colorPickerHTML('color', toHex(s.color)));
-        rows += leaRow('Grosor', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
+        rows += leaRow('Grosor del borde', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
         rows += leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${s.fillOpacity??0.85}" /><span class="lea-val">${Math.round((s.fillOpacity??0.85)*100)}%</span></div>`);
       } else if (geom === 'polygon') {
         rows += leaRow('Color del relleno', colorPickerHTML('fillColor', toHex(s.fillColor)));
         rows += leaRow('Color del borde',   colorPickerHTML('color',     toHex(s.color)));
-        rows += leaRow('Grosor',  `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
+        rows += leaRow('Grosor del borde',  `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
         rows += leaRow('Opacidad',`<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${s.fillOpacity??0.5}" /><span class="lea-val">${Math.round((s.fillOpacity??0.5)*100)}%</span></div>`);
       } else {
         rows += leaRow('Color',   colorPickerHTML('color', toHex(s.color)));
@@ -1127,6 +1160,7 @@ window.LAYERS_PANEL = (() => {
       if (detail.dataset.wired) return;
       detail.dataset.wired = '1';
       detail.querySelectorAll('.lea-range-input').forEach(inp => {
+        wireSliderTouch(inp);
         inp.addEventListener('input', e => {
           const prop  = e.target.dataset.prop;
           const v     = parseFloat(e.target.value);
