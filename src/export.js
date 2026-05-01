@@ -721,13 +721,25 @@ window.EXPORT = (() => {
     };
     const tileUrl = BASEMAP_URLS[baseKey] || null;
 
-    const layersJSON      = JSON.stringify(layers);
-    const legendDisplay   = showLegend   ? '' : 'display:none';
-    const zoomOpts        = allowZoom    ? 'true' : 'false';
-    const dragOpts        = allowZoom    ? '' : 'dragging.disable(); map.scrollWheelZoom.disable(); map.doubleClickZoom.disable(); map.touchZoom.disable();';
-    const tileBlock       = tileUrl
-      ? `L.tileLayer('${tileUrl}', { attribution: '© Esri', maxZoom: 19 }).addTo(map);`
+    const layersJSON    = JSON.stringify(layers);
+    const legendDisplay = showLegend ? '' : 'display:none';
+    const zoomOpts      = allowZoom  ? 'true' : 'false';
+    const dragOpts      = allowZoom  ? '' : 'dragging.disable();map.scrollWheelZoom.disable();map.doubleClickZoom.disable();map.touchZoom.disable();';
+    const tileBlock     = tileUrl
+      ? `L.tileLayer('${tileUrl}',{attribution:'© Esri',maxZoom:19}).addTo(map);`
       : '';
+
+    // Footer dinámico: extraer fuentes únicas de las capas (campo fdc de cada feature)
+    const sources = [...new Set(
+      layers.flatMap(l =>
+        (l.geojson?.features || [])
+          .map(f => f.properties?.fdc)
+          .filter(v => v && v !== 'None')
+      )
+    )];
+    const footerText = sources.length
+      ? 'EPSG 4326 · ' + sources.join(' · ')
+      : 'EPSG 4326 · Instituto Geográfico Nacional';
 
     return `<!DOCTYPE html>
 <html lang="es">
@@ -736,10 +748,12 @@ window.EXPORT = (() => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escHtml(titulo)}</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     html,body{width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
     #map{width:100%;height:100%;background:#e8e4de}
+    /* Leyenda */
     #legend-panel{position:absolute;top:12px;right:12px;z-index:1000;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);min-width:180px;max-width:240px;overflow:hidden;${legendDisplay}}
     #legend-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;user-select:none;border-bottom:0.5px solid rgba(0,0,0,0.08)}
     #legend-title{font-size:13px;font-weight:600;color:#1a1814;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -751,35 +765,135 @@ window.EXPORT = (() => {
     .legend-swatch{width:14px;height:14px;border-radius:2px;flex-shrink:0;border:0.5px solid rgba(0,0,0,0.15)}
     .legend-label{font-size:12px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #legend-footer{padding:6px 12px 8px;border-top:0.5px solid rgba(0,0,0,0.06);font-size:10px;color:#999;line-height:1.5}
+    /* Controles de zoom — arriba a la derecha, debajo de la leyenda */
+    #zoom-controls{position:absolute;top:12px;right:56px;z-index:1000;display:flex;flex-direction:column;gap:4px}
+    .z-btn{width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
+    .z-btn:hover{background:#fff;color:#1a1814}
+    .z-btn .material-icons{font-size:18px}
+    /* Botón consultar — abajo a la izquierda */
+    #btn-identify{position:absolute;bottom:24px;left:12px;z-index:1000;width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
+    #btn-identify:hover{background:#fff;color:#1a1814}
+    #btn-identify.active{background:#444;color:#e2ddd4;border-color:#555}
+    #btn-identify .material-icons{font-size:18px}
+    /* Popup */
+    .sm-popup .leaflet-popup-content-wrapper{background:#2a2a2a;border:0.5px solid rgba(226,221,212,0.18);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);padding:0}
+    .sm-popup .leaflet-popup-tip-container{display:none}
+    .sm-popup .leaflet-popup-content{margin:0}
+    .map-popup{min-width:180px;max-width:280px}
+    .popup-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 16px;border-bottom:0.5px solid rgba(226,221,212,0.1);min-height:40px}
+    .popup-name{font-size:13px;font-weight:600;color:#e2ddd4;padding:10px 0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .popup-close-btn{width:26px;height:26px;flex-shrink:0;background:transparent;border:none;cursor:pointer;color:rgba(226,221,212,0.55);border-radius:4px;display:flex;align-items:center;justify-content:center}
+    .popup-close-btn:hover{background:rgba(226,221,212,0.08);color:#e2ddd4}
+    .popup-close-btn .material-icons{font-size:16px;pointer-events:none}
+    .popup-table{width:100%;border-collapse:collapse}
+    .popup-key{font-family:monospace;font-size:11px;color:rgba(226,221,212,0.55);padding:5px 8px 5px 16px;white-space:nowrap;vertical-align:top;width:40%}
+    .popup-val{font-size:13px;color:#e2ddd4;padding:5px 16px 5px 0;word-break:break-word}
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <div id="legend-panel" style="${legendDisplay}">
+  <div id="zoom-controls">
+    <button class="z-btn" id="zin" title="Zoom +"><span class="material-icons">add</span></button>
+    <button class="z-btn" id="zreset" title="Vista original"><span class="material-icons">undo</span></button>
+    <button class="z-btn" id="zout" title="Zoom -"><span class="material-icons">remove</span></button>
+  </div>
+  <button id="btn-identify" title="Consultar elementos"><span class="material-icons">info</span></button>
+  <div id="legend-panel">
     <div id="legend-header" onclick="toggleLegend()">
       <span id="legend-title">${escHtml(titulo)}</span>
       <span id="legend-toggle">▾</span>
     </div>
     <div id="legend-body"></div>
-    <div id="legend-footer">EPSG 4326 · Instituto Geográfico Nacional</div>
+    <div id="legend-footer">${escHtml(footerText)}</div>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
   <script>
     const D=${layersJSON};
-    const map=L.map('map',{center:[${center.lat.toFixed(6)},${center.lng.toFixed(6)}],zoom:${zoom},zoomControl:${zoomOpts}});
+    const initCenter=[${center.lat.toFixed(6)},${center.lng.toFixed(6)}];
+    const initZoom=${zoom};
+    const map=L.map('map',{center:initCenter,zoom:initZoom,zoomControl:false});
     ${dragOpts}
     ${tileBlock}
+
+    // Estilos
     function ps(s){return{fillColor:s.fillColor||'#c8622a',fillOpacity:s.fillOpacity??0.5,color:s.color||s.fillColor||'#c8622a',weight:s.weight??1.5,opacity:s.opacity??1}}
     function ls(s){const t={color:s.color||'#c8622a',weight:s.weight??2,opacity:s.opacity??1};if(s.dashArray)t.dashArray=s.dashArray;return t}
     function pts(s){return{radius:s.radius??5,fillColor:s.fillColor||'#c8622a',fillOpacity:s.fillOpacity??0.85,color:s.color||'#fff',weight:s.weight??1.5,opacity:s.opacity??1}}
     function fs(g,b,cl,p){if(!cl?.colorMap)return g==='point'?pts(b):g==='line'?ls(b):ps(b);const c=cl.colorMap[p?.[cl.field]];if(!c)return{opacity:0,fillOpacity:0,weight:0,radius:0};const m={...b,...(cl.styleMap?.[p?.[cl.field]]||{}),fillColor:c,color:c};return g==='point'?pts(m):g==='line'?ls(m):ps(m)}
+
+    // Leyenda
     const lb=document.getElementById('legend-body');
     function ai(c,l){const i=document.createElement('div');i.className='legend-item';i.innerHTML='<span class="legend-swatch" style="background:'+c+'"></span><span class="legend-label">'+l+'</span>';lb.appendChild(i)}
+
+    // Capas + consulta
+    let identifyMode=false;
+    let hlLayer=null;
+    let currentPopup=null;
+
+    function clearHL(){if(hlLayer){hlLayer.remove();hlLayer=null;}}
+
+    function buildPopup(feat,titulo){
+      const props=feat.properties||{};
+      const EXCL=new Set(['gid','fdc','sag','entidad','objeto','gna']);
+      const fields=Object.keys(props).filter(k=>!EXCL.has(k)&&!k.endsWith('Type')&&props[k]!=null&&props[k]!==''&&props[k]!=='None');
+      const name=props.fna||props.nom_pfi||props.nam||props.rtn||titulo||'';
+      const rows=fields.map(k=>'<tr><td class="popup-key">'+k+'</td><td class="popup-val">'+props[k]+'</td></tr>').join('');
+      const el=document.createElement('div');
+      el.className='map-popup';
+      el.innerHTML='<div class="popup-header">'+(name?'<span class="popup-name">'+name+'</span>':'<span></span>')+'<button class="popup-close-btn"><span class="material-icons">close</span></button></div><table class="popup-table">'+(rows||'<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>')+'</table>';
+      el.querySelector('.popup-close-btn').addEventListener('click',()=>map.closePopup());
+      return el;
+    }
+
+    function bindIdentify(feat,layer,layerTitulo){
+      const geom=feat.geometry?.type?.toLowerCase()||'';
+      layer.on('click',e=>{
+        if(!identifyMode)return;
+        L.DomEvent.stopPropagation(e);
+        clearHL();
+        let hl;
+        if(geom.includes('point')){
+          hl=L.circleMarker(e.latlng,{radius:14,color:'#f5c518',weight:3,fillColor:'#f5c518',fillOpacity:0.2,opacity:0.9}).addTo(map);
+        } else if(geom.includes('line')){
+          hl=L.geoJSON(feat,{style:{color:'#f5c518',weight:12,opacity:0.75}}).addTo(map);
+        } else {
+          hl=L.geoJSON(feat,{style:{color:'#f5c518',weight:3,fillColor:'#f5c518',fillOpacity:0.2,opacity:0.9}}).addTo(map);
+        }
+        hlLayer=hl;
+        currentPopup=L.popup({className:'sm-popup',offset:L.point(0,6),autoPan:true,closeButton:false})
+          .setLatLng(e.latlng).setContent(buildPopup(feat,layerTitulo)).openOn(map);
+      });
+    }
+
+    map.on('popupclose',()=>{clearHL();currentPopup=null;});
+    map.on('click',()=>{
+      if(identifyMode&&!currentPopup){setIdentify(false);}
+    });
+
+    function setIdentify(on){
+      identifyMode=on;
+      const btn=document.getElementById('btn-identify');
+      btn.classList.toggle('active',on);
+      btn.title=on?'Desactivar consulta':'Consultar elementos';
+      if(!on){map.closePopup();clearHL();}
+    }
+
     D.forEach(l=>{
       if(!l.classification?.colorMap)ai(l.style?.fillColor||l.style?.color||'#888',l.titulo);
       else Object.entries(l.classification.colorMap).forEach(([v,c])=>ai(c,v));
-      L.geoJSON(l.geojson,{style:f=>fs(l.geomType,l.style,l.classification,f.properties),pointToLayer:(f,ll)=>L.circleMarker(ll,fs('point',l.style,l.classification,f.properties))}).addTo(map);
+      const gl=L.geoJSON(l.geojson,{
+        style:f=>fs(l.geomType,l.style,l.classification,f.properties),
+        pointToLayer:(f,ll)=>L.circleMarker(ll,fs('point',l.style,l.classification,f.properties)),
+        onEachFeature:(f,layer)=>bindIdentify(f,layer,l.titulo)
+      }).addTo(map);
     });
+
+    // Controles de zoom
+    document.getElementById('zin').addEventListener('click',()=>map.zoomIn());
+    document.getElementById('zout').addEventListener('click',()=>map.zoomOut());
+    document.getElementById('zreset').addEventListener('click',()=>map.setView(initCenter,initZoom));
+    document.getElementById('btn-identify').addEventListener('click',()=>setIdentify(!identifyMode));
+
     function toggleLegend(){document.getElementById('legend-panel').classList.toggle('collapsed')}
   <\/script>
 </body>
