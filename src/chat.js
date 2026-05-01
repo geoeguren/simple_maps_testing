@@ -66,8 +66,10 @@ window.CHAT = (() => {
         body:    JSON.stringify({
           messages: sanitizeHistoryForLLM(history),
           layers:   window.LAYERS,
+          sources:  window.SOURCES,
+          userLang: navigator.language || null,
           model:    window.SETTINGS?.get('model') || 'auto',
-          tone:     window.SETTINGS?.get('tone')  || 'conversacional',
+          tone:     window.SETTINGS?.get('tone')  || 'default',
           activeMap: Object.keys(activeLayers).length ? {
             titulo:  window.APP?.getCurrentPlan?.()?.titulo || '',
             capas:   activeLayersSummary
