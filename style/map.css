@@ -658,6 +658,8 @@ body.day .pfc-trigger-label { color: #6a6560; }
   box-shadow: 0 4px 16px rgba(0,0,0,0.25);
   max-height: 190px; overflow-y: auto;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch; /* scroll inercial en iOS */
+  touch-action: pan-y;               /* permitir scroll vertical, bloquear gestos del mapa */
   scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
 }
 .pfc-dropdown::-webkit-scrollbar { width: 4px; }
