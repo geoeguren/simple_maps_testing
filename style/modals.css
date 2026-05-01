@@ -285,10 +285,19 @@ body.day .adv-modal-pills { border-color: #c8c4be; }
   transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 .adv-pill:hover:not([disabled]):not(.active) { background: var(--cream3); color: var(--cream); }
-.adv-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.adv-pill.active {
+  background: var(--cream);
+  border-color: var(--cream);
+  color: var(--bg);
+}
 .adv-pill[disabled] { opacity: 0.35; cursor: default; }
 body.day .adv-pill { color: #6a6560; }
 body.day .adv-pill:hover:not([disabled]):not(.active) { background: rgba(0,0,0,0.05); color: #1a1814; }
+body.day .adv-pill.active {
+  background: #1a1814;
+  border-color: #1a1814;
+  color: #f0ede8;
+}
 
 /* Body */
 .adv-modal-body {
