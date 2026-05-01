@@ -563,6 +563,14 @@ window.EXPORT = (() => {
             <input type="checkbox" id="html-zoom" checked />
             <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Permitir zoom</span>
           </label>
+          <label class="pfc-row" style="padding:5px 0">
+            <input type="checkbox" id="html-identify" />
+            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Agregar consulta de elementos</span>
+          </label>
+          <div id="html-fields-wrap" style="padding:4px 0 2px;opacity:0.35;pointer-events:none">
+            <span class="adv-body-label" style="font-size:12px;margin-bottom:4px;display:block">Campos a mostrar</span>
+            <div id="html-fields-list" style="display:flex;flex-direction:column;gap:2px"></div>
+          </div>
         </div>
 
         <div class="adv-body-row">
@@ -587,6 +595,41 @@ window.EXPORT = (() => {
 
     function closeModal() { modal.remove(); backdrop.remove(); }
     modal.querySelector('#html-modal-close').addEventListener('click', closeModal);
+
+    // Construir lista de campos disponibles de las capas activas
+    const EXCL_FIELDS = new Set(['gid','fdc','sag','entidad','objeto','gna']);
+    const allLayerFields = [...new Set(
+      Object.values(activeLayers).flatMap(l =>
+        (l.geojson?.features || []).flatMap(f =>
+          Object.keys(f.properties || {}).filter(k =>
+            !EXCL_FIELDS.has(k) && !k.endsWith('Type')
+          )
+        )
+      )
+    )];
+
+    const fieldsList = modal.querySelector('#html-fields-list');
+    allLayerFields.forEach(field => {
+      const lbl = document.createElement('label');
+      lbl.className = 'pfc-row';
+      lbl.style.cssText = 'padding:3px 0';
+      lbl.innerHTML = `<input type="checkbox" data-field="${field}" checked />
+        <span class="pfc-label" style="font-family:var(--font-mono);font-size:12px;color:var(--cream2)">${field}</span>`;
+      fieldsList.appendChild(lbl);
+    });
+
+    // Wire identify toggle
+    const identifyChk  = modal.querySelector('#html-identify');
+    const fieldsWrap   = modal.querySelector('#html-fields-wrap');
+    identifyChk.addEventListener('change', () => {
+      const on = identifyChk.checked;
+      fieldsWrap.style.opacity       = on ? '1' : '0.35';
+      fieldsWrap.style.pointerEvents = on ? 'auto' : 'none';
+      buildAndShow();
+    });
+    fieldsList.querySelectorAll('input[type=checkbox]').forEach(cb =>
+      cb.addEventListener('change', buildAndShow)
+    );
 
     // Wire basemap csel
     let _selectedBase = curBase;
@@ -668,6 +711,10 @@ window.EXPORT = (() => {
       const baseKey      = _selectedBase;
       const showLegend   = modal.querySelector('#html-legend').checked;
       const allowZoom    = modal.querySelector('#html-zoom').checked;
+      const allowIdentify = modal.querySelector('#html-identify').checked;
+      const selectedFields = allowIdentify
+        ? [...modal.querySelectorAll('#html-fields-list input[type=checkbox]:checked')].map(i => i.dataset.field)
+        : [];
 
       const layers = selectedKeys
         .map(k => activeLayers[k])
@@ -682,7 +729,7 @@ window.EXPORT = (() => {
         }));
 
       try {
-        const code = buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, mapInst);
+        const code = buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, allowIdentify, selectedFields, mapInst);
         renderCodeBox(code);
       } catch (err) {
         console.error('[EXPORT] Error generando HTML:', err);
@@ -708,7 +755,7 @@ window.EXPORT = (() => {
 
   // ── Constructor del HTML ──────────────────────────────────────
 
-  function buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, mapInst) {
+  function buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, allowIdentify, selectedFields, mapInst) {
     const center = mapInst.getCenter();
     const zoom   = mapInst.getZoom();
 
@@ -726,6 +773,72 @@ window.EXPORT = (() => {
     const dragOpts      = allowZoom  ? '' : 'dragging.disable();map.scrollWheelZoom.disable();map.doubleClickZoom.disable();map.touchZoom.disable();';
     const tileBlock     = tileUrl
       ? `L.tileLayer('${tileUrl}',{attribution:'© Esri',maxZoom:19}).addTo(map);`
+      : '';
+    const identifyFieldsJSON = JSON.stringify(selectedFields || []);
+    const identifyBtnHTML    = allowIdentify
+      ? `<button id="btn-identify" title="Consultar elementos"><span class="material-icons">question_mark</span></button>`
+      : '';
+    const identifyBtnCSS     = allowIdentify
+      ? `#btn-identify{position:absolute;top:128px;left:12px;z-index:1000;width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
+    #btn-identify:hover{background:#fff;color:#1a1814}
+    #btn-identify.active{background:#444;color:#e2ddd4;border-color:#555}
+    #btn-identify .material-icons{font-size:18px}`
+      : '';
+    const identifyPopupCSS   = allowIdentify ? `
+    .sm-popup .leaflet-popup-content-wrapper{background:#2a2a2a;border:0.5px solid rgba(226,221,212,0.18);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);padding:0}
+    .sm-popup .leaflet-popup-tip-container{display:none}
+    .sm-popup .leaflet-popup-content{margin:0}
+    .map-popup{width:224px}
+    .popup-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 16px;border-bottom:0.5px solid rgba(226,221,212,0.1);min-height:40px}
+    .popup-name{font-size:13px;font-weight:600;color:#e2ddd4;padding:10px 0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .popup-close-btn{width:26px;height:26px;flex-shrink:0;background:transparent;border:none;cursor:pointer;color:rgba(226,221,212,0.55);border-radius:4px;display:flex;align-items:center;justify-content:center}
+    .popup-close-btn:hover{background:rgba(226,221,212,0.08);color:#e2ddd4}
+    .popup-close-btn .material-icons{font-size:16px;pointer-events:none}
+    .popup-table{width:100%;border-collapse:collapse}
+    .popup-key{font-family:monospace;font-size:11px;color:rgba(226,221,212,0.55);padding:5px 8px 5px 16px;white-space:nowrap;vertical-align:top;width:40%}
+    .popup-val{font-size:13px;color:#e2ddd4;padding:5px 16px 5px 0;word-break:break-word}` : '';
+    const identifyJS = allowIdentify ? `
+    const IDENTIFY_FIELDS=${identifyFieldsJSON};
+    let identifyMode=false,hlLayer=null,currentPopup=null;
+    function clearHL(){if(hlLayer){hlLayer.remove();hlLayer=null;}}
+    function buildPopup(feat,titulo){
+      const props=feat.properties||{};
+      const fields=IDENTIFY_FIELDS.length
+        ?IDENTIFY_FIELDS.filter(k=>props[k]!=null&&props[k]!==''&&props[k]!=='None')
+        :Object.keys(props).filter(k=>props[k]!=null&&props[k]!==''&&props[k]!=='None');
+      const name=props.fna||props.nom_pfi||props.nam||props.rtn||titulo||'';
+      const rows=fields.map(k=>'<tr><td class="popup-key">'+k+'</td><td class="popup-val">'+props[k]+'</td></tr>').join('');
+      const el=document.createElement('div');
+      el.className='map-popup';
+      el.innerHTML='<div class="popup-header">'+(name?'<span class="popup-name">'+name+'</span>':'<span></span>')+'<button class="popup-close-btn"><span class="material-icons">close</span></button></div><table class="popup-table">'+(rows||'<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>')+'</table>';
+      el.querySelector('.popup-close-btn').addEventListener('click',()=>map.closePopup());
+      return el;
+    }
+    function bindIdentify(feat,layer,layerTitulo){
+      const geom=feat.geometry?.type?.toLowerCase()||'';
+      layer.on('click',e=>{
+        if(!identifyMode)return;
+        L.DomEvent.stopPropagation(e);
+        clearHL();
+        let hl;
+        if(geom.includes('point')){hl=L.circleMarker(e.latlng,{radius:14,color:'#f5c518',weight:3,fillColor:'#f5c518',fillOpacity:0.2,opacity:0.9}).addTo(map);}
+        else if(geom.includes('line')){hl=L.geoJSON(feat,{style:{color:'#f5c518',weight:12,opacity:0.75}}).addTo(map);}
+        else{hl=L.geoJSON(feat,{style:{color:'#f5c518',weight:3,fillColor:'#f5c518',fillOpacity:0.2,opacity:0.9}}).addTo(map);}
+        hlLayer=hl;
+        currentPopup=L.popup({className:'sm-popup',offset:L.point(0,6),autoPan:true,closeButton:false}).setLatLng(e.latlng).setContent(buildPopup(feat,layerTitulo)).openOn(map);
+      });
+    }
+    map.on('popupclose',()=>{clearHL();currentPopup=null;});
+    map.on('click',()=>{if(identifyMode&&!currentPopup)setIdentify(false);});
+    function setIdentify(on){
+      identifyMode=on;
+      const btn=document.getElementById('btn-identify');
+      if(btn){btn.classList.toggle('active',on);btn.title=on?'Desactivar consulta':'Consultar elementos';}
+      if(!on){map.closePopup();clearHL();}
+    }
+    document.getElementById('btn-identify')?.addEventListener('click',()=>setIdentify(!identifyMode));` : '';
+    const onEachFeature = allowIdentify
+      ? `onEachFeature:(f,layer)=>bindIdentify(f,layer,l.titulo),`
       : '';
 
     // Footer dinámico: extraer fuentes únicas de las capas (campo fdc de cada feature)
@@ -768,24 +881,7 @@ window.EXPORT = (() => {
     .z-btn{width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
     .z-btn:hover{background:#fff;color:#1a1814}
     .z-btn .material-icons{font-size:18px}
-    /* Botón consultar — abajo a la izquierda */
-    #btn-identify{position:absolute;top:128px;left:12px;z-index:1000;width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
-    #btn-identify:hover{background:#fff;color:#1a1814}
-    #btn-identify.active{background:#444;color:#e2ddd4;border-color:#555}
-    #btn-identify .material-icons{font-size:18px}
-    /* Popup */
-    .sm-popup .leaflet-popup-content-wrapper{background:#2a2a2a;border:0.5px solid rgba(226,221,212,0.18);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);padding:0}
-    .sm-popup .leaflet-popup-tip-container{display:none}
-    .sm-popup .leaflet-popup-content{margin:0}
-    .map-popup{min-width:180px;max-width:280px}
-    .popup-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 16px;border-bottom:0.5px solid rgba(226,221,212,0.1);min-height:40px}
-    .popup-name{font-size:13px;font-weight:600;color:#e2ddd4;padding:10px 0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .popup-close-btn{width:26px;height:26px;flex-shrink:0;background:transparent;border:none;cursor:pointer;color:rgba(226,221,212,0.55);border-radius:4px;display:flex;align-items:center;justify-content:center}
-    .popup-close-btn:hover{background:rgba(226,221,212,0.08);color:#e2ddd4}
-    .popup-close-btn .material-icons{font-size:16px;pointer-events:none}
-    .popup-table{width:100%;border-collapse:collapse}
-    .popup-key{font-family:monospace;font-size:11px;color:rgba(226,221,212,0.55);padding:5px 8px 5px 16px;white-space:nowrap;vertical-align:top;width:40%}
-    .popup-val{font-size:13px;color:#e2ddd4;padding:5px 16px 5px 0;word-break:break-word}
+    ${identifyBtnCSS}${identifyPopupCSS}
   </style>
 </head>
 <body>
@@ -795,7 +891,7 @@ window.EXPORT = (() => {
     <button class="z-btn" id="zreset" title="Vista original"><span class="material-icons">undo</span></button>
     <button class="z-btn" id="zout" title="Zoom -"><span class="material-icons">remove</span></button>
   </div>
-  <button id="btn-identify" title="Consultar elementos"><span class="material-icons">info</span></button>
+  ${identifyBtnHTML}
   <div id="legend-panel">
     <div id="legend-header" onclick="toggleLegend()">
       <span id="legend-title">${escHtml(titulo)}</span>
@@ -829,58 +925,7 @@ window.EXPORT = (() => {
     }
     function ai(svg,label){const i=document.createElement('div');i.className='legend-item';i.innerHTML=svg+'<span class="legend-label">'+label+'</span>';lb.appendChild(i)}
 
-    // Capas + consulta
-    let identifyMode=false;
-    let hlLayer=null;
-    let currentPopup=null;
-
-    function clearHL(){if(hlLayer){hlLayer.remove();hlLayer=null;}}
-
-    function buildPopup(feat,titulo){
-      const props=feat.properties||{};
-      const EXCL=new Set(['gid','fdc','sag','entidad','objeto','gna']);
-      const fields=Object.keys(props).filter(k=>!EXCL.has(k)&&!k.endsWith('Type')&&props[k]!=null&&props[k]!==''&&props[k]!=='None');
-      const name=props.fna||props.nom_pfi||props.nam||props.rtn||titulo||'';
-      const rows=fields.map(k=>'<tr><td class="popup-key">'+k+'</td><td class="popup-val">'+props[k]+'</td></tr>').join('');
-      const el=document.createElement('div');
-      el.className='map-popup';
-      el.innerHTML='<div class="popup-header">'+(name?'<span class="popup-name">'+name+'</span>':'<span></span>')+'<button class="popup-close-btn"><span class="material-icons">close</span></button></div><table class="popup-table">'+(rows||'<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>')+'</table>';
-      el.querySelector('.popup-close-btn').addEventListener('click',()=>map.closePopup());
-      return el;
-    }
-
-    function bindIdentify(feat,layer,layerTitulo){
-      const geom=feat.geometry?.type?.toLowerCase()||'';
-      layer.on('click',e=>{
-        if(!identifyMode)return;
-        L.DomEvent.stopPropagation(e);
-        clearHL();
-        let hl;
-        if(geom.includes('point')){
-          hl=L.circleMarker(e.latlng,{radius:14,color:'#f5c518',weight:3,fillColor:'#f5c518',fillOpacity:0.2,opacity:0.9}).addTo(map);
-        } else if(geom.includes('line')){
-          hl=L.geoJSON(feat,{style:{color:'#f5c518',weight:12,opacity:0.75}}).addTo(map);
-        } else {
-          hl=L.geoJSON(feat,{style:{color:'#f5c518',weight:3,fillColor:'#f5c518',fillOpacity:0.2,opacity:0.9}}).addTo(map);
-        }
-        hlLayer=hl;
-        currentPopup=L.popup({className:'sm-popup',offset:L.point(0,6),autoPan:true,closeButton:false})
-          .setLatLng(e.latlng).setContent(buildPopup(feat,layerTitulo)).openOn(map);
-      });
-    }
-
-    map.on('popupclose',()=>{clearHL();currentPopup=null;});
-    map.on('click',()=>{
-      if(identifyMode&&!currentPopup){setIdentify(false);}
-    });
-
-    function setIdentify(on){
-      identifyMode=on;
-      const btn=document.getElementById('btn-identify');
-      btn.classList.toggle('active',on);
-      btn.title=on?'Desactivar consulta':'Consultar elementos';
-      if(!on){map.closePopup();clearHL();}
-    }
+    ${identifyJS}
 
     function darken(hex,a){a=a??0.22;const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;if(mx===mn){h=s=0;}else{const d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;default:h=((r-g)/d+4)/6;}}l=Math.max(0,l-a);const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q;function h2r(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;}function t2h(n){return Math.round(n*255).toString(16).padStart(2,'0');}return'#'+t2h(h2r(p,q,h+1/3))+t2h(h2r(p,q,h))+t2h(h2r(p,q,h-1/3));}
 
@@ -904,7 +949,7 @@ window.EXPORT = (() => {
       L.geoJSON(l.geojson,{
         style:f=>fs(l.geomType,l.style,l.classification,f.properties),
         pointToLayer:(f,ll)=>L.circleMarker(ll,fs('point',l.style,l.classification,f.properties)),
-        onEachFeature:(f,layer)=>bindIdentify(f,layer,l.titulo)
+        ${onEachFeature}
       }).addTo(map);
     });
 
@@ -912,7 +957,7 @@ window.EXPORT = (() => {
     document.getElementById('zin').addEventListener('click',()=>map.zoomIn());
     document.getElementById('zout').addEventListener('click',()=>map.zoomOut());
     document.getElementById('zreset').addEventListener('click',()=>map.setView(initCenter,initZoom));
-    document.getElementById('btn-identify').addEventListener('click',()=>setIdentify(!identifyMode));
+
 
     function toggleLegend(){document.getElementById('legend-panel').classList.toggle('collapsed')}
   <\/script>
