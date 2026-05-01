@@ -188,12 +188,10 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
 
   <!-- ── Módulos de datos y capas ────────────────────────────────── -->
-  <script src="src/palettes.js"></script>           <!-- window.PALETTES, window.PALETTE_LABELS -->
-  <script src="layers/sources.js"></script>         <!-- window.SOURCES  — registro de fuentes  -->
-  <script src="layers/ar/ign.js"></script>          <!-- window.LAYERS, window.PROVINCIAS_MAP   -->
-  <!-- Al agregar un nuevo organismo o país, agregar su script acá:  -->
-  <!-- <script src="layers/ar/indec.js"></script>                    -->
-  <!-- <script src="layers/cl/ign.js"></script>                      -->
+  <script src="src/palettes.js"></script>               <!-- window.PALETTES, window.PALETTE_LABELS -->
+  <script src="layers/sources.js"></script>             <!-- window.SOURCES  — registro de fuentes  -->
+  <script type="module" src="layers/index.js"></script> <!-- window.LAYERS, window.PROVINCIAS_MAP   -->
+  <!-- index.html no cambia al agregar países — solo layers/index.js -->
 
   <!-- ── Módulos de red / geo ─────────────────────────────────────── -->
   <script src="src/wfs.js"></script>       <!-- window.WFS   — fetch WFS con caché     -->
