@@ -61,6 +61,23 @@ window.EXPORT = (() => {
   }
 
   // ── Capturar el mapa directamente desde los canvas de Leaflet ─
+  //
+  // Los tiles del basemap no se capturan por restricciones CORS (los servidores
+  // de tiles ArcGIS/Carto/OSM no envían Access-Control-Allow-Origin).
+  // En su lugar se pinta un color de fondo representativo del basemap actual.
+  //
+  // Para agregar un basemap nuevo, definir su color de fondo en BASEMAP_BG_COLORS
+  // (o en el propio catálogo window.MAP.getBasemaps() con una propiedad `exportBg`).
+  // Si no se define, se usa el fallback '#e8e4de' (gris claro).
+
+  // Colores de fondo para la exportación, indexados por la clave del basemap.
+  // Centralizado acá para no hardcodear strings en múltiples lugares.
+  const BASEMAP_BG_COLORS = {
+    gray:      '#e8e4de',
+    dark:      '#1a1a1a',
+    satellite: '#0a0a0a'
+    // Agregar nuevos basemaps acá cuando se incorporen
+  };
 
   async function captureLeaflet(mapInst) {
     const container = mapInst.getContainer();
@@ -72,9 +89,13 @@ window.EXPORT = (() => {
     output.height = h;
     const ctx = output.getContext('2d');
 
-    // Fondo con el color del basemap actual
-    const base = window.MAP.getCurrentBase?.() || 'gray';
-    ctx.fillStyle = base === 'dark' ? '#1a1a1a' : base === 'satellite' ? '#0a0a0a' : '#e8e4de';
+    // Fondo con el color representativo del basemap actual.
+    // Primero busca exportBg en la definición del basemap (extensible),
+    // si no, cae en el mapa local BASEMAP_BG_COLORS, y si tampoco, usa el fallback.
+    const base      = window.MAP.getCurrentBase?.() || 'gray';
+    const basemapDef = window.MAP.getBasemaps?.()?.[base];
+    const bgColor   = basemapDef?.exportBg ?? BASEMAP_BG_COLORS[base] ?? '#e8e4de';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, w, h);
 
     // Capas vectoriales (SVG overlay) — sin CORS
