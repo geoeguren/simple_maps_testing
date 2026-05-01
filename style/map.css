@@ -114,67 +114,60 @@ body.day .export-option:hover { background: var(--cream3); color: var(--cream); 
 /* Leyenda */
 .map-legend {
   position: absolute; bottom: 24px; right: 16px;
-  background: rgba(30,30,30,0.96);
-  border: 0.5px solid rgba(255,255,255,0.10); border-radius: var(--radius-sm);
-  padding: 10px 14px; font-size: 12px;
+  background: var(--bg2);
+  border: 0.5px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 10px 14px;
   min-width: 140px; max-width: 240px; z-index: 1000; display: none;
 }
 .map-legend.visible { display: block; }
-.map-legend.basemap-light {
-  background: rgba(245,242,238,0.97);
-  border-color: rgba(0,0,0,0.10);
-}
-.map-legend.basemap-dark {
-  background: rgba(20,20,20,0.97);
-  border-color: rgba(255,255,255,0.08);
-}
-body.day .map-legend { background: rgba(245,242,238,0.97); border-color: rgba(0,0,0,0.10); }
-
-/* Basemap dark sobreescribe el tema día */
-body.day .map-legend.basemap-dark {
-  background: rgba(20,20,20,0.97);
-  border-color: rgba(255,255,255,0.08);
-}
+.map-legend.basemap-light { background: #f0ede8; border-color: #c8c4be; }
+.map-legend.basemap-dark  { background: rgba(20,20,20,0.97); border-color: rgba(255,255,255,0.08); }
+body.day .map-legend { background: #f0ede8; border-color: #c8c4be; }
+body.day .map-legend.basemap-dark { background: rgba(20,20,20,0.97); border-color: rgba(255,255,255,0.08); }
 
 .legend-header {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .legend-title {
-  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
-  color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: .6px;
+  font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+  color: var(--cream2); text-transform: uppercase; letter-spacing: .04em;
   text-align: left; flex: 1;
 }
 .legend-collapse-btn {
   width: 18px; height: 18px; flex-shrink: 0;
   background: transparent; border: none; cursor: pointer;
-  color: rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center;
+  color: var(--cream2); display: flex; align-items: center; justify-content: center;
   border-radius: 3px; padding: 0;
   transition: background var(--transition), color var(--transition);
 }
-.legend-collapse-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+.legend-collapse-btn:hover { background: var(--cream3); color: var(--cream); }
 .legend-collapse-btn .material-icons { font-size: 14px; pointer-events: none; }
-.map-legend.basemap-light .legend-collapse-btn,
-body.day .legend-collapse-btn { color: rgba(0,0,0,0.3); }
-.map-legend.basemap-light .legend-collapse-btn:hover,
-body.day .legend-collapse-btn:hover { background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.6); }
+body.day .legend-title { color: #6a6560; }
+body.day .legend-collapse-btn { color: #6a6560; }
+body.day .legend-collapse-btn:hover { background: rgba(0,0,0,0.06); color: #1a1814; }
 
-.legend-items-wrap { display: flex; flex-direction: column; }
+.legend-items-wrap { display: flex; flex-direction: column; gap: 1px; }
 .map-legend.legend-collapsed .legend-items-wrap { display: none; }
 
-.map-legend.basemap-light .legend-title,
-body.day .legend-title { color: rgba(0,0,0,0.4); }
+.map-legend.basemap-light .legend-title { color: rgba(0,0,0,0.45); }
 body.day .map-legend.basemap-dark .legend-title { color: rgba(255,255,255,0.5); }
 
-.legend-item { display: flex; align-items: center; gap: 8px; padding: 3px 0; color: #e2ddd4; }
-.map-legend.basemap-light .legend-item,
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 0; color: var(--cream);
+  font-family: var(--font-sans); font-size: 13px;
+}
+.map-legend.basemap-light .legend-item { color: #1a1814; }
 body.day .legend-item { color: #1a1814; }
 body.day .map-legend.basemap-dark .legend-item { color: #e2ddd4; }
 .layer-geom-svg { flex-shrink: 0; display: block; }
 
 .legend-label-input {
   background: transparent; border: none; outline: none;
-  color: inherit; font-family: var(--font-sans); font-size: 12px;
+  color: inherit; font-family: var(--font-sans); font-size: 13px;
   padding: 0; width: 100%; cursor: text;
   border-bottom: 1px solid transparent;
   transition: border-color var(--transition);
