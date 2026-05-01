@@ -331,7 +331,7 @@ window.MAP = (() => {
       <div class="legend-header">
         <div class="legend-title">Referencias</div>
         <button class="legend-collapse-btn" title="${isCollapsed ? 'Expandir' : 'Colapsar'}">
-          <span class="material-icons">${isCollapsed ? 'expand_more' : 'expand_less'}</span>
+          <span class="material-icons">${isCollapsed ? 'expand_less' : 'expand_more'}</span>
         </button>
       </div>
       <div class="legend-items-wrap">` +
@@ -389,7 +389,7 @@ window.MAP = (() => {
     el.querySelector('.legend-collapse-btn')?.addEventListener('click', () => {
       el.classList.toggle('legend-collapsed');
       const icon = el.querySelector('.legend-collapse-btn .material-icons');
-      if (icon) icon.textContent = el.classList.contains('legend-collapsed') ? 'expand_more' : 'expand_less';
+      if (icon) icon.textContent = el.classList.contains('legend-collapsed') ? 'expand_less' : 'expand_more';
     });
 
     // Wire edición inline
@@ -771,44 +771,46 @@ window.MAP = (() => {
         <button class="popup-close-btn"><span class="material-icons">close</span></button>
       </div>
       <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
-      <div class="popup-customize-btn adv-ramp-trigger" style="margin:8px 12px 0;border-radius:4px;cursor:pointer">
-        <span style="font-family:var(--font-sans);font-size:12px;color:var(--cream2);flex:1">Más campos</span>
-        <span class="pfc-chevron adv-ramp-arrow">▾</span>
-      </div>
-      <div class="pfc-accordion" style="display:none"></div>
-      <div class="pfc-footer" style="display:none">
-        <button class="pfc-btn pfc-apply" disabled>Aceptar</button>
+      <div class="pfc-csel-wrap">
+        <div class="pfc-trigger adv-ramp-trigger">
+          <span class="pfc-trigger-label">Más campos</span>
+          <span class="pfc-chevron adv-ramp-arrow">▾</span>
+        </div>
+        <div class="pfc-dropdown adv-ramp-dropdown hidden"></div>
       </div>`;
 
-    const accordion = el.querySelector('.pfc-accordion');
-    const applyBtn  = el.querySelector('.pfc-apply');
+    const dropdown = el.querySelector('.pfc-dropdown');
 
+    // Build dropdown options — immediate apply on checkbox change
     allFields.forEach(k => {
       const active = isActive(k);
 
-      const row = document.createElement('label');
-      row.className = 'pfc-row';
+      const opt = document.createElement('div');
+      opt.className = 'adv-ramp-option pfc-option';
+
+      const keySpan = document.createElement('span');
+      keySpan.className   = 'adv-ramp-option-label';
+      keySpan.textContent = k;
+      keySpan.style.cssText = 'font-family:var(--font-mono);font-size:11px';
 
       const cb = document.createElement('input');
-      cb.type             = 'checkbox';
-      cb.dataset.field    = k;
-      cb.dataset.original = active ? '1' : '0';
-      cb.checked          = active;
-
-      // Solo nombre de campo técnico, sin label interpretado
-      const keySpan = document.createElement('span');
-      keySpan.className   = 'pfc-label';
-      keySpan.textContent = k;
+      cb.type    = 'checkbox';
+      cb.checked = active;
+      cb.dataset.field = k;
+      cb.style.cssText = 'flex-shrink:0;accent-color:var(--accent);margin-left:auto;cursor:pointer';
 
       cb.addEventListener('change', () => {
-        const hasChange = [...accordion.querySelectorAll('input[type=checkbox]')]
-          .some(i => (i.checked ? '1' : '0') !== i.dataset.original);
-        applyBtn.toggleAttribute('disabled', !hasChange);
+        const checked = [...dropdown.querySelectorAll('input[type=checkbox]:checked')]
+          .map(i => i.dataset.field);
+        if (checked.length === 0) { cb.checked = true; return; }
+        _popupFieldPrefs[layerKey] = new Set(checked);
+        _savePopupPrefs();
+        _refreshOpenPopup(false);
       });
 
-      row.appendChild(cb);
-      row.appendChild(keySpan);
-      accordion.appendChild(row);
+      opt.appendChild(keySpan);
+      opt.appendChild(cb);
+      dropdown.appendChild(opt);
     });
 
     // Cerrar popup con X
@@ -816,59 +818,36 @@ window.MAP = (() => {
       leafletMap?.closePopup();
     });
 
-    const toggleBtn = el.querySelector('.popup-customize-btn');
-    const footer    = el.querySelector('.pfc-footer');
-    const chevron   = el.querySelector('.pfc-chevron');
+    const trigger = el.querySelector('.pfc-trigger');
+    const chevron = el.querySelector('.pfc-chevron');
 
-    toggleBtn.addEventListener('click', () => {
-      const open = accordion.style.display !== 'none';
-      accordion.style.display = open ? 'none' : 'block';
-      footer.style.display    = open ? 'none' : 'flex';
-      toggleBtn.classList.toggle('pfc-open', !open);
-      chevron.textContent = open ? '▾' : '▲';
-      if (_currentPopup) {
-        const _ap = _currentPopup.options.autoPan;
-        _currentPopup.options.autoPan = false;
-        _currentPopup.update();
-        _currentPopup.options.autoPan = _ap;
-      }
-    });
-
-    // Aceptar
-    applyBtn.addEventListener('click', () => {
-      if (applyBtn.hasAttribute('disabled')) return;
-      const checked = [...accordion.querySelectorAll('input[type=checkbox]:checked')]
-        .map(i => i.dataset.field);
-      if (checked.length === 0) return;
-      _popupFieldPrefs[layerKey] = new Set(checked);
-      _savePopupPrefs();
-      _refreshOpenPopup(false);
+    trigger.addEventListener('click', () => {
+      const isOpen = !dropdown.classList.contains('hidden');
+      dropdown.classList.toggle('hidden', isOpen);
+      chevron.textContent = isOpen ? '▾' : '▲';
+      trigger.classList.toggle('pfc-open', !isOpen);
     });
 
     return el;
   }
 
   // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo.
-  // keepAccordion=true → deja el acordeón abierto (usado internamente por _refreshOpenPopup)
   function _refreshOpenPopup(keepAccordion = false) {
     const openPopup = _currentPopup;
     if (!openPopup || !_lastIdentifyFeature) return;
 
-    // Actualizar solo la tabla de datos visible — sin tocar el DOM del popup completo
     const wrapper = openPopup.getElement?.();
     if (!wrapper) return;
-    const popupEl   = wrapper.querySelector('.map-popup');
-    const tableEl   = popupEl?.querySelector('.popup-table');
-    const accordion = popupEl?.querySelector('.pfc-accordion');
-    const footer    = popupEl?.querySelector('.pfc-footer');
-    const toggleBtn = popupEl?.querySelector('.popup-customize-btn');
-    const chevron   = toggleBtn?.querySelector('.pfc-chevron');
+    const popupEl  = wrapper.querySelector('.map-popup');
+    const tableEl  = popupEl?.querySelector('.popup-table');
+    const dropdown = popupEl?.querySelector('.pfc-dropdown');
+    const trigger  = popupEl?.querySelector('.pfc-trigger');
+    const chevron  = popupEl?.querySelector('.pfc-chevron');
     if (!tableEl) return;
 
     // Recalcular filas visibles con las preferencias ya guardadas
     const props     = _lastIdentifyFeature.properties;
     const layerKey  = activeLayers[_lastIdentifyMapKey]?.layerKey || _lastIdentifyMapKey;
-    const layerDef  = window.LAYERS?.[layerKey] || {};
     const allFields = Object.keys(props).filter(k =>
       !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type') &&
       props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
@@ -878,22 +857,12 @@ window.MAP = (() => {
       `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`
     ).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
 
-    // Actualizar data-original de los checkboxes para reflejar el nuevo estado guardado
-    accordion?.querySelectorAll('input[type=checkbox]').forEach(cb => {
-      cb.dataset.original = cb.checked ? '1' : '0';
-    });
-    // Desactivar Aplicar (ya no hay cambios pendientes)
-    popupEl?.querySelector('.pfc-apply')?.toggleAttribute('disabled', true);
+    // Cerrar dropdown
+    if (dropdown) dropdown.classList.add('hidden');
+    if (chevron)  chevron.textContent = '▾';
+    if (trigger)  trigger.classList.remove('pfc-open');
 
-    // Cerrar acordeón salvo que se pida mantenerlo abierto
-    if (!keepAccordion && accordion) {
-      accordion.style.display = 'none';
-      if (footer)    footer.style.display = 'none';
-      if (toggleBtn) toggleBtn.classList.remove('pfc-open');
-      if (chevron)   chevron.textContent  = '▾';
-    }
-
-    // Recalcular tamaño del popup sin mover
+    // Recalcular tamaño sin mover
     const _ap = openPopup.options.autoPan;
     openPopup.options.autoPan = false;
     openPopup.update();
