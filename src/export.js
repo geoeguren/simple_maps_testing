@@ -524,7 +524,7 @@ window.EXPORT = (() => {
     // Filas de capas
     const layerRows = Object.entries(activeLayers).map(([key, l]) => `
       <label class="pfc-row html-layer-row" style="padding:5px 0">
-        <input type="checkbox" data-key="${key}" checked />
+        <input type="checkbox" data-key="${key}" />
         <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">${escHtml(l.titulo || key)}</span>
       </label>`).join('');
 
@@ -568,23 +568,15 @@ window.EXPORT = (() => {
 
         <div class="adv-body-row">
           <span class="adv-body-label">Código</span>
-          <div style="position:relative;width:100%">
-            <textarea id="html-code-box" readonly
-              style="width:100%;height:80px;resize:none;
-                     background:var(--bg);border:0.5px solid var(--border-md);
-                     border-radius:4px;padding:8px;
-                     font-family:var(--font-mono);font-size:11px;color:var(--cream2);
-                     outline:none;scrollbar-width:thin"
-              placeholder="Generando código…"></textarea>
-            <button id="html-copy-btn"
-              style="position:absolute;top:8px;right:8px;
-                     padding:5px 12px;border-radius:4px;border:0.5px solid var(--border-md);
-                     background:var(--bg2);color:var(--cream2);
-                     font-family:var(--font-sans);font-size:11px;cursor:pointer">
-              Copiar
-            </button>
+          <div id="html-code-wrapper" style="width:100%;max-width:380px;background:#0d0d0d;border:0.5px solid rgba(226,221,212,0.18);border-radius:6px;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;min-height:36px;background:#1a1a1a;border-bottom:0.5px solid #2a2a2a;">
+              <span style="font-family:var(--font-mono);font-size:11px;color:#666">html</span>
+              <div id="html-copy-area" style="display:flex;align-items:center;gap:6px;">
+                <button id="html-copy-btn" title="Copiar" style="background:none;border:none;cursor:pointer;padding:2px;color:#888;display:flex;align-items:center;transition:color .15s;"><span class="material-icons" style="font-size:16px;pointer-events:none">content_copy</span></button>
+              </div>
+            </div>
+            <pre id="html-code-pre" style="margin:0;padding:12px 14px;font-family:var(--font-mono);font-size:11.5px;line-height:1.65;color:#e2ddd4;overflow-x:auto;max-height:220px;overflow-y:auto;white-space:pre;scrollbar-width:thin;scrollbar-color:#333 transparent;"><span style="color:#546e7a;font-style:italic">// Seleccioná capas para generar el código</span></pre>
           </div>
-
         </div>
 
       </div>
@@ -632,71 +624,39 @@ window.EXPORT = (() => {
     backdrop.addEventListener('click', closeModal);
 
     // Syntax highlighting en el bloque de código
-    function renderCodeBox(textarea, code) {
-      // Reemplazar textarea por un contenedor con highlighting si no existe aún
-      let wrapper = modal.querySelector('#html-code-wrapper');
-      if (!wrapper) {
-        wrapper = document.createElement('div');
-        wrapper.id = 'html-code-wrapper';
-        wrapper.style.cssText = `
-          position: relative; width: 100%;
-          background: #0d0d0d; border: 0.5px solid rgba(226,221,212,0.18);
-          border-radius: 6px; overflow: hidden;
-        `;
-        const header = document.createElement('div');
-        header.style.cssText = `
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 6px 12px;
-          background: #1a1a1a; border-bottom: 0.5px solid #2a2a2a;
-        `;
-        header.innerHTML = `
-          <span style="font-family:var(--font-mono);font-size:11px;color:#666">html</span>
-          <button id="html-copy-btn" style="
-            font-size:11px;font-family:var(--font-sans);color:#888;
-            background:none;border:none;cursor:pointer;padding:0;
-            display:flex;align-items:center;gap:4px;
-          ">
-            <span class="material-icons" style="font-size:13px">content_copy</span>
-            Copiar
-          </button>
-        `;
-        const pre = document.createElement('pre');
-        pre.id = 'html-code-pre';
-        pre.style.cssText = `
-          margin: 0; padding: 12px 14px;
-          font-family: var(--font-mono); font-size: 11.5px; line-height: 1.65;
-          color: #e2ddd4; overflow-x: auto; max-height: 260px; overflow-y: auto;
-          white-space: pre; scrollbar-width: thin; scrollbar-color: #333 transparent;
-        `;
-        wrapper.appendChild(header);
-        wrapper.appendChild(pre);
-        textarea.replaceWith(wrapper);
+    // Wire copy button con feedback "Copiado"
+    function wireCopyBtn() {
+      const btn = modal.querySelector('#html-copy-btn');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        const raw = modal.querySelector('#html-code-wrapper')?.dataset.raw || '';
+        if (!raw) return;
+        navigator.clipboard?.writeText(raw).catch(() => {});
+        const area = modal.querySelector('#html-copy-area');
+        area.innerHTML = `
+          <span class="material-icons" style="font-size:14px;color:#9abf9a;pointer-events:none">check_circle</span>
+          <span style="font-family:var(--font-sans);font-size:11px;color:#9abf9a">Copiado</span>`;
+        setTimeout(() => {
+          area.innerHTML = `<button id="html-copy-btn" title="Copiar" style="background:none;border:none;cursor:pointer;padding:2px;color:#888;display:flex;align-items:center;transition:color .15s;"><span class="material-icons" style="font-size:16px;pointer-events:none">content_copy</span></button>`;
+          wireCopyBtn();
+        }, 2000);
+      });
+    }
+    wireCopyBtn();
 
-        // Rewire copy button
-        wrapper.querySelector('#html-copy-btn').addEventListener('click', () => {
-          navigator.clipboard?.writeText(wrapper.dataset.raw || '').catch(() => {});
-          window.TOAST.success('Código copiado.');
-        });
-      }
-
+    function renderCodeBox(code) {
+      const wrapper = modal.querySelector('#html-code-wrapper');
       wrapper.dataset.raw = code;
 
       // Highlight básico para HTML
       function hl(str) {
         return str
           .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-          // Tags
           .replace(/(&lt;\/?)([\w!-]+)/g, '<span style="color:#f07178">$1$2</span>')
-          // Atributos
           .replace(/\s([\w-]+)=/g, ' <span style="color:#ffcb6b">$1</span>=')
-          // Strings con comillas
           .replace(/=(&quot;|&#39;|")(.*?)(\1)/g, '=<span style="color:#c3e88d">$1$2$3</span>')
-          // Comentarios
           .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span style="color:#546e7a;font-style:italic">$1</span>')
-          // JS keywords dentro de script
-          .replace(/\b(const|let|var|function|return|if|else|for|new|true|false|null)\b/g,
-            '<span style="color:#c792ea">$1</span>')
-          // Números
+          .replace(/\b(const|let|var|function|return|if|else|for|new|true|false|null)\b/g, '<span style="color:#c792ea">$1</span>')
           .replace(/\b(\d+\.?\d*)\b/g, '<span style="color:#f78c6c">$1</span>');
       }
 
@@ -724,8 +684,7 @@ window.EXPORT = (() => {
 
       try {
         const code = buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, mapInst);
-        const target = modal.querySelector('#html-code-box') || modal.querySelector('#html-code-wrapper');
-        renderCodeBox(target, code);
+        renderCodeBox(code);
       } catch (err) {
         console.error('[EXPORT] Error generando HTML:', err);
         const pre = modal.querySelector('#html-code-pre');
