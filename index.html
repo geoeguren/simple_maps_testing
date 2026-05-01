@@ -1,240 +1,49 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>simple maps</title>
-
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Turf.js -->
-  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-
-  <link rel="stylesheet" href="style/base.css" />
-  <link rel="stylesheet" href="style/home.css" />
-  <link rel="stylesheet" href="style/sidebar.css" />
-  <link rel="stylesheet" href="style/chat.css" />
-  <link rel="stylesheet" href="style/map.css" />
-  <link rel="stylesheet" href="style/modals.css" />
-</head>
-<body>
-
-  <!-- ===== PANTALLA HOME ===== -->
-  <div id="screen-home" class="screen active">
-    <!-- Sidebar en home -->
-    <div class="sidebar sidebar-home" id="sidebar-home"></div>
-    <main class="home-main">
-
-      <h1 class="home-greeting" id="home-greeting"></h1>
-
-      <div class="prompt-box" id="prompt-box">
-        <textarea
-          id="initial-prompt"
-          class="prompt-textarea"
-          placeholder="¿Qué mapa querés hacer?"
-          rows="1"
-        ></textarea>
-<button class="prompt-send" id="btn-send-initial" title="Enviar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="19" x2="12" y2="5"></line>
-            <polyline points="5 12 12 5 19 12"></polyline>
-          </svg>
-        </button>
-      </div>
-
-    </main>
-  </div>
-
-  <!-- ===== PANTALLA DE TRABAJO ===== -->
-  <div id="screen-work" class="screen">
-
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar"></div>
-
-    <!-- Panel izquierdo: chat -->
-    <aside class="chat-panel" id="chat-panel">
-      <!-- Barra de título del chat -->
-      <div class="chat-header-bar" id="chat-header-bar" style="display:none">
-        <div class="chat-header-inner">
-          <input type="text" class="chat-header-title-input" id="chat-header-title"
-                 placeholder="Sin título" autocomplete="off" />
-        </div>
-        <button class="chat-header-delete-btn" id="chat-header-delete-btn" title="Eliminar chat">
-          <span class="material-icons">delete</span>
-        </button>
-      </div>
-
-      <div class="chat-messages" id="chat-messages"></div>
-      <button class="btn-scroll-bottom" id="btn-scroll-bottom" title="Ir al final">
-        <span class="material-icons">south</span>
-      </button>
-      <div class="chat-input-area">
-        <div class="prompt-box compact">
-          <textarea
-            id="chat-input"
-            class="prompt-textarea"
-            placeholder="Escribí tu mensaje..."
-            rows="1"
-          ></textarea>
-<button class="prompt-send" id="btn-send-chat" title="Enviar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="19" x2="12" y2="5"></line>
-            <polyline points="5 12 12 5 19 12"></polyline>
-          </svg>
-          </button>
-        </div>
-      </div>
-      <p class="chat-legend">Simple Maps puede cometer errores. Verificá la información importante.</p>
-    </aside>
-
-    <!-- Divisor redimensionable -->
-    <div class="resize-divider" id="resize-divider"></div>
-
-    <!-- Panel derecho: visor de mapa -->
-    <section class="map-panel" id="map-panel" style="display:none">
-
-      <div class="map-topbar" id="map-topbar">
-        <input
-          type="text"
-          id="map-title"
-          class="map-title-input"
-          value="Mi mapa"
-          placeholder="Título del mapa"
-        />
-        <div class="map-topbar-actions">
-          <div class="export-wrapper">
-            <button class="btn-export-text" id="btn-export" title="Exportar">
-              EXPORTAR <span class="material-icons">expand_more</span>
-            </button>
-            <div class="export-dropdown" id="export-dropdown">
-              <button class="export-option" id="export-geojson">Capa vectorial (geojson)</button>
-              <button class="export-option" id="export-jpeg">Imagen (jpeg)</button>
-              <button class="export-option" id="export-pdf">Archivo portable (pdf)</button>
-              <button class="export-option" id="export-html">Embebido (html)</button>
-            </div>
-          </div>
-          <button class="btn-icon btn-map-action" id="btn-refresh-map" title="Actualizar mapa">
-            <span class="material-icons">refresh</span>
-          </button>
-          <button class="btn-icon btn-map-action" id="btn-close-map" title="Cerrar mapa">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div id="map-container">
-        <div id="leaflet-map"></div>
-
-        <!-- Controles izquierda -->
-        <div class="map-controls map-controls-left">
-          <button class="map-ctrl-btn" id="btn-zoom-in"    title="Zoom +"><span class="material-icons">add</span></button>
-          <button class="map-ctrl-btn" id="btn-zoom-reset" title="Vista original"><span class="material-icons">undo</span></button>
-          <button class="map-ctrl-btn" id="btn-zoom-out"   title="Zoom -"><span class="material-icons">remove</span></button>
-        </div>
-
-        <!-- Controles derecha -->
-        <div class="map-controls map-controls-right">
-          <button class="map-ctrl-btn" id="btn-map-layers" title="Capas" style="display:none">
-            <span class="material-icons">layers</span>
-          </button>
-          <button class="map-ctrl-btn" id="btn-identify" title="Consultar elementos" style="display:none">
-            <span class="material-icons">question_mark</span>
-          </button>
-        </div>
-
-        <div class="map-empty hidden" id="map-empty">
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" width="44" height="44" opacity="0.2">
-            <path d="M42 6L22 12L6 6v44l16 6 20-6 16 6V12L58 6z"/>
-            <line x1="22" y1="12" x2="22" y2="56"/>
-            <line x1="42" y1="6" x2="42" y2="50"/>
-          </svg>
-          <p>El mapa aparecerá aquí</p>
-        </div>
-        <div class="map-legend" id="map-legend"></div>
-      </div>
-
-    </section>
-
-    <!-- Editor de estilos -->
-  </div>
-
-  <!-- Modal de búsqueda -->
-  <div class="search-modal-backdrop" id="search-backdrop"></div>
-  <div class="search-modal" id="search-modal">
-    <div class="search-modal-input-row">
-      <span class="material-icons search-modal-icon">search</span>
-      <input type="text" id="search-input" class="search-modal-input" placeholder="Buscar en chats..." autocomplete="off" />
-      <button class="search-modal-close" id="search-close">
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-    <div class="search-modal-results" id="search-results"></div>
-  </div>
-
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
-
-  <!-- ── Librerías externas ──────────────────────────────────────── -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
-
-  <!-- ── Módulos de datos y capas ────────────────────────────────── -->
-  <script src="src/palettes.js"></script>               <!-- window.PALETTES, window.PALETTE_LABELS -->
-  <script src="src/layers/sources.js"></script>         <!-- window.SOURCES  — registro de fuentes  -->
-  <script type="module" src="src/layers/index.js"></script> <!-- window.LAYERS, window.PROVINCIAS_MAP   -->
-
-  <!-- ── Módulos de red / geo ─────────────────────────────────────── -->
-  <script src="src/wfs.js"></script>       <!-- window.WFS   — fetch WFS con caché     -->
-  <script src="src/clip.js"></script>      <!-- window.CLIP  — recorte espacial        -->
-
-  <!-- ── Módulos de mapa ──────────────────────────────────────────── -->
-  <script src="src/map.js"></script>       <!-- window.MAP   — Leaflet                 -->
-  <script src="src/export.js"></script>    <!-- window.EXPORT                          -->
-
-  <!-- ── Módulos de UI ────────────────────────────────────────────── -->
-  <script src="src/chat.js"></script>      <!-- window.CHAT, window.UI                 -->
-  <script src="src/settings.js"></script>  <!-- window.SETTINGS                        -->
-  <script src="src/auth.js"></script>      <!-- window.AUTH                            -->
-  <script src="src/firebase.js"></script>  <!-- window.FB                              -->
-  <script src="src/sidebar.js"></script>   <!-- window.SIDEBAR                         -->
-  <script src="src/search.js"></script>    <!-- window.SEARCH                          -->
-  <script src="src/chat-header.js"></script>  <!-- window.CHAT_HEADER                  -->
-  <script src="src/map-controls.js"></script> <!-- window.MAP_CONTROLS                 -->
-  <script src="src/layers-panel-utils.js"></script>  <!-- window.LP_UTILS  — helpers compartidos     -->
-  <script src="src/layers-panel-style.js"></script>  <!-- window.LP_STYLE  — acordeón y estilos      -->
-  <script src="src/layers-panel-modal.js"></script>  <!-- window.LP_MODAL  — modal avanzado           -->
-  <script src="src/layers-panel.js"></script>        <!-- window.LP_PANEL, window.LAYERS_PANEL        -->
-
-  <!-- ── Orquestador principal (debe ir último) ───────────────────── -->
-  <script src="src/app.js"></script>       <!-- window.APP, window.TOAST, window.THEME -->
-
-  <!-- ── Verificación de módulos en desarrollo ────────────────────── -->
-  <!-- Detecta módulos faltantes temprano, antes de que fallen silenciosamente en runtime -->
-  <script>
-    (function checkModules() {
-      const required = [
-        'PALETTES', 'LAYERS', 'PROVINCIAS_MAP',
-        'WFS', 'CLIP',
-        'MAP', 'EXPORT',
-        'CHAT', 'UI', 'SETTINGS', 'AUTH', 'FB',
-        'SIDEBAR', 'SEARCH', 'CHAT_HEADER', 'MAP_CONTROLS',
-        'LP_UTILS', 'LP_STYLE', 'LP_MODAL', 'LP_PANEL', 'LAYERS_PANEL',
-        'APP', 'TOAST', 'THEME'
-      ];
-      const missing = required.filter(m => !window[m]);
-      if (missing.length) {
-        console.error('[simple maps] Módulos no cargados:', missing.join(', '));
-      }
-    })();
-  </script>
-</body>
-</html>
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/src/layers/(.*)\\.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        }
+      ]
+    }
+  ]
+}
