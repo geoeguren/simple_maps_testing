@@ -497,7 +497,30 @@ body.day .adv-apply:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
 
 /* ── HTML Export modal — elementos nuevos ────────────────────── */
 
-/* Fila de checkbox dentro de un dropdown (capas o campos) */
+/* Fila de capa demasiado compleja — deshabilitada en el selector */
+.html-layer-too-complex {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+.html-layer-complex-icon {
+  font-size: 14px !important;
+  color: var(--cream2);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Texto de ayuda debajo del selector de capas cuando hay alguna bloqueada */
+.html-complex-hint {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--cream2);
+  line-height: 1.4;
+  padding: 0 2px;
+}
+body.day .html-complex-hint { color: #8a8580; }
+
+
 .html-csel-chk-row {
   display: flex; align-items: center; gap: 8px;
   padding: 7px 12px; cursor: pointer;
