@@ -3,6 +3,27 @@
  *
  * Depende de: window.MAP, window.LAYERS, window.TOAST, window.AUTH,
  *             window.CHAT, window.FB, window.SIDEBAR
+ *
+ * REFACTORIZACIÓN PENDIENTE — dividir en 4 módulos:
+ *
+ *   layers-panel-utils.js   — helpers compartidos (esc, geomSVG, leaRow, toHex,
+ *                             wireSliderTouch, buildDashSelect, colorPickerHTML,
+ *                             buildPaletteSelect, wireCsel, getCselValue)        ~200 líneas
+ *
+ *   layers-panel-style.js   — acordeón de estilo simple: styleControlsHTML,
+ *                             toggleEditAccordion, wireStyleControls,
+ *                             applySimpleStyle, buildCatItems,
+ *                             wireClassifiedControls                             ~350 líneas
+ *
+ *   layers-panel-modal.js   — modal de edición avanzada: openAdvancedModal
+ *                             y todo su contenido interno                        ~800 líneas
+ *
+ *   layers-panel.js         — orquestador: persistStyle, persistClassification,
+ *                             buildLayerRow, renderLayerRows, wireCheckboxes,
+ *                             wireDrag, toggle, close                            ~300 líneas
+ *
+ * API pública NO cambia: window.LAYERS_PANEL = { toggle, close, geomSVG }
+ * Orden de carga en index.html: utils → style → modal → layers-panel
  */
 
 window.LAYERS_PANEL = (() => {
