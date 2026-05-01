@@ -9,7 +9,7 @@ window.EXPORT = (() => {
   function toGeoJSON() {
     const activeLayers = window.MAP.getActiveLayers();
     const keys = Object.keys(activeLayers);
-    if (!keys.length) { window.TOAST.warning('No hay capas para exportar.'); return; }
+    if (!keys.length) { window.TOAST.warning('No hay capas para exportar.'); return Promise.reject('sin capas'); }
 
     const allFeatures = keys.flatMap(key => {
       const { geojson, titulo } = activeLayers[key];
@@ -28,13 +28,14 @@ window.EXPORT = (() => {
     const blob = new Blob([JSON.stringify(fc, null, 2)], { type: 'application/geo+json' });
     downloadBlob(blob, `${sanitizeFilename(fc.name)}.geojson`);
     window.TOAST.success('GeoJSON exportado.');
+    return Promise.resolve();
   }
 
   // ── JPEG ──────────────────────────────────────────────────────
 
   async function toJPEG() {
     const mapInst = window.MAP.getInstance();
-    if (!mapInst) { window.TOAST.warning('No hay mapa activo.'); return; }
+    if (!mapInst) { window.TOAST.warning('No hay mapa activo.'); return Promise.reject('sin mapa'); }
 
     window.TOAST.loading('Generando imagen…');
 
@@ -42,15 +43,20 @@ window.EXPORT = (() => {
       const mapCanvas    = await captureLeaflet(mapInst);
       const outputCanvas = buildA4Canvas(mapCanvas);
 
-      outputCanvas.toBlob(blob => {
-        const title = document.getElementById('map-title')?.value || 'simple-maps';
-        downloadBlob(blob, `${sanitizeFilename(title)}.jpg`);
-        window.TOAST.success('Imagen exportada.');
-      }, 'image/jpeg', 0.93);
+      await new Promise((resolve, reject) => {
+        outputCanvas.toBlob(blob => {
+          if (!blob) { reject(new Error('Canvas vacío')); return; }
+          const title = document.getElementById('map-title')?.value || 'simple-maps';
+          downloadBlob(blob, `${sanitizeFilename(title)}.jpg`);
+          window.TOAST.success('Imagen exportada.');
+          resolve();
+        }, 'image/jpeg', 0.93);
+      });
 
     } catch (err) {
       console.error('[EXPORT] Error JPEG:', err);
       window.TOAST.error('Error al generar imagen: ' + err.message);
+      throw err;
     }
   }
 
@@ -453,6 +459,7 @@ window.EXPORT = (() => {
     } catch (err) {
       console.error('[EXPORT] Error PDF:', err);
       window.TOAST.error('Error al generar PDF: ' + err.message);
+      throw err;
     }
   }
 
