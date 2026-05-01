@@ -9,7 +9,7 @@ window.EXPORT = (() => {
   function toGeoJSON() {
     const activeLayers = window.MAP.getActiveLayers();
     const keys = Object.keys(activeLayers);
-    if (!keys.length) { window.TOAST.show('No hay capas para exportar'); return; }
+    if (!keys.length) { window.TOAST.warning('No hay capas para exportar.'); return; }
 
     const allFeatures = keys.flatMap(key => {
       const { geojson, titulo } = activeLayers[key];
@@ -27,16 +27,16 @@ window.EXPORT = (() => {
 
     const blob = new Blob([JSON.stringify(fc, null, 2)], { type: 'application/geo+json' });
     downloadBlob(blob, `${sanitizeFilename(fc.name)}.geojson`);
-    window.TOAST.show('GeoJSON exportado');
+    window.TOAST.success('GeoJSON exportado.');
   }
 
   // ── JPEG ──────────────────────────────────────────────────────
 
   async function toJPEG() {
     const mapInst = window.MAP.getInstance();
-    if (!mapInst) { window.TOAST.show('No hay mapa activo'); return; }
+    if (!mapInst) { window.TOAST.warning('No hay mapa activo.'); return; }
 
-    window.TOAST.show('Generando imagen…', 8000);
+    window.TOAST.loading('Generando imagen…');
 
     try {
       const mapCanvas    = await captureLeaflet(mapInst);
@@ -45,12 +45,12 @@ window.EXPORT = (() => {
       outputCanvas.toBlob(blob => {
         const title = document.getElementById('map-title')?.value || 'simple-maps';
         downloadBlob(blob, `${sanitizeFilename(title)}.jpg`);
-        window.TOAST.show('Imagen exportada');
+        window.TOAST.success('Imagen exportada.');
       }, 'image/jpeg', 0.93);
 
     } catch (err) {
       console.error('[EXPORT] Error JPEG:', err);
-      window.TOAST.show('Error al generar imagen: ' + err.message);
+      window.TOAST.error('Error al generar imagen: ' + err.message);
     }
   }
 
@@ -325,9 +325,9 @@ window.EXPORT = (() => {
 
   async function toPDF() {
     const mapInst = window.MAP.getInstance();
-    if (!mapInst) { window.TOAST.show('No hay mapa activo'); return; }
+    if (!mapInst) { window.TOAST.warning('No hay mapa activo.'); return; }
 
-    window.TOAST.show('Generando PDF…', 10000);
+    window.TOAST.loading('Generando PDF…');
 
     try {
       // Cargar jsPDF dinámicamente si no está disponible
@@ -448,11 +448,11 @@ window.EXPORT = (() => {
       // ── Guardar ───────────────────────────────────────────────
       const filename = sanitizeFilename(titulo || 'mapa') + '.pdf';
       doc.save(filename);
-      window.TOAST.show('PDF exportado');
+      window.TOAST.success('PDF exportado.');
 
     } catch (err) {
       console.error('[EXPORT] Error PDF:', err);
-      window.TOAST.show('Error al generar PDF: ' + err.message);
+      window.TOAST.error('Error al generar PDF: ' + err.message);
     }
   }
 
@@ -484,10 +484,10 @@ window.EXPORT = (() => {
 
   function toHTML() {
     const mapInst = window.MAP.getInstance();
-    if (!mapInst) { window.TOAST.show('No hay mapa activo'); return; }
+    if (!mapInst) { window.TOAST.warning('No hay mapa activo.'); return; }
 
     const activeLayers = window.MAP.getActiveLayers();
-    if (!Object.keys(activeLayers).length) { window.TOAST.show('No hay capas para exportar'); return; }
+    if (!Object.keys(activeLayers).length) { window.TOAST.warning('No hay capas para exportar.'); return; }
 
     const titulo    = document.getElementById('map-title')?.value || 'Mapa';
     const BASEMAPS  = window.MAP.getBasemaps();
@@ -656,7 +656,7 @@ window.EXPORT = (() => {
       const box = modal.querySelector('#html-code-box');
       box.select();
       navigator.clipboard?.writeText(box.value).catch(() => document.execCommand('copy'));
-      window.TOAST.show('Código copiado');
+      window.TOAST.success('Código copiado.');
     });
 
     // Descargar
@@ -665,7 +665,7 @@ window.EXPORT = (() => {
       if (!code) return;
       const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
       downloadBlob(blob, sanitizeFilename(titulo) + '.html');
-      window.TOAST.show('HTML descargado');
+      window.TOAST.success('HTML descargado.');
     });
   }
 
