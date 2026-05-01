@@ -782,6 +782,8 @@ window.MAP = (() => {
     const dropdown = document.createElement('div');
     dropdown.className = 'pfc-dropdown adv-ramp-dropdown hidden';
     document.body.appendChild(dropdown);
+    // Prevent Leaflet from intercepting scroll inside the dropdown
+    dropdown.addEventListener('wheel', e => e.stopPropagation(), { passive: false });
 
     // Build dropdown options — immediate apply on checkbox change
     allFields.forEach(k => {
@@ -858,24 +860,21 @@ window.MAP = (() => {
     const chevron  = popupEl?.querySelector('.pfc-chevron');
     if (!tableEl) return;
 
-    // Recalcular filas visibles con las preferencias ya guardadas
-    const props     = _lastIdentifyFeature.properties;
-    const layerKey  = activeLayers[_lastIdentifyMapKey]?.layerKey || _lastIdentifyMapKey;
-    const allFields = Object.keys(props).filter(k =>
-      !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type') &&
-      props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
-    );
-    const visibleFields = _getVisibleFields(layerKey, allFields);
-    tableEl.innerHTML = visibleFields.map(k =>
-      `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`
-    ).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
+    // Actualizar tabla y mantener dropdown abierto (no cerrarlo)
+    if (tableEl) {
+      const props     = _lastIdentifyFeature.properties;
+      const layerKey  = activeLayers[_lastIdentifyMapKey]?.layerKey || _lastIdentifyMapKey;
+      const allFields = Object.keys(props).filter(k =>
+        !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type') &&
+        props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
+      );
+      const visibleFields = _getVisibleFields(layerKey, allFields);
+      tableEl.innerHTML = visibleFields.map(k =>
+        `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`
+      ).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
+    }
 
-    // Cerrar dropdown
-    if (dropdown) dropdown.classList.add('hidden');
-    if (chevron)  chevron.textContent = '▾';
-    if (trigger)  trigger.classList.remove('pfc-open');
-
-    // Recalcular tamaño sin mover
+    // Recalcular tamaño sin mover (dropdown permanece abierto)
     const _ap = openPopup.options.autoPan;
     openPopup.options.autoPan = false;
     openPopup.update();
