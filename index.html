@@ -184,22 +184,53 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
+  <!-- ── Librerías externas ──────────────────────────────────────── -->
   <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
-  <script src="src/palettes.js"></script>
-  <script src="src/layers.js"></script>
-  <script src="src/wfs.js"></script>
-  <script src="src/clip.js"></script>
-  <script src="src/map.js"></script>
-  <script src="src/export.js"></script>
-  <script src="src/chat.js"></script>
-  <script src="src/settings.js"></script>
-  <script src="src/auth.js"></script>
-  <script src="src/firebase.js"></script>
-  <script src="src/sidebar.js"></script>
-  <script src="src/search.js"></script>
-  <script src="src/chat-header.js"></script>
-  <script src="src/map-controls.js"></script>
-  <script src="src/layers-panel.js"></script>
-  <script src="src/app.js"></script>
+
+  <!-- ── Módulos de datos y capas ────────────────────────────────── -->
+  <script src="src/palettes.js"></script>  <!-- window.PALETTES, window.PALETTE_LABELS -->
+  <script src="src/layers.js"></script>    <!-- window.LAYERS, window.PROVINCIAS_MAP   -->
+
+  <!-- ── Módulos de red / geo ─────────────────────────────────────── -->
+  <script src="src/wfs.js"></script>       <!-- window.WFS   — fetch WFS con caché     -->
+  <script src="src/clip.js"></script>      <!-- window.CLIP  — recorte espacial        -->
+
+  <!-- ── Módulos de mapa ──────────────────────────────────────────── -->
+  <script src="src/map.js"></script>       <!-- window.MAP   — Leaflet                 -->
+  <script src="src/export.js"></script>    <!-- window.EXPORT                          -->
+
+  <!-- ── Módulos de UI ────────────────────────────────────────────── -->
+  <script src="src/chat.js"></script>      <!-- window.CHAT, window.UI                 -->
+  <script src="src/settings.js"></script>  <!-- window.SETTINGS                        -->
+  <script src="src/auth.js"></script>      <!-- window.AUTH                            -->
+  <script src="src/firebase.js"></script>  <!-- window.FB                              -->
+  <script src="src/sidebar.js"></script>   <!-- window.SIDEBAR                         -->
+  <script src="src/search.js"></script>    <!-- window.SEARCH                          -->
+  <script src="src/chat-header.js"></script>  <!-- window.CHAT_HEADER                  -->
+  <script src="src/map-controls.js"></script> <!-- window.MAP_CONTROLS                 -->
+  <script src="src/layers-panel.js"></script> <!-- window.LAYERS_PANEL                 -->
+  <!-- TODO refactor: layers-panel-utils.js → layers-panel-style.js → layers-panel-modal.js → layers-panel.js -->
+
+  <!-- ── Orquestador principal (debe ir último) ───────────────────── -->
+  <script src="src/app.js"></script>       <!-- window.APP, window.TOAST, window.THEME -->
+
+  <!-- ── Verificación de módulos en desarrollo ────────────────────── -->
+  <!-- Detecta módulos faltantes temprano, antes de que fallen silenciosamente en runtime -->
+  <script>
+    (function checkModules() {
+      const required = [
+        'PALETTES', 'LAYERS', 'PROVINCIAS_MAP',
+        'WFS', 'CLIP',
+        'MAP', 'EXPORT',
+        'CHAT', 'UI', 'SETTINGS', 'AUTH', 'FB',
+        'SIDEBAR', 'SEARCH', 'CHAT_HEADER', 'MAP_CONTROLS', 'LAYERS_PANEL',
+        'APP', 'TOAST', 'THEME'
+      ];
+      const missing = required.filter(m => !window[m]);
+      if (missing.length) {
+        console.error('[simple maps] Módulos no cargados:', missing.join(', '));
+      }
+    })();
+  </script>
 </body>
 </html>
