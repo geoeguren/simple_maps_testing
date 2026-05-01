@@ -321,7 +321,164 @@ window.EXPORT = (() => {
     return rounded.toLocaleString('es-AR');
   }
 
-  // ── Helpers ───────────────────────────────────────────────────
+  // ── PDF vectorial ─────────────────────────────────────────────
+
+  async function toPDF() {
+    const mapInst = window.MAP.getInstance();
+    if (!mapInst) { window.TOAST.show('No hay mapa activo'); return; }
+
+    window.TOAST.show('Generando PDF…', 10000);
+
+    try {
+      // Cargar jsPDF dinámicamente si no está disponible
+      if (!window.jspdf) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          s.onload  = resolve;
+          s.onerror = () => reject(new Error('No se pudo cargar jsPDF'));
+          document.head.appendChild(s);
+        });
+      }
+      const { jsPDF } = window.jspdf;
+
+      // A4 en puntos PDF (72 DPI): 595.28 x 841.89 pt
+      // Usamos mm: 210 x 297
+      const W = 210, H = 297, PAD = 14;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // ── Título centrado ──────────────────────────────────────
+      const titulo = document.getElementById('map-title')?.value || 'Mapa';
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(26, 24, 20);
+      doc.text(titulo, W / 2, PAD + 6, { align: 'center' });
+
+      // ── Mapa rasterizado ─────────────────────────────────────
+      const mapCanvas  = await captureLeaflet(mapInst);
+      const titleH     = 14;   // mm
+      const footerH    = 32;   // mm
+      const mapAreaW   = W - PAD * 2;
+      const mapAreaH   = H - PAD - titleH - footerH - PAD;
+      const mapX       = PAD;
+      const mapY       = PAD + titleH;
+
+      // Escalar manteniendo aspect ratio
+      const scaleF = Math.min(mapAreaW / mapCanvas.width, mapAreaH / mapCanvas.height);
+      const mwMm   = (mapCanvas.width  * scaleF) * 25.4 / 96;
+      const mhMm   = (mapCanvas.height * scaleF) * 25.4 / 96;
+      const mxMm   = mapX + (mapAreaW - mwMm) / 2;
+      const myMm   = mapY;
+
+      const imgData = mapCanvas.toDataURL('image/jpeg', 0.88);
+      doc.addImage(imgData, 'JPEG', mxMm, myMm, mwMm, mhMm);
+
+      // Borde del mapa
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.2);
+      doc.rect(mxMm, myMm, mwMm, mhMm);
+
+      // ── Flecha norte (esquina superior derecha del mapa) ─────
+      const nX = mxMm + mwMm - 10;
+      const nY = myMm + 4;
+      drawNorthArrowPDF(doc, nX, nY);
+
+      // ── Separador footer ─────────────────────────────────────
+      const fy = myMm + mhMm + 4;
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.3);
+      doc.line(PAD, fy, W - PAD, fy);
+
+      // ── Columna izquierda: Referencias ───────────────────────
+      const activeLayers = window.MAP.getActiveLayers();
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(80, 80, 80);
+      doc.text('Referencias', PAD, fy + 5);
+
+      let refY = fy + 9;
+      Object.values(activeLayers).reverse().forEach(layer => {
+        if (layer.visible === false) return;
+        const color = layer.style?.fillColor || layer.style?.color || '#888888';
+        const rgb   = hexToRgb(color);
+        doc.setFillColor(rgb.r, rgb.g, rgb.b);
+        doc.setDrawColor(rgb.r, rgb.g, rgb.b);
+        doc.setLineWidth(0.2);
+        doc.rect(PAD, refY - 2.5, 3.5, 3.5, 'FD');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+        doc.setTextColor(50, 50, 50);
+        doc.text(layer.titulo || '', PAD + 5, refY);
+        refY += 5;
+      });
+
+      // ── Columna derecha: escala, proyección, fuente ──────────
+      const colR     = W / 2 + 4;
+      const scale_m  = getMapScale(mapInst);
+      const scaleStr = formatScale(scale_m);
+      const niceKm   = niceScaleKm(scale_m, mwMm * 96 / 25.4, mapCanvas.width);
+      const barMm    = Math.min(kmToPixelsOnOutput(niceKm, scale_m, mwMm * 96 / 25.4, mapCanvas.width) * 25.4 / 96, 60);
+
+      // Barra gráfica
+      const barY = fy + 5;
+      doc.setFillColor(50, 50, 50);
+      doc.rect(colR, barY, barMm, 2.5, 'F');
+      // Mitad blanca
+      doc.setFillColor(255, 255, 255);
+      doc.rect(colR, barY, barMm / 2, 2.5, 'F');
+      // Borde
+      doc.setDrawColor(50, 50, 50);
+      doc.setLineWidth(0.2);
+      doc.rect(colR, barY, barMm, 2.5);
+      // Etiquetas
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(5.5);
+      doc.setTextColor(50, 50, 50);
+      doc.text('0', colR, barY + 4.5, { align: 'center' });
+      doc.text(`${niceKm / 2} km`, colR + barMm / 2, barY + 4.5, { align: 'center' });
+      doc.text(`${niceKm} km`, colR + barMm, barY + 4.5, { align: 'center' });
+
+      // Escala numérica, proyección, fuente
+      doc.setFontSize(6.5);
+      doc.setTextColor(80, 80, 80);
+      doc.text(`1:${scaleStr}`, colR, barY + 9);
+      doc.text('EPSG 4326 (WGS 84)', colR, barY + 14);
+      doc.text('Fuente: Instituto Geográfico Nacional', colR, barY + 19);
+
+      // ── Guardar ───────────────────────────────────────────────
+      const filename = sanitizeFilename(titulo || 'mapa') + '.pdf';
+      doc.save(filename);
+      window.TOAST.show('PDF exportado');
+
+    } catch (err) {
+      console.error('[EXPORT] Error PDF:', err);
+      window.TOAST.show('Error al generar PDF: ' + err.message);
+    }
+  }
+
+  function drawNorthArrowPDF(doc, x, y) {
+    // Círculo de fondo
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(180, 180, 180);
+    doc.setLineWidth(0.2);
+    doc.circle(x, y + 4, 4, 'FD');
+    // Flecha (triángulo hacia arriba)
+    doc.setFillColor(26, 24, 20);
+    doc.triangle(x, y + 1, x - 1.5, y + 4, x + 1.5, y + 4, 'F');
+    // N
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(4.5);
+    doc.setTextColor(26, 24, 20);
+    doc.text('N', x, y + 7.2, { align: 'center' });
+  }
+
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    if (h.length === 3) {
+      return { r: parseInt(h[0]+h[0], 16), g: parseInt(h[1]+h[1], 16), b: parseInt(h[2]+h[2], 16) };
+    }
+    return { r: parseInt(h.slice(0,2), 16), g: parseInt(h.slice(2,4), 16), b: parseInt(h.slice(4,6), 16) };
+  }
 
   function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
@@ -338,6 +495,6 @@ window.EXPORT = (() => {
                .substring(0, 80);
   }
 
-  return { toGeoJSON, toJPEG };
+  return { toGeoJSON, toJPEG, toPDF };
 
 })();
