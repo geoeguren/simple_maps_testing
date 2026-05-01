@@ -346,7 +346,10 @@ window.MAP = (() => {
             <span>${entry.titulo || key}</span>
           </div>`;
           Object.entries(cl.colorMap).forEach(([val, color]) => {
-            const svg = makeSVG(geom, color, color, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1, s.dashArray);
+            const valStyle = cl.styleMap?.[val] || {};
+            const fill   = valStyle.fillColor || color;
+            const border = valStyle.color     || (geom === 'line' ? fill : darkenHex(fill));
+            const svg = makeSVG(geom, border, fill, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1, s.dashArray);
             html += `<div class="legend-item legend-item-classified">${svg}<span>${val}</span></div>`;
           });
           return html;
@@ -359,8 +362,9 @@ window.MAP = (() => {
           </div>`;
           const colors = cl.paletteColors || ['#888'];
           for (let i = 0; i < cl.breaks.length - 1; i++) {
-            const color = colors[Math.min(i, colors.length-1)];
-            const svg   = makeSVG(geom, color, color, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1);
+            const fill   = colors[Math.min(i, colors.length-1)];
+            const border = geom === 'line' ? fill : darkenHex(fill);
+            const svg   = makeSVG(geom, border, fill, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1);
             const from  = Number(cl.breaks[i]).toLocaleString('es-AR', {maximumFractionDigits: 1});
             const to    = Number(cl.breaks[i+1]).toLocaleString('es-AR', {maximumFractionDigits: 1});
             html += `<div class="legend-item legend-item-classified">${svg}<span>${from} – ${to}</span></div>`;
@@ -498,6 +502,37 @@ window.MAP = (() => {
     return [];
   }
 
+  // Oscurece un color hex reduciendo la luminosidad en HSL
+  function darkenHex(hex, amount = 0.22) {
+    const r = parseInt(hex.slice(1,3),16)/255;
+    const g = parseInt(hex.slice(3,5),16)/255;
+    const b = parseInt(hex.slice(5,7),16)/255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    let h, s, l = (max+min)/2;
+    if (max === min) { h = s = 0; }
+    else {
+      const d = max - min;
+      s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max) {
+        case r: h = ((g-b)/d + (g<b?6:0))/6; break;
+        case g: h = ((b-r)/d + 2)/6; break;
+        default: h = ((r-g)/d + 4)/6;
+      }
+    }
+    l = Math.max(0, l - amount);
+    const q = l < 0.5 ? l*(1+s) : l+s-l*s;
+    const p = 2*l - q;
+    const hue2rgb = (p,q,t) => {
+      if(t<0) t+=1; if(t>1) t-=1;
+      if(t<1/6) return p+(q-p)*6*t;
+      if(t<1/2) return q;
+      if(t<2/3) return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    const toHex2 = n => Math.round(n*255).toString(16).padStart(2,'0');
+    return '#' + toHex2(hue2rgb(p,q,h+1/3)) + toHex2(hue2rgb(p,q,h)) + toHex2(hue2rgb(p,q,h-1/3));
+  }
+
   function getColorForValue(val, breaks, palette) {
     if (!breaks?.length || val == null) return palette[0] || '#888';
     for (let i = 0; i < breaks.length - 1; i++) {
@@ -516,10 +551,11 @@ window.MAP = (() => {
       if (!cl) return entry.style;
       const val = feat?.properties?.[cl.field];
       if (cl.type === 'graduated') {
-        const color = getColorForValue(parseFloat(val), cl.breaks, cl.paletteColors || ['#888']);
+        const fill = getColorForValue(parseFloat(val), cl.breaks, cl.paletteColors || ['#888']);
+        const border = darkenHex(fill);
         return geom === 'line'
-          ? { ...entry.style, color }
-          : { ...entry.style, color, fillColor: color };
+          ? { ...entry.style, color: fill }
+          : { ...entry.style, color: border, fillColor: fill };
       }
       // categorized — si el valor no está en colorMap, ocultar el feature
       if (!cl.colorMap?.hasOwnProperty(val)) {
@@ -527,11 +563,13 @@ window.MAP = (() => {
           ? { ...entry.style, radius: 0, opacity: 0, fillOpacity: 0 }
           : { ...entry.style, opacity: 0, fillOpacity: 0, weight: 0 };
       }
-      const color = cl.colorMap[val];
+      const fill     = cl.colorMap[val];
       const valStyle = cl.styleMap?.[val] || {};
+      // Usar color de borde explícito del styleMap si existe, si no derivar del fill
+      const border   = valStyle.color || darkenHex(valStyle.fillColor || fill);
       return geom === 'line'
-        ? { ...entry.style, ...valStyle, color }
-        : { ...entry.style, ...valStyle, color, fillColor: valStyle.fillColor || color };
+        ? { ...entry.style, ...valStyle, color: valStyle.color || fill }
+        : { ...entry.style, ...valStyle, color: border, fillColor: valStyle.fillColor || fill };
     };
 
     if (geom === 'point') {
