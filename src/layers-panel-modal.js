@@ -615,12 +615,29 @@ window.LP_MODAL = (() => {
           )];
           return { value: a.campo, label: a.campo, disabled: vals.length > MAX_UNIQUE };
         });
-        let curField = initField || (fieldOpts.find(o => !o.disabled)?.value || '');
+
+        // Si hay una clasificación previa con un campo válido (≤15 valores), usarlo.
+        // Si no, buscar el primer campo habilitado. Nunca arrancar con un campo deshabilitado.
+        const initFieldEnabled = initField && fieldOpts.find(o => o.value === initField && !o.disabled);
+        let curField = initFieldEnabled
+          ? initField
+          : (fieldOpts.find(o => !o.disabled)?.value || '');
+
+        const allDisabled = fieldOpts.every(o => o.disabled);
+
         const fieldCsel = buildFieldCsel(fieldOpts, curField, val => { curField = val; applyPreview(); });
         fieldCsel.classList.add('adv-field');
         fieldRow.appendChild(fieldLabel);
         fieldRow.appendChild(fieldCsel);
         bodyEl.appendChild(fieldRow);
+
+        // Hint cuando todos los campos superan el límite de valores únicos
+        if (allDisabled) {
+          const hint = document.createElement('p');
+          hint.className = 'adv-body-note adv-all-disabled-hint';
+          hint.innerHTML = '<span class="material-icons" style="font-size:13px;vertical-align:-2px;margin-right:4px">block</span>Todos los campos tienen más de ' + MAX_UNIQUE + ' valores únicos y no son clasificables.';
+          bodyEl.appendChild(hint);
+        }
 
         buildGlobalControls(bodyEl, geom);
 
