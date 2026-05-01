@@ -10,6 +10,30 @@ window.CHAT = (() => {
   let _lastModel         = null;
   let _pendingChatTitle  = null;
 
+  // ── Sanitizar historial para el LLM ──────────────────────────
+  //
+  // Los mensajes del asistente se guardan con los bloques de código
+  // (```map, ```style, etc.) incluidos — necesarios para Firestore y
+  // para restaurar el estado. Pero enviárselos al LLM consume tokens
+  // innecesarios y puede confundirlo en conversaciones largas.
+  // Esta función devuelve una copia del historial con esos bloques
+  // eliminados solo de los mensajes del asistente.
+
+  function sanitizeHistoryForLLM(messages) {
+    return messages.map(m => {
+      if (m.role !== 'assistant') return m;
+      const clean = m.content
+        .replace(/```map[\s\S]*?```/g, '')
+        .replace(/```style[\s\S]*?```/g, '')
+        .replace(/```classify[\s\S]*?```/g, '')
+        .replace(/```chat-title[\s\S]*?```/g, '')
+        .replace(/```export-choice[\s\S]*?```/g, '')
+        .replace(/```export[\s\S]*?```/g, '')
+        .trim();
+      return { ...m, content: clean };
+    });
+  }
+
   // ── Enviar mensaje ────────────────────────────────────────────
 
   async function send(userText) {
@@ -40,7 +64,7 @@ window.CHAT = (() => {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
-          messages: history,
+          messages: sanitizeHistoryForLLM(history),
           layers:   window.LAYERS,
           model:    window.SETTINGS?.get('model') || 'auto',
           tone:     window.SETTINGS?.get('tone')  || 'conversacional',
