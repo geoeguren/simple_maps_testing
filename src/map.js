@@ -1089,7 +1089,8 @@ window.MAP = (() => {
     getPopupPrefs,
     renameLayer,
     getActiveLayers: () => activeLayers,
-    getInstance:     () => leafletMap
+    getInstance:     () => leafletMap,
+    darkenHex
   };
 
 })();
