@@ -823,8 +823,7 @@ window.MAP = (() => {
     // Prevent Leaflet from intercepting scroll inside the dropdown
     dropdown.addEventListener('wheel', e => {
       e.stopPropagation();
-      // Permitir scroll interno; solo cancelar el evento si el dropdown
-      // tiene contenido scrollable para que no propague al mapa de Leaflet
+      e.stopImmediatePropagation();
       const atTop    = dropdown.scrollTop === 0;
       const atBottom = dropdown.scrollTop + dropdown.clientHeight >= dropdown.scrollHeight - 1;
       const scrollingUp   = e.deltaY < 0;
@@ -883,7 +882,7 @@ window.MAP = (() => {
         const rect = trigger.getBoundingClientRect();
         dropdown.style.position = 'fixed';
         dropdown.style.left     = rect.left + 'px';
-        dropdown.style.width    = '220px';
+        dropdown.style.width    = rect.width + 'px';
         dropdown.style.top      = (rect.bottom + 3) + 'px';
         dropdown.style.bottom   = 'auto';
       }
