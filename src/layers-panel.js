@@ -146,13 +146,13 @@ window.LAYERS_PANEL = (() => {
   function buildDashSelect(curDash, id) {
     const DASH_DEFS = [
       {v:'none',    label:'Continua',     dasharray:''},
-      {v:'8,5',     label:'Guiones',      dasharray:'8,5'},
-      {v:'2,5',     label:'Puntos',       dasharray:'2,5'},
-      {v:'8,5,2,5', label:'Guión-Punto',  dasharray:'8,5,2,5'},
+      {v:'8,4',     label:'Guiones',      dasharray:'8,4'},
+      {v:'2,4',     label:'Puntos',       dasharray:'2,4'},
+      {v:'8,4,2,4', label:'Guión-Punto',  dasharray:'8,4,2,4'},
     ];
 
-    const svgLine = (da) => `<svg viewBox="0 0 56 14" width="56" height="14">
-      <line x1="2" y1="7" x2="54" y2="7" stroke="currentColor" stroke-width="2"
+    const svgLine = (da) => `<svg viewBox="0 0 60 14" width="60" height="14" style="display:block">
+      <line x1="0" y1="7" x2="60" y2="7" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" ${da ? `stroke-dasharray="${da}"` : ''}/>
     </svg>`;
 
