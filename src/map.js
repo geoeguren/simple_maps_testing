@@ -836,16 +836,34 @@ window.MAP = (() => {
     const dropdown = document.createElement('div');
     dropdown.className = 'pfc-dropdown adv-ramp-dropdown hidden';
     document.body.appendChild(dropdown);
-    // Prevent Leaflet from intercepting scroll inside the dropdown
+
+    // Evitar que Leaflet intercepte wheel y touch dentro del dropdown.
+    // Sin esto, el scroll del dropdown arrastra el mapa en lugar de la lista.
     dropdown.addEventListener('wheel', e => {
       e.stopPropagation();
       e.stopImmediatePropagation();
       const atTop    = dropdown.scrollTop === 0;
       const atBottom = dropdown.scrollTop + dropdown.clientHeight >= dropdown.scrollHeight - 1;
-      const scrollingUp   = e.deltaY < 0;
-      const scrollingDown = e.deltaY > 0;
-      if ((scrollingUp && !atTop) || (scrollingDown && !atBottom)) {
+      if ((e.deltaY < 0 && !atTop) || (e.deltaY > 0 && !atBottom)) {
         e.preventDefault();
+      }
+    }, { passive: false });
+
+    // Touch: registrar posición inicial y scrollear el dropdown manualmente
+    let _touchStartY = 0;
+    dropdown.addEventListener('touchstart', e => {
+      _touchStartY = e.touches[0].clientY;
+      e.stopPropagation();
+    }, { passive: true });
+    dropdown.addEventListener('touchmove', e => {
+      e.stopPropagation();
+      const dy       = _touchStartY - e.touches[0].clientY;
+      _touchStartY   = e.touches[0].clientY;
+      const atTop    = dropdown.scrollTop === 0;
+      const atBottom = dropdown.scrollTop + dropdown.clientHeight >= dropdown.scrollHeight - 1;
+      if ((dy < 0 && !atTop) || (dy > 0 && !atBottom)) {
+        e.preventDefault();
+        dropdown.scrollTop += dy;
       }
     }, { passive: false });
 
