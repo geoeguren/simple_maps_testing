@@ -478,7 +478,16 @@ window.APP = (() => {
         }
         const mapKey = `${inst.layerKey}_${i}`;
         inst.mapKey  = mapKey;
-        const style  = inst.style ? { ...inst.style } : { ...layerDef.defaultStyle };
+
+        // Estilo: usa el que mandó el LLM, o un fallback neutro por geometría.
+        // El LLM siempre debería mandar estilo — el fallback es red de seguridad.
+        const STYLE_FALLBACK = {
+          polygon: { fillColor: '#888888', fillOpacity: 0.2,  color: '#555555', weight: 1,   opacity: 0.8 },
+          line:    { color: '#555555', weight: 2, opacity: 0.8 },
+          point:   { fillColor: '#888888', fillOpacity: 0.85, color: '#555555', radius: 5, weight: 1.5, opacity: 1 },
+        };
+        const geomType = layerDef.geomType || 'polygon';
+        const style    = inst.style ? { ...inst.style } : { ...STYLE_FALLBACK[geomType] };
         window.MAP.addLayer(mapKey, inst.layerKey, geojson, style, inst.titulo || inst.descripcion || layerDef.titulo);
         // Restaurar visibilidad si fue ocultada
         if (inst.visible === false) window.MAP.restoreLayerVisible(mapKey, false);
