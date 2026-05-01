@@ -250,12 +250,12 @@ body.day .msg-collapse-fade {
 
 /* Export choice card */
 .msg-export-choice {
-  width: 100%; display: grid; grid-template-columns: 1fr 1fr;
-  gap: 8px; box-sizing: border-box;
+  width: 100%; display: flex; flex-direction: column;
+  gap: 4px; box-sizing: border-box;
 }
 .export-choice-btn {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px; cursor: pointer;
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 8px 12px; cursor: pointer;
   background: var(--bg2); border: 0.5px solid var(--border-md);
   border-radius: var(--radius-sm);
   transition: background var(--transition), border-color var(--transition);
@@ -265,11 +265,8 @@ body.day .msg-collapse-fade {
 body.day .export-choice-btn { background: rgba(0,0,0,0.02); }
 body.day .export-choice-btn:hover { background: rgba(0,0,0,0.05); }
 
-.export-choice-icon { font-size: 20px !important; color: var(--cream2); flex-shrink: 0; }
-.export-choice-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .export-choice-label {
   font-size: 13px; font-weight: 500; color: var(--cream);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .export-choice-sub { font-size: 11px; color: var(--cream2); font-family: var(--font-mono); }
 body.day .export-choice-label { color: #1a1814; }
