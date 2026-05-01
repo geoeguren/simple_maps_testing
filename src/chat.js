@@ -540,6 +540,8 @@ window.UI = (() => {
     $msgs()?.appendChild(el);
     scrollBottom();
   }
+
+  function showMapReady(plan) {
     const capas = (plan.instrucciones || [])
       .filter(i => i.descripcion)
       .map(i => i.descripcion)
