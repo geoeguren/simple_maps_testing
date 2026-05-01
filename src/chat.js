@@ -56,8 +56,8 @@ window.CHAT = (() => {
 
     try {
       const activeLayers = window.MAP?.getActiveLayers?.() || {};
-      const activeLayersSummary = Object.entries(activeLayers).map(([k, v]) => 
-        `${k}: ${v.titulo} (${v.geomType})`
+      const activeLayersSummary = Object.entries(activeLayers).map(([, v]) => 
+        `${v.layerKey}: ${v.titulo} (${v.geomType})`
       ).join(', ');
 
       const resp = await fetch('/api/llm', {
