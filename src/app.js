@@ -403,17 +403,26 @@ window.APP = (() => {
 
   // ── renderMap ─────────────────────────────────────────────────
 
+  let _isRendering = false;
+
   async function renderMap(plan) {
+    // Evitar renders concurrentes — si ya hay uno en curso, ignorar
+    if (_isRendering) {
+      console.warn('[APP] renderMap ignorado — ya hay un render en curso');
+      return;
+    }
+    _isRendering = true;
+
+    try {
     if (!plan?.instrucciones?.length) {
-      // Plan vacío explícito → limpiar el mapa
       if (plan && Array.isArray(plan.instrucciones)) {
         window.MAP.clearAll();
         currentPlan = plan;
         window.MAP.updateLegend();
         _persistPlan();
-        return;
+      } else {
+        window.TOAST.error('El mapa no tiene capas.');
       }
-      window.TOAST.error('El mapa no tiene capas.');
       return;
     }
 
@@ -548,6 +557,10 @@ window.APP = (() => {
     if (errors.length) window.TOAST.warning(errors.length === 1 ? errors[0] + '.' : `${errors.length} capas tuvieron problemas.`);
 
     refreshBtn?.classList.remove('spinning');
+
+    } finally {
+      _isRendering = false;
+    }
   }
 
   // ── Aplicar estilos desde chat ────────────────────────────────
