@@ -521,18 +521,19 @@ window.EXPORT = (() => {
     const BASEMAPS  = window.MAP.getBasemaps();
     const curBase   = window.MAP.getCurrentBase?.() || 'gray';
 
-    // ── Abrir modal ───────────────────────────────────────────
     document.getElementById('html-export-modal')?.remove();
     document.getElementById('html-export-backdrop')?.remove();
 
     const backdrop = document.createElement('div');
-    backdrop.id = 'html-export-backdrop';
+    backdrop.id        = 'html-export-backdrop';
     backdrop.className = 'adv-modal-backdrop';
     document.body.appendChild(backdrop);
 
     const modal = document.createElement('div');
-    modal.id = 'html-export-modal';
+    modal.id        = 'html-export-modal';
     modal.className = 'adv-modal';
+
+    const layerEntries = Object.entries(activeLayers);  // [[key, layer], ...]
 
     // Opciones de mapa base
     const basemapDefs = [
@@ -542,12 +543,48 @@ window.EXPORT = (() => {
       { key: 'none',      label: 'sin mapa base' },
     ];
 
-    // Filas de capas
-    const layerRows = Object.entries(activeLayers).map(([key, l]) => `
-      <label class="pfc-row html-layer-row" style="padding:5px 0">
-        <input type="checkbox" data-key="${key}" />
-        <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">${escHtml(l.titulo || key)}</span>
+    // Campos excluidos del popup (técnicos / sin valor para el usuario)
+    const EXCL_FIELDS = new Set(['gid','fdc','sag','entidad','objeto','gna']);
+
+    // Construir HTML del selector de capas (dropdown con checkboxes)
+    const layerCheckboxesHTML = layerEntries.map(([key, l]) => `
+      <label class="html-csel-chk-row">
+        <input type="checkbox" class="html-layer-chk" data-key="${escHtml(key)}" />
+        <span class="html-csel-chk-label">${escHtml(l.titulo || key)}</span>
       </label>`).join('');
+
+    // Construir HTML de los selectores de campos por capa
+    const identifySelectorsHTML = layerEntries.map(([key, l]) => {
+      const layerDef  = window.LAYERS[l.layerKey] || {};
+      const attrNames = (layerDef.attributes || [])
+        .filter(a => a.campo && !EXCL_FIELDS.has(a.campo))
+        .map(a => a.campo);
+      // Si no hay attrs en el catálogo, leer del geojson
+      const fallbackFields = attrNames.length ? attrNames : [...new Set(
+        (l.geojson?.features || []).flatMap(f =>
+          Object.keys(f.properties || {}).filter(k => !EXCL_FIELDS.has(k) && !k.endsWith('Type'))
+        )
+      )];
+
+      const optionsHTML = fallbackFields.map(f => `
+        <label class="html-csel-chk-row html-field-chk-row">
+          <input type="checkbox" class="html-field-chk" data-key="${escHtml(key)}" data-field="${escHtml(f)}" checked />
+          <span class="html-csel-chk-label" style="font-family:var(--font-mono);font-size:12px">${escHtml(f)}</span>
+        </label>`).join('');
+
+      return `
+        <div class="html-identify-row" data-key="${escHtml(key)}">
+          <div class="adv-ramp-csel adv-field-csel html-identify-csel html-identify-disabled" id="html-id-csel-${escHtml(key)}">
+            <div class="adv-ramp-trigger adv-field-trigger html-identify-trigger">
+              <span class="adv-field-selected html-id-label">${escHtml(l.titulo || key)}</span>
+              <span class="adv-ramp-arrow">▾</span>
+            </div>
+            <div class="adv-ramp-dropdown hidden html-identify-dd">
+              ${optionsHTML || '<span style="padding:8px 12px;font-size:12px;color:var(--cream2);display:block">Sin campos disponibles</span>'}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
 
     modal.innerHTML = `
       <div class="adv-modal-header">
@@ -556,11 +593,7 @@ window.EXPORT = (() => {
       </div>
       <div class="adv-modal-body" style="gap:0">
 
-        <div class="adv-body-row" style="padding-bottom:2px">
-          <span class="adv-body-label">Capas</span>
-          <div style="display:flex;flex-direction:column;gap:0;width:100%">${layerRows}</div>
-        </div>
-
+        <!-- Mapa base -->
         <div class="adv-body-row">
           <span class="adv-body-label">Mapa base</span>
           <div class="adv-ramp-csel adv-field-csel" id="html-basemap-csel">
@@ -574,6 +607,29 @@ window.EXPORT = (() => {
           </div>
         </div>
 
+        <!-- Capas — selector con checkboxes internos -->
+        <div class="adv-body-row">
+          <span class="adv-body-label">Capas</span>
+          <div class="adv-ramp-csel adv-field-csel html-layers-csel" id="html-layers-csel">
+            <div class="adv-ramp-trigger adv-field-trigger" id="html-layers-trigger">
+              <span class="adv-field-selected" id="html-layers-summary">Ninguna seleccionada</span>
+              <span class="adv-ramp-arrow">▾</span>
+            </div>
+            <div class="adv-ramp-dropdown hidden" id="html-layers-dd">
+              ${layerCheckboxesHTML}
+            </div>
+          </div>
+        </div>
+
+        <!-- Consulta de elementos — un selector de campos por capa -->
+        <div class="adv-body-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <span class="adv-body-label" style="margin-bottom:2px">Consulta de elementos</span>
+          <div style="display:flex;flex-direction:column;gap:6px;width:100%" id="html-identify-wrap">
+            ${identifySelectorsHTML}
+          </div>
+        </div>
+
+        <!-- Interfaz -->
         <div class="adv-body-row" style="gap:8px">
           <span class="adv-body-label">Interfaz</span>
           <label class="pfc-row" style="padding:5px 0">
@@ -584,16 +640,9 @@ window.EXPORT = (() => {
             <input type="checkbox" id="html-zoom" checked />
             <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Permitir zoom</span>
           </label>
-          <label class="pfc-row" style="padding:5px 0">
-            <input type="checkbox" id="html-identify" />
-            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Agregar consulta de elementos</span>
-          </label>
-          <div id="html-fields-wrap" style="padding:4px 0 2px;opacity:0.35;pointer-events:none">
-            <span class="adv-body-label" style="font-size:12px;margin-bottom:4px;display:block">Campos a mostrar</span>
-            <div id="html-fields-list" style="display:flex;flex-direction:column;gap:2px"></div>
-          </div>
         </div>
 
+        <!-- Código generado -->
         <div class="adv-body-row">
           <span class="adv-body-label">Código</span>
           <div id="html-code-wrapper" style="width:100%;background:#0d0d0d;border:0.5px solid rgba(226,221,212,0.18);border-radius:6px;overflow:hidden;">
@@ -616,43 +665,10 @@ window.EXPORT = (() => {
 
     function closeModal() { modal.remove(); backdrop.remove(); }
     modal.querySelector('#html-modal-close').addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
 
-    // Construir lista de campos disponibles de las capas activas
-    const EXCL_FIELDS = new Set(['gid','fdc','sag','entidad','objeto','gna']);
-    const allLayerFields = [...new Set(
-      Object.values(activeLayers).flatMap(l =>
-        (l.geojson?.features || []).flatMap(f =>
-          Object.keys(f.properties || {}).filter(k =>
-            !EXCL_FIELDS.has(k) && !k.endsWith('Type')
-          )
-        )
-      )
-    )];
+    // ── Wire selector de mapa base ────────────────────────────
 
-    const fieldsList = modal.querySelector('#html-fields-list');
-    allLayerFields.forEach(field => {
-      const lbl = document.createElement('label');
-      lbl.className = 'pfc-row';
-      lbl.style.cssText = 'padding:3px 0';
-      lbl.innerHTML = `<input type="checkbox" data-field="${field}" checked />
-        <span class="pfc-label" style="font-family:var(--font-mono);font-size:12px;color:var(--cream2)">${field}</span>`;
-      fieldsList.appendChild(lbl);
-    });
-
-    // Wire identify toggle
-    const identifyChk  = modal.querySelector('#html-identify');
-    const fieldsWrap   = modal.querySelector('#html-fields-wrap');
-    identifyChk.addEventListener('change', () => {
-      const on = identifyChk.checked;
-      fieldsWrap.style.opacity       = on ? '1' : '0.35';
-      fieldsWrap.style.pointerEvents = on ? 'auto' : 'none';
-      buildAndShow();
-    });
-    fieldsList.querySelectorAll('input[type=checkbox]').forEach(cb =>
-      cb.addEventListener('change', buildAndShow)
-    );
-
-    // Wire basemap csel
     let _selectedBase = curBase;
     const bTrigger = modal.querySelector('#html-basemap-trigger');
     const bDd      = modal.querySelector('#html-basemap-dd');
@@ -662,7 +678,12 @@ window.EXPORT = (() => {
       e.stopPropagation();
       const isOpen = !bDd.classList.contains('hidden');
       bDd.classList.toggle('hidden', isOpen);
-      if (bArrow) bArrow.classList.toggle('open', !isOpen);
+      bArrow?.classList.toggle('open', !isOpen);
+      // Cerrar otros dropdowns
+      modal.querySelectorAll('.adv-ramp-dropdown:not(#html-basemap-dd)').forEach(d => {
+        d.classList.add('hidden');
+        d.previousElementSibling?.querySelector('.adv-ramp-arrow')?.classList.remove('open');
+      });
     });
     bDd?.querySelectorAll('.adv-field-option').forEach(opt => {
       opt.addEventListener('click', e => {
@@ -672,22 +693,104 @@ window.EXPORT = (() => {
         _selectedBase = opt.dataset.key;
         if (bVal) bVal.textContent = opt.querySelector('.adv-ramp-option-label').textContent;
         bDd.classList.add('hidden');
-        if (bArrow) bArrow.classList.remove('open');
+        bArrow?.classList.remove('open');
         buildAndShow();
       });
     });
+
+    // ── Wire selector de capas ────────────────────────────────
+
+    const layersTrigger = modal.querySelector('#html-layers-trigger');
+    const layersDd      = modal.querySelector('#html-layers-dd');
+    const layersArrow   = layersTrigger?.querySelector('.adv-ramp-arrow');
+    const layersSummary = modal.querySelector('#html-layers-summary');
+
+    function updateLayersSummary() {
+      const checked = modal.querySelectorAll('.html-layer-chk:checked');
+      layersSummary.textContent = checked.length === 0
+        ? 'Ninguna seleccionada'
+        : checked.length === layerEntries.length
+          ? 'Todas las capas'
+          : `${checked.length} capa${checked.length > 1 ? 's' : ''} seleccionada${checked.length > 1 ? 's' : ''}`;
+    }
+
+    layersTrigger?.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = !layersDd.classList.contains('hidden');
+      layersDd.classList.toggle('hidden', isOpen);
+      layersArrow?.classList.toggle('open', !isOpen);
+      // Cerrar otros dropdowns
+      modal.querySelectorAll('.adv-ramp-dropdown:not(#html-layers-dd)').forEach(d => {
+        d.classList.add('hidden');
+        d.previousElementSibling?.querySelector('.adv-ramp-arrow')?.classList.remove('open');
+      });
+    });
+
+    // Al marcar/desmarcar una capa: habilitar/deshabilitar su selector de campos
+    modal.querySelectorAll('.html-layer-chk').forEach(chk => {
+      chk.addEventListener('change', () => {
+        const key    = chk.dataset.key;
+        const csel   = modal.querySelector(`#html-id-csel-${CSS.escape(key)}`);
+        const isOn   = chk.checked;
+        csel?.classList.toggle('html-identify-disabled', !isOn);
+        // Habilitar/deshabilitar los checkboxes de campos de esta capa
+        csel?.querySelectorAll('.html-field-chk').forEach(fc => { fc.disabled = !isOn; });
+        updateLayersSummary();
+        buildAndShow();
+      });
+    });
+
+    // ── Wire selectores de campos por capa ───────────────────
+
+    modal.querySelectorAll('.html-identify-csel').forEach(csel => {
+      const trigger = csel.querySelector('.html-identify-trigger');
+      const dd      = csel.querySelector('.html-identify-dd');
+      const arrow   = trigger?.querySelector('.adv-ramp-arrow');
+
+      trigger?.addEventListener('click', e => {
+        e.stopPropagation();
+        if (csel.classList.contains('html-identify-disabled')) return;
+        const isOpen = !dd.classList.contains('hidden');
+        // Cerrar todos los otros identify dropdowns
+        modal.querySelectorAll('.html-identify-dd').forEach(d => {
+          if (d !== dd) {
+            d.classList.add('hidden');
+            d.previousElementSibling?.querySelector('.adv-ramp-arrow')?.classList.remove('open');
+          }
+        });
+        dd.classList.toggle('hidden', isOpen);
+        arrow?.classList.toggle('open', !isOpen);
+      });
+
+      // Al cambiar un campo: regenerar código
+      dd?.querySelectorAll('.html-field-chk').forEach(fc => {
+        fc.addEventListener('change', buildAndShow);
+      });
+    });
+
+    // ── Wire leyenda y zoom ───────────────────────────────────
+
+    modal.querySelector('#html-legend').addEventListener('change', buildAndShow);
+    modal.querySelector('#html-zoom').addEventListener('change', buildAndShow);
+
+    // ── Cerrar dropdowns al hacer click afuera ────────────────
+
     setTimeout(() => {
-      document.addEventListener('click', function bHandler(e) {
-        if (!modal.querySelector('#html-basemap-csel')?.contains(e.target)) {
-          bDd?.classList.add('hidden');
-          bArrow?.classList.remove('open');
+      document.addEventListener('click', function outsideHandler(e) {
+        if (!modal.contains(e.target)) return;
+        // Solo cerrar dropdowns si el click no fue dentro de uno
+        if (!e.target.closest('.adv-ramp-dropdown') && !e.target.closest('.adv-ramp-trigger') &&
+            !e.target.closest('.adv-field-trigger') && !e.target.closest('.html-identify-trigger')) {
+          modal.querySelectorAll('.adv-ramp-dropdown, .html-identify-dd').forEach(d => {
+            d.classList.add('hidden');
+            d.previousElementSibling?.querySelector('.adv-ramp-arrow')?.classList.remove('open');
+          });
         }
       }, { passive: true });
     }, 0);
-    backdrop.addEventListener('click', closeModal);
 
-    // Syntax highlighting en el bloque de código
-    // Wire copy button con feedback "Copiado"
+    // ── Copy button ───────────────────────────────────────────
+
     function wireCopyBtn() {
       const btn = modal.querySelector('#html-copy-btn');
       if (!btn) return;
@@ -707,11 +810,12 @@ window.EXPORT = (() => {
     }
     wireCopyBtn();
 
+    // ── Render del bloque de código ───────────────────────────
+
     function renderCodeBox(code) {
       const wrapper = modal.querySelector('#html-code-wrapper');
       wrapper.dataset.raw = code;
 
-      // Highlight básico para HTML
       function hl(str) {
         return str
           .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -722,25 +826,39 @@ window.EXPORT = (() => {
           .replace(/\b(const|let|var|function|return|if|else|for|new|true|false|null)\b/g, '<span style="color:#c792ea">$1</span>')
           .replace(/\b(\d+\.?\d*)\b/g, '<span style="color:#f78c6c">$1</span>');
       }
-
       modal.querySelector('#html-code-pre').innerHTML = hl(code);
     }
 
-    // Generar código al cambiar opciones
+    // ── Generar código ────────────────────────────────────────
+
     function buildAndShow() {
-      const selectedKeys = [...modal.querySelectorAll('.html-layer-row input:checked')].map(i => i.dataset.key);
-      const baseKey      = _selectedBase;
-      const showLegend   = modal.querySelector('#html-legend').checked;
-      const allowZoom    = modal.querySelector('#html-zoom').checked;
-      const allowIdentify = modal.querySelector('#html-identify').checked;
-      const selectedFields = allowIdentify
-        ? [...modal.querySelectorAll('#html-fields-list input[type=checkbox]:checked')].map(i => i.dataset.field)
-        : [];
+      // Capas seleccionadas
+      const selectedKeys = [...modal.querySelectorAll('.html-layer-chk:checked')].map(i => i.dataset.key);
+
+      // Campos seleccionados por capa (solo de capas activas)
+      // Formato: { [layerKey]: [field1, field2, ...] }  — array vacío = todos los campos
+      const identifyFieldsByLayer = {};
+      selectedKeys.forEach(key => {
+        const csel   = modal.querySelector(`#html-id-csel-${CSS.escape(key)}`);
+        const isDisabled = csel?.classList.contains('html-identify-disabled');
+        if (isDisabled) return; // capa no seleccionada
+        const checked = [...(csel?.querySelectorAll('.html-field-chk:checked') || [])].map(c => c.dataset.field);
+        const total   = csel?.querySelectorAll('.html-field-chk').length || 0;
+        // Si todos están marcados, pasar array vacío (= mostrar todos)
+        identifyFieldsByLayer[key] = checked.length === total ? [] : checked;
+      });
+
+      const hasIdentify = selectedKeys.some(k => !modal.querySelector(`#html-id-csel-${CSS.escape(k)}`)?.classList.contains('html-identify-disabled'));
+      const allowIdentify = Object.keys(identifyFieldsByLayer).length > 0;
+
+      const baseKey    = _selectedBase;
+      const showLegend = modal.querySelector('#html-legend').checked;
+      const allowZoom  = modal.querySelector('#html-zoom').checked;
 
       const layers = selectedKeys
         .map(k => activeLayers[k])
         .filter(Boolean)
-        .map((l, i, arr) => ({
+        .map(l => ({
           key:            Object.keys(activeLayers).find(k => activeLayers[k] === l),
           titulo:         l.titulo || '',
           geomType:       l.geomType || 'polygon',
@@ -749,8 +867,16 @@ window.EXPORT = (() => {
           classification: l.classification || null
         }));
 
+      if (!layers.length) {
+        const pre = modal.querySelector('#html-code-pre');
+        if (pre) pre.innerHTML = '<span style="color:#546e7a;font-style:italic">// Seleccioná capas para generar el código</span>';
+        const wrapper = modal.querySelector('#html-code-wrapper');
+        if (wrapper) wrapper.dataset.raw = '';
+        return;
+      }
+
       try {
-        const code = buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, allowIdentify, selectedFields, mapInst);
+        const code = buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, allowIdentify, identifyFieldsByLayer, mapInst);
         renderCodeBox(code);
       } catch (err) {
         console.error('[EXPORT] Error generando HTML:', err);
@@ -760,9 +886,8 @@ window.EXPORT = (() => {
       }
     }
 
-    // Wirear cambios
-    modal.querySelectorAll('input, select').forEach(el => el.addEventListener('change', buildAndShow));
-    setTimeout(buildAndShow, 0); // Diferir para que el modal aparezca antes de calcular
+    updateLayersSummary();
+    setTimeout(buildAndShow, 0);
 
     // Descargar
     modal.querySelector('#html-download-btn').addEventListener('click', () => {
@@ -776,7 +901,7 @@ window.EXPORT = (() => {
 
   // ── Constructor del HTML ──────────────────────────────────────
 
-  function buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, allowIdentify, selectedFields, mapInst) {
+  function buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, allowIdentify, identifyFieldsByLayer, mapInst) {
     const center = mapInst.getCenter();
     const zoom   = mapInst.getZoom();
 
@@ -795,17 +920,21 @@ window.EXPORT = (() => {
     const tileBlock     = tileUrl
       ? `L.tileLayer('${tileUrl}',{attribution:'© Esri',maxZoom:19}).addTo(map);`
       : '';
-    const identifyFieldsJSON = JSON.stringify(selectedFields || []);
-    const identifyBtnHTML    = allowIdentify
+
+    // identifyFieldsByLayer: { layerKey: [field1, field2] }  — array vacío = todos los campos
+    // Se serializa al HTML para que el popup de cada capa filtre sus propios campos
+    const identifyFieldsJSON = JSON.stringify(identifyFieldsByLayer || {});
+
+    const identifyBtnHTML = allowIdentify
       ? `<button id="btn-identify" title="Consultar elementos"><span class="material-icons">question_mark</span></button>`
       : '';
-    const identifyBtnCSS     = allowIdentify
+    const identifyBtnCSS  = allowIdentify
       ? `#btn-identify{position:absolute;top:128px;left:12px;z-index:1000;width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);color:#5a5650;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.12);transition:background .15s,color .15s;font-size:0}
     #btn-identify:hover{background:#fff;color:#1a1814}
     #btn-identify.active{background:#444;color:#e2ddd4;border-color:#555}
     #btn-identify .material-icons{font-size:18px}`
       : '';
-    const identifyPopupCSS   = allowIdentify ? `
+    const identifyPopupCSS = allowIdentify ? `
     .sm-popup .leaflet-popup-content-wrapper{background:#2a2a2a;border:0.5px solid rgba(226,221,212,0.18);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);padding:0}
     .sm-popup .leaflet-popup-tip-container{display:none}
     .sm-popup .leaflet-popup-content{margin:0}
@@ -819,13 +948,14 @@ window.EXPORT = (() => {
     .popup-key{font-family:monospace;font-size:11px;color:rgba(226,221,212,0.55);padding:5px 8px 5px 16px;white-space:nowrap;vertical-align:top;width:40%}
     .popup-val{font-size:13px;color:#e2ddd4;padding:5px 16px 5px 0;word-break:break-word}` : '';
     const identifyJS = allowIdentify ? `
-    const IDENTIFY_FIELDS=${identifyFieldsJSON};
+    const IDENTIFY_FIELDS_MAP=${identifyFieldsJSON};
     let identifyMode=false,hlLayer=null,currentPopup=null;
     function clearHL(){if(hlLayer){hlLayer.remove();hlLayer=null;}}
-    function buildPopup(feat,titulo){
+    function buildPopup(feat,titulo,layerKey){
       const props=feat.properties||{};
-      const fields=IDENTIFY_FIELDS.length
-        ?IDENTIFY_FIELDS.filter(k=>props[k]!=null&&props[k]!==''&&props[k]!=='None')
+      const layerFields=IDENTIFY_FIELDS_MAP[layerKey]||[];
+      const fields=layerFields.length
+        ?layerFields.filter(k=>props[k]!=null&&props[k]!==''&&props[k]!=='None')
         :Object.keys(props).filter(k=>props[k]!=null&&props[k]!==''&&props[k]!=='None');
       const name=props.fna||props.nom_pfi||props.nam||props.rtn||titulo||'';
       const rows=fields.map(k=>'<tr><td class="popup-key">'+k+'</td><td class="popup-val">'+props[k]+'</td></tr>').join('');
@@ -835,7 +965,7 @@ window.EXPORT = (() => {
       el.querySelector('.popup-close-btn').addEventListener('click',()=>map.closePopup());
       return el;
     }
-    function bindIdentify(feat,layer,layerTitulo){
+    function bindIdentify(feat,layer,layerTitulo,layerKey){
       const geom=feat.geometry?.type?.toLowerCase()||'';
       layer.on('click',e=>{
         if(!identifyMode)return;
@@ -846,7 +976,7 @@ window.EXPORT = (() => {
         else if(geom.includes('line')){hl=L.geoJSON(feat,{style:{color:'#f5c518',weight:12,opacity:0.75}}).addTo(map);}
         else{hl=L.geoJSON(feat,{style:{color:'#f5c518',weight:3,fillColor:'#f5c518',fillOpacity:0.2,opacity:0.9}}).addTo(map);}
         hlLayer=hl;
-        currentPopup=L.popup({className:'sm-popup',offset:L.point(0,6),autoPan:true,closeButton:false}).setLatLng(e.latlng).setContent(buildPopup(feat,layerTitulo)).openOn(map);
+        currentPopup=L.popup({className:'sm-popup',offset:L.point(0,6),autoPan:true,closeButton:false}).setLatLng(e.latlng).setContent(buildPopup(feat,layerTitulo,layerKey)).openOn(map);
       });
     }
     map.on('popupclose',()=>{clearHL();currentPopup=null;});
@@ -859,7 +989,7 @@ window.EXPORT = (() => {
     }
     document.getElementById('btn-identify')?.addEventListener('click',()=>setIdentify(!identifyMode));` : '';
     const onEachFeature = allowIdentify
-      ? `onEachFeature:(f,layer)=>bindIdentify(f,layer,l.titulo),`
+      ? `onEachFeature:(f,layer)=>bindIdentify(f,layer,l.titulo,l.key),`
       : '';
 
     // Footer dinámico: extraer fuentes únicas de las capas (campo fdc de cada feature)
