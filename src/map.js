@@ -326,7 +326,15 @@ window.MAP = (() => {
     el.classList.add('visible');
     const layerDef = k => window.LAYERS[k] || {};
 
-    el.innerHTML = `<div class="legend-title">Referencias</div>` +
+    const isCollapsed = el.classList.contains('legend-collapsed');
+    el.innerHTML = `
+      <div class="legend-header">
+        <div class="legend-title">Referencias</div>
+        <button class="legend-collapse-btn" title="${isCollapsed ? 'Expandir' : 'Colapsar'}">
+          <span class="material-icons">${isCollapsed ? 'expand_more' : 'expand_less'}</span>
+        </button>
+      </div>
+      <div class="legend-items-wrap">` +
       items.map(([key, entry]) => {
         const s           = entry.style || {};
         const geom        = entry.geomType || window.LAYERS[entry.layerKey]?.geomType || 'polygon';
@@ -375,7 +383,14 @@ window.MAP = (() => {
                    value="${(entry.titulo || key).replace(/"/g,'&quot;')}"
                    title="Click para editar" />
           </div>`;
-      }).join('');
+      }).join('') + `</div>`;
+
+    // Wire colapsar
+    el.querySelector('.legend-collapse-btn')?.addEventListener('click', () => {
+      el.classList.toggle('legend-collapsed');
+      const icon = el.querySelector('.legend-collapse-btn .material-icons');
+      if (icon) icon.textContent = el.classList.contains('legend-collapsed') ? 'expand_more' : 'expand_less';
+    });
 
     // Wire edición inline
     el.querySelectorAll('.legend-label-input').forEach(input => {
