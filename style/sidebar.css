@@ -153,6 +153,24 @@ body.day .sidebar.expanded .sb-chat-row.active { background: rgba(0,0,0,0.07); }
 .sidebar.expanded .sb-chat-row:hover .sb-chat-delete { color: var(--cream2); }
 .sidebar.expanded .sb-chat-delete:hover { color: #e06060 !important; background: rgba(200,80,80,0.1); }
 
+/* Botón "Cargar más" — visible sólo cuando el sidebar está expandido */
+.sb-load-more {
+  display: none;
+  width: 100%;
+  padding: 8px 14px 8px 22px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--cream2);
+  font-family: var(--font-sans);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition);
+  opacity: 0.7;
+}
+.sidebar.expanded .sb-load-more { display: block; }
+.sb-load-more:hover { color: var(--cream); opacity: 1; }
+
 /* Opciones inline del chat */
 .sb-chat-opts {
   max-height: 0; overflow: hidden;
