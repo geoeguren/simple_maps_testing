@@ -783,7 +783,18 @@ window.MAP = (() => {
     dropdown.className = 'pfc-dropdown adv-ramp-dropdown hidden';
     document.body.appendChild(dropdown);
     // Prevent Leaflet from intercepting scroll inside the dropdown
-    dropdown.addEventListener('wheel', e => e.stopPropagation(), { passive: false });
+    dropdown.addEventListener('wheel', e => {
+      e.stopPropagation();
+      // Permitir scroll interno; solo cancelar el evento si el dropdown
+      // tiene contenido scrollable para que no propague al mapa de Leaflet
+      const atTop    = dropdown.scrollTop === 0;
+      const atBottom = dropdown.scrollTop + dropdown.clientHeight >= dropdown.scrollHeight - 1;
+      const scrollingUp   = e.deltaY < 0;
+      const scrollingDown = e.deltaY > 0;
+      if ((scrollingUp && !atTop) || (scrollingDown && !atBottom)) {
+        e.preventDefault();
+      }
+    }, { passive: false });
 
     // Build dropdown options — immediate apply on checkbox change
     allFields.forEach(k => {
