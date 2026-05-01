@@ -270,6 +270,12 @@ window.APP = (() => {
         document.getElementById('btn-export').classList.remove('open');
         window.EXPORT.toPDF();
       });
+    document.getElementById('export-html')
+      ?.addEventListener('click', () => {
+        document.getElementById('export-dropdown').classList.remove('open');
+        document.getElementById('btn-export').classList.remove('open');
+        window.EXPORT.toHTML();
+      });
     document.addEventListener('click', e => {
       if (!e.target.closest('.export-wrapper')) {
         document.getElementById('export-dropdown')?.classList.remove('open');
