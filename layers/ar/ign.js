@@ -24,13 +24,6 @@ export const IGN_AR = {
     labelField:   'nam',
     clipStrategy: null,
     keywords:     ['provincia', 'provincias', 'división política', 'límite provincial'],
-    defaultStyle: {
-      fillColor:   '#c8622a',
-      fillOpacity: 0.12,
-      color:       '#c8622a',
-      weight:      1.5,
-      opacity:     1
-    },
     attributes: [
       { campo: 'fna', label: 'Nombre completo' },
       { campo: 'nam', label: 'Nombre corto' },
@@ -47,13 +40,6 @@ export const IGN_AR = {
     labelField:   'nam',
     clipStrategy: 'spatial',
     keywords:     ['departamento', 'partido', 'comuna', 'municipio', 'departamentos'],
-    defaultStyle: {
-      fillColor:   '#4a7fa5',
-      fillOpacity: 0.10,
-      color:       '#4a7fa5',
-      weight:      1,
-      opacity:     0.8
-    },
     attributes: [
       { campo: 'fna', label: 'Nombre completo' },
       { campo: 'nam', label: 'Nombre corto' },
@@ -73,14 +59,6 @@ export const IGN_AR = {
     clipField:     'nom_pcia',
     clipFieldCode: 'cod_pcia',
     keywords:     ['localidad', 'localidades', 'ciudad', 'pueblo', 'poblado', 'asentamiento'],
-    defaultStyle: {
-      color:       '#2d6a4f',
-      fillColor:   '#52b788',
-      fillOpacity: 0.85,
-      radius:      5,
-      weight:      1.5,
-      opacity:     1
-    },
     attributes: [
       { campo: 'fna',        label: 'Nombre' },
       { campo: 'tipo_asent', label: 'Tipo de asentamiento', classifiable: true },
@@ -99,11 +77,6 @@ export const IGN_AR = {
     labelField:   'rtn',
     clipStrategy: 'spatial',
     keywords:     ['ruta', 'rutas', 'red vial', 'vial', 'carretera', 'camino nacional'],
-    defaultStyle: {
-      color:   '#d4720f',
-      weight:  2,
-      opacity: 0.85
-    },
     attributes: [
       { campo: 'rtn', label: 'Número de ruta', numeric: true },
       { campo: 'typ', label: 'Tipo de vía',    classifiable: true },
@@ -119,11 +92,6 @@ export const IGN_AR = {
     labelField:   'fna',
     clipStrategy: 'spatial',
     keywords:     ['puente', 'puentes', 'viaducto', 'cruce', 'enlace'],
-    defaultStyle: {
-      color:   '#5a5650',
-      weight:  3,
-      opacity: 0.85
-    },
     attributes: [
       { campo: 'fna',    label: 'Nombre' },
       { campo: 'objeto', label: 'Tipo' },
@@ -139,14 +107,6 @@ export const IGN_AR = {
     labelField:   'fna',
     clipStrategy: 'spatial',
     keywords:     ['puerto', 'puertos', 'muelle', 'muelles', 'terminal portuaria'],
-    defaultStyle: {
-      color:       '#023e8a',
-      fillColor:   '#4cc9f0',
-      fillOpacity: 0.9,
-      radius:      6,
-      weight:      1.5,
-      opacity:     1
-    },
     attributes: [
       { campo: 'fna',    label: 'Nombre' },
       { campo: 'gna',    label: 'Tipo' },
@@ -164,14 +124,6 @@ export const IGN_AR = {
     clipStrategy: 'attribute',
     clipField:    'prov',
     keywords:     ['paso', 'pasos', 'frontera', 'paso fronterizo', 'paso internacional'],
-    defaultStyle: {
-      color:       '#6a0572',
-      fillColor:   '#c77dff',
-      fillOpacity: 0.9,
-      radius:      6,
-      weight:      1.5,
-      opacity:     1
-    },
     attributes: [
       { campo: 'nom_pfi',   label: 'Nombre' },
       { campo: 'cruce_pfi', label: 'Tipo de cruce',  classifiable: true },
@@ -191,13 +143,6 @@ export const IGN_AR = {
     labelField:   'fna',
     clipStrategy: 'spatial',
     keywords:     ['área protegida', 'areas protegidas', 'reserva', 'parque nacional', 'parque', 'reserva natural'],
-    defaultStyle: {
-      fillColor:   '#40916c',
-      fillOpacity: 0.25,
-      color:       '#1b4332',
-      weight:      1.2,
-      opacity:     0.9
-    },
     attributes: [
       { campo: 'fna', label: 'Nombre' },
       { campo: 'gna', label: 'Tipo de área',       classifiable: true },
@@ -217,14 +162,6 @@ export const IGN_AR = {
     geoFields:    { departamento: 'nom_depto' },
     clipStrategy: null,
     keywords:     ['base antártica', 'antártida', 'base', 'antártico'],
-    defaultStyle: {
-      color:       '#03045e',
-      fillColor:   '#90e0ef',
-      fillOpacity: 0.9,
-      radius:      7,
-      weight:      2,
-      opacity:     1
-    },
     attributes: [
       { campo: 'fna',        label: 'Nombre' },
       { campo: 'tipo_asent', label: 'Tipo' },
@@ -280,13 +217,6 @@ export const PROVINCIAS_MAP_AR = {
     labelField:   'nam',
     clipStrategy: null,
     keywords:     ['provincia', 'provincias', 'división política', 'límite provincial'],
-    defaultStyle: {
-      fillColor:   '#c8622a',
-      fillOpacity: 0.12,
-      color:       '#c8622a',
-      weight:      1.5,
-      opacity:     1
-    },
     attributes: [
       { campo: 'fna', label: 'Nombre completo' },
       { campo: 'nam', label: 'Nombre corto' },
@@ -303,13 +233,6 @@ export const PROVINCIAS_MAP_AR = {
     labelField:   'nam',
     clipStrategy: 'spatial',
     keywords:     ['departamento', 'partido', 'comuna', 'municipio', 'departamentos'],
-    defaultStyle: {
-      fillColor:   '#4a7fa5',
-      fillOpacity: 0.10,
-      color:       '#4a7fa5',
-      weight:      1,
-      opacity:     0.8
-    },
     attributes: [
       { campo: 'fna', label: 'Nombre completo' },
       { campo: 'nam', label: 'Nombre corto' },
@@ -329,14 +252,6 @@ export const PROVINCIAS_MAP_AR = {
     clipField:     'nom_pcia',
     clipFieldCode: 'cod_pcia',
     keywords:      ['localidad', 'localidades', 'ciudad', 'pueblo', 'poblado', 'asentamiento'],
-    defaultStyle: {
-      color:       '#2d6a4f',
-      fillColor:   '#52b788',
-      fillOpacity: 0.85,
-      radius:      5,
-      weight:      1.5,
-      opacity:     1
-    },
     attributes: [
       { campo: 'fna',        label: 'Nombre' },
       { campo: 'tipo_asent', label: 'Tipo de asentamiento', classifiable: true },
@@ -355,11 +270,6 @@ export const PROVINCIAS_MAP_AR = {
     labelField:   'rtn',
     clipStrategy: 'spatial',
     keywords:     ['ruta', 'rutas', 'red vial', 'vial', 'carretera', 'camino nacional'],
-    defaultStyle: {
-      color:   '#d4720f',
-      weight:  2,
-      opacity: 0.85
-    },
     attributes: [
       { campo: 'rtn', label: 'Número de ruta', numeric: true },
       { campo: 'typ', label: 'Tipo de vía',    classifiable: true },
@@ -375,11 +285,6 @@ export const PROVINCIAS_MAP_AR = {
     labelField:   'fna',
     clipStrategy: 'spatial',
     keywords:     ['puente', 'puentes', 'viaducto', 'cruce', 'enlace'],
-    defaultStyle: {
-      color:   '#5a5650',
-      weight:  3,
-      opacity: 0.85
-    },
     attributes: [
       { campo: 'fna',    label: 'Nombre' },
       { campo: 'objeto', label: 'Tipo' },
@@ -395,14 +300,6 @@ export const PROVINCIAS_MAP_AR = {
     labelField:   'fna',
     clipStrategy: 'spatial',
     keywords:     ['puerto', 'puertos', 'muelle', 'muelles', 'terminal portuaria'],
-    defaultStyle: {
-      color:       '#023e8a',
-      fillColor:   '#4cc9f0',
-      fillOpacity: 0.9,
-      radius:      6,
-      weight:      1.5,
-      opacity:     1
-    },
     attributes: [
       { campo: 'fna',    label: 'Nombre' },
       { campo: 'gna',    label: 'Tipo' },
@@ -420,14 +317,6 @@ export const PROVINCIAS_MAP_AR = {
     clipStrategy: 'attribute',
     clipField:    'prov',
     keywords:     ['paso', 'pasos', 'frontera', 'paso fronterizo', 'paso internacional', 'frontera internacional'],
-    defaultStyle: {
-      color:       '#6a0572',
-      fillColor:   '#c77dff',
-      fillOpacity: 0.9,
-      radius:      6,
-      weight:      1.5,
-      opacity:     1
-    },
     attributes: [
       { campo: 'nom_pfi',   label: 'Nombre' },
       { campo: 'cruce_pfi', label: 'Tipo de cruce',  classifiable: true },
@@ -447,13 +336,6 @@ export const PROVINCIAS_MAP_AR = {
     labelField:   'fna',
     clipStrategy: 'spatial',
     keywords:     ['área protegida', 'areas protegidas', 'reserva', 'parque nacional', 'parque', 'reserva natural'],
-    defaultStyle: {
-      fillColor:   '#40916c',
-      fillOpacity: 0.25,
-      color:       '#1b4332',
-      weight:      1.2,
-      opacity:     0.9
-    },
     attributes: [
       { campo: 'fna', label: 'Nombre' },
       { campo: 'gna', label: 'Tipo de área',       classifiable: true },
@@ -473,14 +355,6 @@ export const PROVINCIAS_MAP_AR = {
     geoFields:    { departamento: 'nom_depto' },
     clipStrategy: null,
     keywords:     ['base antártica', 'antártida', 'base', 'antártico'],
-    defaultStyle: {
-      color:       '#03045e',
-      fillColor:   '#90e0ef',
-      fillOpacity: 0.9,
-      radius:      7,
-      weight:      2,
-      opacity:     1
-    },
     attributes: [
       { campo: 'fna',        label: 'Nombre' },
       { campo: 'tipo_asent', label: 'Tipo' },
