@@ -529,7 +529,7 @@ window.EXPORT = (() => {
       <div class="adv-modal-body" style="gap:0">
 
         <div class="adv-body-row" style="padding-bottom:2px">
-          <span class="adv-body-label">Capas a incluir</span>
+          <span class="adv-body-label">Capas</span>
           <div style="display:flex;flex-direction:column;gap:0;width:100%">${layerRows}</div>
         </div>
 
@@ -547,27 +547,20 @@ window.EXPORT = (() => {
         </div>
 
         <div class="adv-body-row" style="gap:8px">
-          <span class="adv-body-label">Interfaz</span>
+          <span class="adv-body-label">Opciones de interfaz</span>
           <label class="pfc-row" style="padding:3px 0">
             <input type="checkbox" id="html-legend" checked />
             <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Mostrar leyenda</span>
           </label>
-          <label class="pfc-row" style="padding:3px 0">
-            <input type="checkbox" id="html-legend-collapsed" />
-            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Leyenda colapsada por defecto</span>
-          </label>
-          <label class="pfc-row" style="padding:3px 0">
-            <input type="checkbox" id="html-north" checked />
-            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Mostrar flecha de norte</span>
-          </label>
+
           <label class="pfc-row" style="padding:3px 0">
             <input type="checkbox" id="html-zoom" checked />
-            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Permitir zoom y pan</span>
+            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Permitir zoom</span>
           </label>
         </div>
 
         <div class="adv-body-row">
-          <span class="adv-body-label">Código generado</span>
+          <span class="adv-body-label">Código</span>
           <div style="position:relative;width:100%">
             <textarea id="html-code-box" readonly
               style="width:100%;height:80px;resize:none;
@@ -577,22 +570,18 @@ window.EXPORT = (() => {
                      outline:none;scrollbar-width:thin"
               placeholder="Generando código…"></textarea>
             <button id="html-copy-btn"
-              style="position:absolute;top:6px;right:6px;
-                     padding:3px 8px;border-radius:4px;border:0.5px solid var(--border-md);
+              style="position:absolute;top:8px;right:8px;
+                     padding:5px 12px;border-radius:4px;border:0.5px solid var(--border-md);
                      background:var(--bg2);color:var(--cream2);
                      font-family:var(--font-sans);font-size:11px;cursor:pointer">
               Copiar
             </button>
           </div>
-          <p style="font-size:11px;color:var(--cream2);margin-top:4px;font-family:var(--font-sans)">
-            Para embeber en tu sitio, subí el archivo a un servidor y usá:
-            <code style="font-family:var(--font-mono);font-size:10px">&lt;iframe src="tu-mapa.html" width="800" height="500"&gt;&lt;/iframe&gt;</code>
-          </p>
+
         </div>
 
       </div>
       <div class="adv-modal-footer" style="justify-content:flex-end;gap:8px">
-        <button class="adv-footer-btn adv-cancel" id="html-cancel-btn">Cerrar</button>
         <button class="adv-footer-btn adv-accept" id="html-download-btn">Descargar</button>
       </div>`;
 
@@ -633,7 +622,6 @@ window.EXPORT = (() => {
         }
       }, { passive: true });
     }, 0);
-    modal.querySelector('#html-cancel-btn').addEventListener('click', closeModal);
     backdrop.addEventListener('click', closeModal);
 
     // Generar código al cambiar opciones
@@ -641,8 +629,6 @@ window.EXPORT = (() => {
       const selectedKeys = [...modal.querySelectorAll('.html-layer-row input:checked')].map(i => i.dataset.key);
       const baseKey      = _selectedBase;
       const showLegend   = modal.querySelector('#html-legend').checked;
-      const collapsedDef = modal.querySelector('#html-legend-collapsed').checked;
-      const showNorth    = modal.querySelector('#html-north').checked;
       const allowZoom    = modal.querySelector('#html-zoom').checked;
 
       const layers = selectedKeys
