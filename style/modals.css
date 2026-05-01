@@ -289,7 +289,7 @@ body.day .adv-ramp-option-label { color: #6a6560; }
 
 /* Campo/opción csel — mismas dimensiones que ramp, opciones de texto */
 .adv-field-csel .adv-field-trigger {
-  min-height: 32px;
+  /* Sin min-height forzado — hereda padding del .adv-ramp-trigger (5px 8px) */
 }
 .adv-field-selected {
   font-family: var(--font-mono); font-size: 12px; color: var(--cream);
