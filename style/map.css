@@ -582,12 +582,32 @@ body.day .sm-popup .leaflet-popup-content-wrapper { background: #f0ede8; border-
 .map-popup { min-width: 180px; max-width: 280px; }
 
 /* Título — mismo estilo que cabecera de dropdown */
+.popup-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 8px 0 16px;
+  border-bottom: 0.5px solid var(--border);
+  min-height: 40px;
+}
+body.day .popup-header { border-color: #c8c4be; }
+
 .popup-name {
   font-family: var(--font-sans); font-size: 13px; font-weight: 600;
-  color: var(--cream); padding: 11px 16px 10px;
-  border-bottom: 0.5px solid var(--border);
+  color: var(--cream); padding: 10px 0; flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-body.day .popup-name { color: #1a1814; border-color: #c8c4be; }
+body.day .popup-name { color: #1a1814; }
+
+.popup-close-btn {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--cream2); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition), color var(--transition);
+}
+.popup-close-btn:hover { background: var(--cream3); color: var(--cream); }
+.popup-close-btn .material-icons { font-size: 16px; pointer-events: none; }
+body.day .popup-close-btn { color: #6a6560; }
+body.day .popup-close-btn:hover { background: rgba(0,0,0,0.06); color: #1a1814; }
 
 .popup-table { width: 100%; border-collapse: collapse; }
 .popup-key {
