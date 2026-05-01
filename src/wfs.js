@@ -23,10 +23,20 @@ window.WFS = (() => {
 
   // ── Helpers de caché ──────────────────────────────────────────
 
+  // Hash djb2 simple: convierte el filtro CQL en una clave alfanumérica corta.
+  // No necesitamos que sea reversible — solo que sea única y estable para la misma entrada.
+  // Reemplaza el anterior btoa(unescape(encodeURIComponent())) que usaba unescape(), deprecated desde ES5.
+  function hashFilter(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) {
+      h = ((h << 5) + h) ^ str.charCodeAt(i);
+      h = h >>> 0; // mantener como uint32
+    }
+    return h.toString(36); // base36: más corto que decimal, solo alfanumérico
+  }
+
   function cacheKey(typename, cqlFilter) {
-    const f = cqlFilter
-      ? '_' + btoa(unescape(encodeURIComponent(cqlFilter))).replace(/[^a-zA-Z0-9]/g, '')
-      : '';
+    const f = cqlFilter ? '_' + hashFilter(cqlFilter) : '';
     return CACHE_PREFIX + typename.replace(':', '_') + f;
   }
 
