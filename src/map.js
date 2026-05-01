@@ -38,18 +38,32 @@ window.MAP = (() => {
 
   // ── Catálogo de mapas base ────────────────────────────────────
 
+  // Catálogo de mapas base.
+  // Propiedades por entrada:
+  //   label    — nombre legible para la UI
+  //   url      — URL de tiles Leaflet
+  //   exportBg — color de fondo para exportación JPEG/PDF (los tiles no se capturan por CORS)
+  //   isLight  — true si el mapa es claro (afecta el contraste de la leyenda)
+  // Al agregar un basemap nuevo, definir todas las propiedades acá —
+  // export.js y applyBasemap() las leen automáticamente.
   const BASEMAPS = {
     gray: {
-      label: 'Gris',
-      url:   'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+      label:    'Gris',
+      url:      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      exportBg: '#e8e4de',
+      isLight:  true
     },
     dark: {
-      label: 'Oscuro',
-      url:   'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+      label:    'Oscuro',
+      url:      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      exportBg: '#1a1a1a',
+      isLight:  false
     },
     satellite: {
-      label: 'Satelital',
-      url:   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+      label:    'Satelital',
+      url:      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      exportBg: '#0a0a0a',
+      isLight:  false
     }
   };
 
@@ -85,12 +99,14 @@ window.MAP = (() => {
     localStorage.setItem('sm_basemap', baseKey === 'gray' || baseKey === 'dark' ? 'auto' : baseKey);
     localStorage.setItem('sm_labels', _showLabels ? 'true' : 'false');
 
-    // Actualizar clase de la leyenda según luminosidad del basemap
+    // Actualizar clase de la leyenda según luminosidad del basemap.
+    // isLight viene del catálogo BASEMAPS — al agregar un basemap nuevo
+    // solo hay que definirlo ahí, sin tocar este código.
     const legend = document.getElementById('map-legend');
     if (legend) {
-      const isLight = baseKey === 'gray' || baseKey === 'satellite';
+      const isLight = def.isLight ?? true;
       legend.classList.toggle('basemap-light', isLight);
-      legend.classList.toggle('basemap-dark', baseKey === 'dark');
+      legend.classList.toggle('basemap-dark', !isLight);
     }
   }
 
