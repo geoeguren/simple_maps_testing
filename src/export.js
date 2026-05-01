@@ -547,7 +547,7 @@ window.EXPORT = (() => {
         </div>
 
         <div class="adv-body-row" style="gap:8px">
-          <span class="adv-body-label">Opciones de interfaz</span>
+          <span class="adv-body-label">Interfaz</span>
           <label class="pfc-row" style="padding:3px 0">
             <input type="checkbox" id="html-legend" checked />
             <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Mostrar leyenda</span>
