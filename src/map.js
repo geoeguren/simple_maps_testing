@@ -1,1044 +1,630 @@
 /**
- * map.js — Módulo Leaflet
+ * app.js — Orquestación principal
  *
- * Responsabilidades:
- *   - Inicializar y destruir el mapa Leaflet
- *   - Agregar/quitar capas GeoJSON con estilos
- *   - Exponer el objeto de capas activas para el editor de estilos y exportación
+ * Depende de: window.MAP, window.CHAT, window.UI, window.SIDEBAR,
+ *             window.AUTH, window.FB, window.CLIP, window.TOAST,
+ *             window.THEME, window.SETTINGS, window.SEARCH,
+ *             window.LAYERS_PANEL, window.MAP_CONTROLS, window.CHAT_HEADER
  */
 
-window.MAP = (() => {
+// ── Toast ─────────────────────────────────────────────────────────
 
-  let leafletMap   = null;
-  let activeLayers = {};  // { layerKey: { geojson, leafletLayer, style, titulo } }
+window.TOAST = (() => {
+  let timer;
+  function show(msg, duration = 3000) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(() => el.classList.remove('show'), duration);
+  }
+  return { show };
+})();
 
-  // ── Inicialización ─────────────────────────────────────────────
+// ── Tema ──────────────────────────────────────────────────────────
+
+window.THEME = (() => {
+  const KEY = 'sm_theme';
+  function isDayHour() { const h = new Date().getHours(); return h >= 7 && h < 20; }
+  function apply(mode) {
+    document.body.classList.toggle('day', mode === 'day');
+    const icon = mode === 'day' ? 'mode_night' : 'light_mode';
+    document.querySelectorAll('[id^="theme-icon"]').forEach(el => el.textContent = icon);
+    localStorage.setItem(KEY, mode);
+  }
+  function toggle() { apply(document.body.classList.contains('day') ? 'night' : 'day'); }
+  function init() {
+    const saved = localStorage.getItem(KEY);
+    apply(saved || (isDayHour() ? 'day' : 'night'));
+  }
+  function applyWithBasemap(mode) {
+    apply(mode);
+    const curBase = window.MAP?.getCurrentBase?.();
+    if (curBase === 'gray' || curBase === 'dark') {
+      window.MAP?.setBasemap?.(mode === 'day' ? 'gray' : 'dark');
+    }
+  }
+  return { init, toggle, apply, applyWithBasemap };
+})();
+
+// ── APP ───────────────────────────────────────────────────────────
+
+window.APP = (() => {
+
+  let currentPlan = null;
 
   function init() {
-    if (leafletMap) return;
+    wireHomeEvents();
+    wireWorkEvents();
+    wireTextareas();
+  }
 
-    leafletMap = L.map('leaflet-map', {
-      center:    [-38.5, -63.5],
-      zoom:      5,
-      zoomControl: false,
-      attributionControl: true
+  // ── Home ──────────────────────────────────────────────────────
+
+  function wireHomeEvents() {
+    document.getElementById('btn-send-initial')
+      ?.addEventListener('click', sendInitialPrompt);
+    document.querySelectorAll('.ex-chip').forEach(chip => {
+      chip.addEventListener('click', () => goToWork(chip.dataset.prompt));
     });
-
-    leafletMap.on('popupclose', () => { clearHighlight(); _currentPopup = null; });
-
-
-
-    const savedBase = localStorage.getItem('sm_basemap') || 'auto';
-    applyBasemap(savedBase);
-
-    // Forzar recálculo de tamaño luego del primer paint
-    setTimeout(() => leafletMap.invalidateSize(), 0);
-    setTimeout(() => leafletMap.invalidateSize(), 300);
   }
 
-  // ── Catálogo de mapas base ────────────────────────────────────
-
-  const BASEMAPS = {
-    gray: {
-      label: 'Gris',
-      url:   'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-    },
-    dark: {
-      label: 'Oscuro',
-      url:   'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-    },
-    satellite: {
-      label: 'Satelital',
-      url:   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-    }
-  };
-
-  let _baseLayer   = null;
-  let _labelsLayer = null;
-  let _currentBase = 'gray';
-  let _showLabels  = true;
-
-  function applyBasemap(baseKey) {
-    // 'auto' = gray en día, dark en noche
-    if (baseKey === 'auto') {
-      const h = new Date().getHours();
-      baseKey = (h >= 7 && h < 20) ? 'gray' : 'dark';
-    }
-
-    const def = BASEMAPS[baseKey] || BASEMAPS.gray;
-    _currentBase = baseKey;
-
-    // Remover capas anteriores
-    if (_baseLayer)   { leafletMap.removeLayer(_baseLayer);   _baseLayer   = null; }
-    if (_labelsLayer) { leafletMap.removeLayer(_labelsLayer); _labelsLayer = null; }
-
-    const attr = baseKey === 'satellite' ? '© <a href="https://www.esri.com">Esri</a> | Datos: <a href="https://ign.gob.ar">IGN Argentina</a>' : '© <a href="https://carto.com">Carto</a> | Datos: <a href="https://ign.gob.ar">IGN Argentina</a>';
-
-    _baseLayer = L.tileLayer(def.url, { attribution: attr, maxZoom: 19 });
-    _baseLayer.addTo(leafletMap);
-
-    // Mover capas de datos por encima de los labels
-    Object.values(activeLayers).forEach(l => {
-      if (l.leafletLayer) l.leafletLayer.bringToFront();
-    });
-
-    localStorage.setItem('sm_basemap', baseKey === 'gray' || baseKey === 'dark' ? 'auto' : baseKey);
-    localStorage.setItem('sm_labels', _showLabels ? 'true' : 'false');
-
-    // Actualizar clase de la leyenda según luminosidad del basemap
-    const legend = document.getElementById('map-legend');
-    if (legend) {
-      const isLight = baseKey === 'gray' || baseKey === 'satellite';
-      legend.classList.toggle('basemap-light', isLight);
-      legend.classList.toggle('basemap-dark', baseKey === 'dark');
-    }
+  function sendInitialPrompt() {
+    const ta  = document.getElementById('initial-prompt');
+    const txt = ta.value.trim();
+    if (!txt) return;
+    goToWork(txt);
   }
 
-  function setBasemap(key)   { applyBasemap(key); }
-  function setLabels(show)   { /* no-op: sin labels */ }
-  function getCurrentBase()  { return _currentBase; }
-  function getShowLabels()   { return _showLabels; }
-  function hasLabels(key)    { return BASEMAPS[key]?.hasLabels ?? false; }
-  function getBasemaps()     { return BASEMAPS; }
+  // ── Work screen ───────────────────────────────────────────────
 
-  function destroy() {
-    if (leafletMap) {
-      leafletMap.remove();
-      leafletMap   = null;
-      activeLayers = {};
+  function goToWork(initialPrompt) {
+    document.getElementById('screen-home').classList.remove('active');
+    document.getElementById('screen-work').classList.add('active');
+    window.MAP_CONTROLS.setMapVisible(false);
+    if (initialPrompt) {
+      window.CHAT.reset();
+      document.getElementById('chat-messages').innerHTML = '';
+      window.CHAT.send(initialPrompt);
     }
+    setTimeout(() => document.getElementById('chat-input')?.focus(), 200);
   }
 
-  // ── Agregar capa ──────────────────────────────────────────────
-  // mapKey:    clave única en activeLayers (puede repetirse la misma capa con distinto índice)
-  // layerKey:  clave en window.LAYERS (define geomType, defaultStyle, etc.)
-  // titulo:    etiqueta legible (opcional, usa layerDef.titulo por defecto)
+  // ── Work events ───────────────────────────────────────────────
 
-  function addLayer(mapKey, layerKey, geojson, style, titulo) {
-    if (!leafletMap) init();
+  function wireWorkEvents() {
+    document.getElementById('btn-send-chat')
+      ?.addEventListener('click', sendChatMessage);
 
-    // Remover si ya existe esa clave
-    removeLayer(mapKey);
+    document.getElementById('btn-close-map')
+      ?.addEventListener('click', () => window.MAP_CONTROLS.setMapVisible(false));
 
-    const layerDef = window.LAYERS[layerKey];
-    const geomType = layerDef?.geomType || 'polygon';
-
-    let leafletLayer;
-
-    if (geomType === 'point') {
-      leafletLayer = L.geoJSON(geojson, {
-        pointToLayer: (feat, latlng) => L.circleMarker(latlng, pointStyle(style)),
-        onEachFeature: bindIdentify
+    document.getElementById('btn-refresh-map')
+      ?.addEventListener('click', () => {
+        if (currentPlan) renderMap(currentPlan);
       });
 
-    } else if (geomType === 'line') {
-      leafletLayer = L.geoJSON(geojson, {
-        style: () => lineStyle(style),
-        onEachFeature: bindIdentify
+    document.getElementById('btn-map-layers')
+      ?.addEventListener('click', e => {
+        e.stopPropagation();
+        window.LAYERS_PANEL.toggle();
       });
 
-    } else {
-      leafletLayer = L.geoJSON(geojson, {
-        style: () => polygonStyle(style),
-        onEachFeature: bindIdentify
+    document.getElementById('btn-identify')
+      ?.addEventListener('click', () => {
+        const btn    = document.getElementById('btn-identify');
+        const active = !window.MAP.getIdentifyMode();
+        window.MAP.setIdentifyMode(active);
+        btn.classList.toggle('active', active);
+        btn.title = active ? 'Desactivar consulta' : 'Consultar elementos';
+      });
+
+    document.getElementById('btn-zoom-in')
+      ?.addEventListener('click', () => window.MAP.getInstance()?.zoomIn());
+    document.getElementById('btn-zoom-out')
+      ?.addEventListener('click', () => window.MAP.getInstance()?.zoomOut());
+    document.getElementById('btn-zoom-reset')
+      ?.addEventListener('click', () => window.MAP.fitBounds());
+
+    // Scroll to bottom
+    const scrollBtn = document.getElementById('btn-scroll-bottom');
+    const chatMsgs  = document.getElementById('chat-messages');
+    if (chatMsgs && scrollBtn) {
+      chatMsgs.addEventListener('scroll', () => {
+        const dist = chatMsgs.scrollHeight - chatMsgs.scrollTop - chatMsgs.clientHeight;
+        scrollBtn.classList.toggle('visible', dist > 120);
+      });
+      scrollBtn.addEventListener('click', () => {
+        chatMsgs.scrollTo({ top: chatMsgs.scrollHeight, behavior: 'smooth' });
       });
     }
 
-    leafletLayer.addTo(leafletMap);
-
-    activeLayers[mapKey] = {
-      geojson,
-      leafletLayer,
-      layerKey,
-      geomType,
-      style:   { ...style },
-      titulo:  titulo || layerDef?.titulo || mapKey,
-      visible: true
-    };
-
-    // Reordenar z-order: polígonos abajo, líneas al medio, puntos arriba
-    _reorderLayers();
-
-    return leafletLayer;
-  }
-
-  function removeLayer(mapKey) {
-    if (activeLayers[mapKey]) {
-      leafletMap.removeLayer(activeLayers[mapKey].leafletLayer);
-      delete activeLayers[mapKey];
-    }
-  }
-
-  function clearAll() {
-    Object.keys(activeLayers).forEach(removeLayer);
-  }
-
-  // ── Actualizar estilo de una capa ─────────────────────────────
-
-  function updateLayerStyle(mapKey, newStyle) {
-    const entry = activeLayers[mapKey];
-    if (!entry) return;
-
-    entry.style = { ...entry.style, ...newStyle };
-    const layerDef = window.LAYERS[entry.layerKey || mapKey];
-    const geomType = layerDef?.geomType || 'polygon';
-
-    entry.leafletLayer.eachLayer(l => {
-      if (geomType === 'point') {
-        l.setStyle(pointStyle(entry.style));
-      } else if (geomType === 'line') {
-        l.setStyle(lineStyle(entry.style));
-      } else {
-        l.setStyle(polygonStyle(entry.style));
+    // Renombrar capas desde la leyenda
+    window.MAP.onLayerRename((key, newName) => {
+      const panelInput = document.querySelector(`.layers-data-row[data-key="${key}"] .layer-name-input`);
+      if (panelInput && panelInput !== document.activeElement) panelInput.value = newName;
+      if (currentPlan?.instrucciones) {
+        const inst = currentPlan.instrucciones.find(c => c.mapKey === key);
+        if (inst) inst.descripcion = newName;
+      }
+      const user   = window.AUTH?.currentUser();
+      const chatId = window.CHAT?.getChatId?.();
+      if (user && chatId && currentPlan) {
+        window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
+          .then(() => window.TOAST.show('Nombre guardado'))
+          .catch(() => window.TOAST.show('Error al guardar nombre'));
+        window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
       }
     });
 
-    updateLegend();
-  }
-
-  // ── Actualizar estilo por clasificación de atributo ───────────
-
-  function updateLayerClassification(mapKey, campo, classMap) {
-    const entry = activeLayers[mapKey];
-    if (!entry) return;
-
-    const layerDef = window.LAYERS[entry.layerKey || mapKey];
-    const geomType = layerDef?.geomType || 'polygon';
-
-    entry.leafletLayer.eachLayer(l => {
-      const val   = l.feature?.properties?.[campo];
-      const color = classMap[val];
-      // Si el valor no tiene categoría asignada, ocultar el feature
-      if (!classMap.hasOwnProperty(val)) {
-        const hiddenStyle = geomType === 'point'
-          ? { ...entry.style, radius: 0, opacity: 0, fillOpacity: 0 }
-          : { ...entry.style, opacity: 0, fillOpacity: 0, weight: 0 };
-        if (geomType === 'point')   l.setStyle(pointStyle(hiddenStyle));
-        else if (geomType === 'line') l.setStyle(lineStyle(hiddenStyle));
-        else l.setStyle(polygonStyle(hiddenStyle));
-        return;
-      }
-      const s     = { ...entry.style, fillColor: color, color };
-
-      if (geomType === 'point')   l.setStyle(pointStyle(s));
-      else if (geomType === 'line') l.setStyle(lineStyle(s));
-      else l.setStyle(polygonStyle(s));
-    });
-  }
-
-  // ── Ajustar bounds ────────────────────────────────────────────
-
-  // ── Orden de capas ────────────────────────────────────────────
-
-  const GEOM_ORDER = { polygon: 0, line: 1, point: 2 };
-
-  function _reorderLayers() {
-    // Ordenar por geomType: polígonos abajo, líneas medio, puntos arriba
-    const sorted = Object.entries(activeLayers)
-      .sort((a, b) => (GEOM_ORDER[a[1].geomType] ?? 1) - (GEOM_ORDER[b[1].geomType] ?? 1));
-    sorted.forEach(([, layer]) => {
-      if (layer.leafletLayer && layer.visible !== false) {
-        layer.leafletLayer.bringToFront();
-      }
-    });
-  }
-
-  // Mover una capa específica dentro del orden (delta: -1 = subir, +1 = bajar)
-  function moveLayer(mapKey, targetIdx) {
-    const keys = Object.keys(activeLayers);
-    const fromIdx = keys.indexOf(mapKey);
-    if (fromIdx < 0) return;
-    const clampedIdx = Math.max(0, Math.min(keys.length - 1, targetIdx));
-    if (clampedIdx === fromIdx) return;
-
-    const entries = Object.entries(activeLayers);
-    const [removed] = entries.splice(fromIdx, 1);
-    entries.splice(clampedIdx, 0, removed);
-    Object.keys(activeLayers).forEach(k => delete activeLayers[k]);
-    entries.forEach(([k, v]) => { activeLayers[k] = v; });
-
-    // Re-aplicar z-order: el último en el array queda arriba
-    Object.values(activeLayers).forEach(layer => {
-      if (layer.leafletLayer && layer.visible !== false) {
-        layer.leafletLayer.bringToFront();
-      }
-    });
-  }
-
-  function fitBounds() {
-    const layers = Object.values(activeLayers);
-    if (!layers.length) return;
-
-    const group = L.featureGroup(layers.map(l => l.leafletLayer));
-    const bounds = group.getBounds();
-    if (bounds.isValid()) {
-      leafletMap.fitBounds(bounds, { padding: [40, 40] });
+    // Función interna para persistir currentPlan en Firestore
+    function _persistPlan(toastMsg) {
+      const user   = window.AUTH?.currentUser();
+      const chatId = window.CHAT?.getChatId?.();
+      if (!user || !chatId || !currentPlan) return;
+      window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
+        .then(() => { if (toastMsg) window.TOAST.show(toastMsg); })
+        .catch(e => console.warn('[APP] Error al persistir:', e));
+      window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
     }
-  }
 
-  // ── Leyenda ───────────────────────────────────────────────────
-
-  function makeSVG(geom, fill, stroke, fillOpacity, weight, opacity, dashArray) {
-    weight = Math.min(weight ?? 1.5, 3);
-    if (geom === 'line') {
-      const dash = dashArray ? `stroke-dasharray="${dashArray}"` : '';
-      return `<svg viewBox="0 0 14 14" width="14" height="14" style="flex-shrink:0">
-        <line x1="1" y1="7" x2="13" y2="7" stroke="${stroke}" stroke-width="${weight*1.5}" stroke-opacity="${opacity}" stroke-linecap="round" ${dash}/></svg>`;
-    }
-    if (geom === 'point') return `<svg viewBox="0 0 14 14" width="14" height="14" style="flex-shrink:0">
-      <circle cx="7" cy="7" r="5" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${stroke}" stroke-width="${weight}" stroke-opacity="${opacity}"/></svg>`;
-    return `<svg viewBox="0 0 14 14" width="14" height="14" style="flex-shrink:0">
-      <rect x="1" y="1" width="12" height="12" rx="2" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${stroke}" stroke-width="${weight}" stroke-opacity="${opacity}"/></svg>`;
-  }
-
-  // Restaurar visible desde instrucciones guardadas (llamado desde app.js tras addLayer)
-  function restoreLayerVisible(key, visible) {
-    const layer = activeLayers[key];
-    if (!layer) return;
-    if (visible === false && layer.visible !== false) {
-      layer.visible = false;
-      if (layer.leafletLayer) leafletMap.removeLayer(layer.leafletLayer);
-    }
-  }
-
-  // Popup prefs: setear desde Firestore (reemplaza localStorage)
-  function setPopupPrefs(prefs) {
-    Object.keys(_popupFieldPrefs).forEach(k => delete _popupFieldPrefs[k]);
-    Object.entries(prefs).forEach(([lk, fields]) => {
-      _popupFieldPrefs[lk] = new Set(fields);
+    // Persistir preferencias del popup en Firestore
+    window.MAP.onPopupPrefsSave((prefs) => {
+      const user   = window.AUTH?.currentUser();
+      const chatId = window.CHAT?.getChatId?.();
+      if (!user || !chatId) return;
+      window.FB.updateChat(user.uid, chatId, { popupPrefs: prefs })
+        .catch(e => console.warn('[APP] Error al persistir popup prefs:', e));
+      window.SIDEBAR.updateCachedChat(chatId, { popupPrefs: prefs });
     });
-  }
 
-  function getPopupPrefs() {
-    const out = {};
-    Object.entries(_popupFieldPrefs).forEach(([lk, set]) => { out[lk] = [...set]; });
-    return out;
-  }
+    // Persistir visibilidad cuando se toggle desde el panel de capas
+    window.MAP.onLayerVisibilityChange((key, visible) => {
+      if (currentPlan?.instrucciones) {
+        const inst = currentPlan.instrucciones.find(c => c.mapKey === key);
+        if (inst) inst.visible = visible;
+      }
+      _persistPlan();
+    });
 
-  function updateLegend() {
-    const el = document.getElementById('map-legend');
-    if (!el) return;
+    // Persistir orden cuando se arrastra una capa
+    window.MAP.onLayerOrderChange(() => {
+      if (!currentPlan?.instrucciones) return;
+      const activeKeys = Object.keys(window.MAP.getActiveLayers());
+      currentPlan.instrucciones.sort((a, b) =>
+        activeKeys.indexOf(a.mapKey) - activeKeys.indexOf(b.mapKey)
+      );
+      _persistPlan();
+    });
 
-    const items = Object.entries(activeLayers).reverse();
-    if (!items.length) { el.classList.remove('visible'); return; }
-
-    el.classList.add('visible');
-    const layerDef = k => window.LAYERS[k] || {};
-
-    el.innerHTML = `<div class="legend-title">Referencias</div>` +
-      items.map(([key, entry]) => {
-        const s           = entry.style || {};
-        const geom        = entry.geomType || window.LAYERS[entry.layerKey]?.geomType || 'polygon';
-        const cl          = entry.classification;
-
-        // Clasificación categorizada
-        if (cl?.type === 'categorized' && cl.colorMap) {
-          let html = `<div class="legend-item legend-item-title">
-            <span>${entry.titulo || key}</span>
-          </div>`;
-          Object.entries(cl.colorMap).forEach(([val, color]) => {
-            const svg = makeSVG(geom, color, color, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1, s.dashArray);
-            html += `<div class="legend-item legend-item-classified">${svg}<span>${val}</span></div>`;
-          });
-          return html;
-        }
-
-        // Clasificación graduada
-        if (cl?.type === 'graduated' && cl.breaks?.length) {
-          let html = `<div class="legend-item legend-item-title">
-            <span>${entry.titulo || key}</span>
-          </div>`;
-          const colors = cl.paletteColors || ['#888'];
-          for (let i = 0; i < cl.breaks.length - 1; i++) {
-            const color = colors[Math.min(i, colors.length-1)];
-            const svg   = makeSVG(geom, color, color, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1);
-            const from  = Number(cl.breaks[i]).toLocaleString('es-AR', {maximumFractionDigits: 1});
-            const to    = Number(cl.breaks[i+1]).toLocaleString('es-AR', {maximumFractionDigits: 1});
-            html += `<div class="legend-item legend-item-classified">${svg}<span>${from} – ${to}</span></div>`;
+    // Título del mapa
+    const mapTitleInput = document.getElementById('map-title');
+    if (mapTitleInput) {
+      mapTitleInput.addEventListener('blur', () => {
+        const newTitulo = mapTitleInput.value.trim();
+        if (!newTitulo || !currentPlan) return;
+        currentPlan.titulo = newTitulo;
+        const card = document.querySelector('.msg-map-card');
+        if (card) {
+          const titleEl = card.querySelector('.map-card-title');
+          if (titleEl) titleEl.textContent = newTitulo;
+          const btn = card.querySelector('.map-card-btn');
+          if (btn) {
+            try {
+              const plan = JSON.parse(btn.dataset.plan.replace(/&#39;/g, "'"));
+              plan.titulo = newTitulo;
+              btn.dataset.plan = JSON.stringify(plan).replace(/'/g, '&#39;');
+            } catch (e) {}
           }
-          return html;
         }
-
-        // Estilo uniforme
-        const fill        = s.fillColor  || s.color   || '#888';
-        const fillOpacity = s.fillOpacity ?? (geom === 'polygon' ? 0.3 : 0.85);
-        const stroke      = s.color      || fill;
-        const weight      = Math.min(s.weight ?? 1.5, 3);
-        const opacity     = s.opacity    ?? 1;
-        const svgHTML     = makeSVG(geom, fill, stroke, fillOpacity, weight, opacity, s.dashArray);
-
-        return `
-          <div class="legend-item">
-            ${svgHTML}
-            <input class="legend-label-input" data-key="${key}"
-                   value="${(entry.titulo || key).replace(/"/g,'&quot;')}"
-                   title="Click para editar" />
-          </div>`;
-      }).join('');
-
-    // Wire edición inline
-    el.querySelectorAll('.legend-label-input').forEach(input => {
-      input.addEventListener('focus', () => { input.dataset.original = input.value; });
-      input.addEventListener('blur',  () => _onLegendRename(input));
-      input.addEventListener('keydown', e => {
-        if (e.key === 'Enter')  { e.preventDefault(); input.blur(); }
-        if (e.key === 'Escape') { input.value = input.dataset.original || input.value; input.blur(); }
+        const user   = window.AUTH?.currentUser();
+        const chatId = window.CHAT?.getChatId?.();
+        if (user && chatId) {
+          window.FB.updateChat(user.uid, chatId, { lastMap: currentPlan })
+            .then(() => window.TOAST.show('Nombre guardado'))
+            .catch(() => window.TOAST.show('Error al guardar nombre'));
+          window.SIDEBAR.updateCachedChat(chatId, { lastMap: currentPlan });
+        }
       });
+      mapTitleInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') mapTitleInput.blur();
+        if (e.key === 'Escape') mapTitleInput.blur();
+      });
+    }
+
+    // Export
+    document.getElementById('btn-export')
+      ?.addEventListener('click', () => {
+        const btn = document.getElementById('btn-export');
+        const dd  = document.getElementById('export-dropdown');
+        const isOpen = dd.classList.toggle('open');
+        btn.classList.toggle('open', isOpen);
+        if (isOpen) {
+          const rect = btn.getBoundingClientRect();
+          dd.style.position = 'fixed';
+          dd.style.top      = (rect.bottom + 6) + 'px';
+          dd.style.left     = '0px'; // temporal para que tenga tamaño
+          dd.style.zIndex   = '9999';
+          // Medir después de que sea visible
+          requestAnimationFrame(() => {
+            dd.style.left = (rect.right - dd.offsetWidth) + 'px';
+          });
+        }
+      });
+    document.getElementById('export-geojson')
+      ?.addEventListener('click', () => {
+        document.getElementById('export-dropdown').classList.remove('open');
+        document.getElementById('btn-export').classList.remove('open');
+        window.EXPORT.toGeoJSON();
+      });
+    document.getElementById('export-jpeg')
+      ?.addEventListener('click', () => {
+        document.getElementById('export-dropdown').classList.remove('open');
+        document.getElementById('btn-export').classList.remove('open');
+        window.EXPORT.toJPEG();
+      });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.export-wrapper')) {
+        document.getElementById('export-dropdown')?.classList.remove('open');
+        document.getElementById('btn-export')?.classList.remove('open');
+      }
+    });
+
+    // Chat header events
+    window.CHAT_HEADER.wireEvents();
+  }
+
+  // ── Textareas ─────────────────────────────────────────────────
+
+  function wireTextareas() {
+    const map = {
+      'initial-prompt': sendInitialPrompt,
+      'chat-input':     sendChatMessage
+    };
+    Object.entries(map).forEach(([id, fn]) => {
+      const ta = document.getElementById(id);
+      if (!ta) return;
+      ta.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); fn(); }
+      });
+      ta.addEventListener('input', () => autoResize(ta));
     });
   }
 
-  // ── Etiquetas ─────────────────────────────────────────────────
+  function autoResize(ta) {
+    const box = ta.closest('.prompt-box');
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+    if (box) box.classList.toggle('multiline', ta.scrollHeight > 44);
+  }
 
-  function setLayerLabels(mapKey, show, opts = {}) {
-    const entry = activeLayers[mapKey];
-    if (!entry?.leafletLayer) return;
+  function sendChatMessage() {
+    const ta  = document.getElementById('chat-input');
+    const txt = ta.value.trim();
+    if (!txt) return;
+    ta.value = '';
+    ta.style.height = 'auto';
+    const box = ta.closest('.prompt-box');
+    if (box) box.classList.remove('multiline');
+    window.CHAT.send(txt);
+  }
 
-    entry.labels     = show;
-    entry.labelSize  = opts.size  || entry.labelSize  || 12;
-    entry.labelColor = opts.color || entry.labelColor || '#ffffff';
-    const field      = opts.field || entry.labelField;
-    entry.labelField = field;
+  // ── renderMap ─────────────────────────────────────────────────
 
-    // Quitar tooltips existentes
-    entry.leafletLayer.eachLayer?.(l => l.unbindTooltip?.());
-    if (entry.leafletLayer.unbindTooltip) entry.leafletLayer.unbindTooltip();
+  async function renderMap(plan) {
+    if (!plan?.instrucciones?.length) {
+      window.TOAST.show('El plan de mapa no tiene capas');
+      return;
+    }
 
-    if (!show || !field) return;
+    currentPlan = plan;
 
-    const style = `
-      font-size: ${entry.labelSize}px;
-      color: ${entry.labelColor};
-      font-family: var(--font-sans, sans-serif);
-      font-weight: 500;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-      white-space: nowrap;
+    const titleInput = document.getElementById('map-title');
+    if (plan.titulo) titleInput.value = plan.titulo;
+
+    window.MAP_CONTROLS.setMapVisible(true);
+    window.MAP.clearAll();
+
+    const refreshBtn = document.getElementById('btn-refresh-map');
+    refreshBtn?.classList.add('spinning');
+
+    const emptyEl = document.getElementById('map-empty');
+    emptyEl?.classList.remove('hidden');
+    if (emptyEl) emptyEl.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32" opacity="0.3" style="animation:spin 1.2s linear infinite">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>
+      <p style="color:var(--cream2);font-size:13px">Cargando capas…</p>
     `;
 
-    entry.leafletLayer.eachLayer(l => {
-      const val = l.feature?.properties?.[field];
-      if (!val) return;
-      l.bindTooltip(String(val), {
-        permanent:   true,
-        direction:   'center',
-        className:   'map-label-tooltip',
-        offset:      [0, 0]
-      });
-      // Aplicar estilo inline al elemento del tooltip
-      l.on('tooltipopen', ev => {
-        const el = ev.tooltip?.getElement?.();
-        if (el) el.style.cssText += style;
-      });
-    });
-  }
-
-  // ── Clasificación por atributo ────────────────────────────────
-
-  // Métodos de clasificación graduada
-  function computeBreaks(values, method, classes) {
-    const sorted = [...values].sort((a, b) => a - b);
-    const n = sorted.length;
-    if (!n) return [];
-
-    if (method === 'equal') {
-      const min = sorted[0], max = sorted[n-1], step = (max - min) / classes;
-      return Array.from({length: classes+1}, (_, i) => min + i * step);
+    if (!document.getElementById('spin-style')) {
+      const st = document.createElement('style');
+      st.id = 'spin-style';
+      st.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+      document.head.appendChild(st);
     }
-    if (method === 'quantile') {
-      const breaks = [sorted[0]];
-      for (let i = 1; i < classes; i++) {
-        const idx = Math.floor(i * n / classes);
-        breaks.push(sorted[idx]);
-      }
-      breaks.push(sorted[n-1]);
-      return breaks;
-    }
-    // Jenks (Natural Breaks) simplificado
-    if (method === 'jenks') {
-      const mat1 = [], mat2 = [];
-      for (let i = 0; i <= n; i++) { mat1[i] = []; mat2[i] = []; }
-      for (let i = 1; i <= n; i++) { mat1[i][1] = 1; mat2[i][1] = 0; }
-      for (let j = 2; j <= classes; j++) {
-        for (let i = j; i <= n; i++) {
-          let minV = Infinity;
-          for (let m = 1; m <= i-1; m++) {
-            const slice = sorted.slice(m-1, i);
-            const mean  = slice.reduce((a,b)=>a+b,0)/slice.length;
-            const ssd   = slice.reduce((a,b)=>a+(b-mean)**2,0);
-            const v     = (mat2[m][j-1]||0) + ssd;
-            if (v < minV) { minV = v; mat1[i][j] = m; mat2[i][j] = v; }
-          }
+
+    const errors = [];
+
+    for (let i = 0; i < plan.instrucciones.length; i++) {
+      const inst = plan.instrucciones[i];
+      try {
+        const layerDef = window.LAYERS[inst.layerKey];
+        if (!layerDef) throw new Error(`Capa desconocida: ${inst.layerKey}`);
+        const geojson = await window.CLIP.ejecutar(inst);
+        if (!geojson.features?.length) {
+          errors.push(`"${inst.descripcion || layerDef.titulo}" no devolvió datos`);
+          continue;
         }
+        const mapKey = `${inst.layerKey}_${i}`;
+        inst.mapKey  = mapKey;
+        const style  = inst.style ? { ...inst.style } : { ...layerDef.defaultStyle };
+        window.MAP.addLayer(mapKey, inst.layerKey, geojson, style, inst.titulo || inst.descripcion || layerDef.titulo);
+        // Restaurar visibilidad si fue ocultada
+        if (inst.visible === false) window.MAP.restoreLayerVisible(mapKey, false);
+        // Restaurar clasificación si existe
+        if (inst.classification?.field && inst.classification?.type) {
+          const cl = inst.classification;
+          const paletteColors = cl.paletteColors || window.PALETTES[cl.palette] || window.PALETTES.qualitative;
+          window.MAP.applyClassification(mapKey, { ...cl, paletteColors });
+        }
+      } catch (err) {
+        errors.push(err.message);
+        console.error(`[APP] Error cargando capa ${inst.layerKey}:`, err);
       }
-      const breaks = [sorted[n-1]];
-      let k = n;
-      for (let j = classes; j >= 2; j--) {
-        const id = mat1[k][j] - 1;
-        breaks.unshift(sorted[id]);
-        k = mat1[k][j];
-      }
-      breaks.unshift(sorted[0]);
-      return breaks;
-    }
-    return [];
-  }
-
-  function getColorForValue(val, breaks, palette) {
-    if (!breaks?.length || val == null) return palette[0] || '#888';
-    for (let i = 0; i < breaks.length - 1; i++) {
-      if (val <= breaks[i+1]) return palette[Math.min(i, palette.length-1)];
-    }
-    return palette[palette.length-1];
-  }
-
-  function rebuildLayer(entry, mapKey) {
-    if (entry.leafletLayer) leafletMap.removeLayer(entry.leafletLayer);
-    const geom = entry.geomType || 'polygon';
-    const cl   = entry.classification;
-    let newLayer;
-
-    const getStyle = (feat) => {
-      if (!cl) return entry.style;
-      const val = feat?.properties?.[cl.field];
-      if (cl.type === 'graduated') {
-        const color = getColorForValue(parseFloat(val), cl.breaks, cl.paletteColors || ['#888']);
-        return geom === 'line'
-          ? { ...entry.style, color }
-          : { ...entry.style, color, fillColor: color };
-      }
-      // categorized — si el valor no está en colorMap, ocultar el feature
-      if (!cl.colorMap?.hasOwnProperty(val)) {
-        return geom === 'point'
-          ? { ...entry.style, radius: 0, opacity: 0, fillOpacity: 0 }
-          : { ...entry.style, opacity: 0, fillOpacity: 0, weight: 0 };
-      }
-      const color = cl.colorMap[val];
-      const valStyle = cl.styleMap?.[val] || {};
-      return geom === 'line'
-        ? { ...entry.style, ...valStyle, color }
-        : { ...entry.style, ...valStyle, color, fillColor: valStyle.fillColor || color };
-    };
-
-    if (geom === 'point') {
-      newLayer = L.geoJSON(entry.geojson, {
-        pointToLayer:  (feat, latlng) => L.circleMarker(latlng, pointStyle(getStyle(feat))),
-        onEachFeature: bindIdentify
-      });
-    } else if (geom === 'line') {
-      newLayer = L.geoJSON(entry.geojson, {
-        style:         feat => lineStyle(getStyle(feat)),
-        onEachFeature: bindIdentify
-      });
-    } else {
-      newLayer = L.geoJSON(entry.geojson, {
-        style:         feat => polygonStyle(getStyle(feat)),
-        onEachFeature: bindIdentify
-      });
-    }
-    newLayer.addTo(leafletMap);
-    entry.leafletLayer = newLayer;
-  }
-
-  function applyClassification(mapKey, opts) {
-    const entry = activeLayers[mapKey];
-    if (!entry?.geojson) return;
-
-    const { type, field, palette, paletteColors, method, classes } = opts;
-    const colors = paletteColors || [];
-    const MAX_CATS = 8;
-
-    if (type === 'categorized') {
-      const values = [...new Set(
-        entry.geojson.features.map(f => f.properties?.[field]).filter(v => v != null)
-      )].sort();
-
-      const colorMap = {};
-      values.slice(0, MAX_CATS * 2).forEach((v, i) => {
-        colorMap[v] = colors[i % colors.length] || '#888';
-      });
-      entry.classification = { type, field, palette, paletteColors: colors, colorMap };
-
-    } else if (type === 'graduated') {
-      const numVals = entry.geojson.features
-        .map(f => parseFloat(f.properties?.[field]))
-        .filter(v => !isNaN(v));
-      const breaks = computeBreaks(numVals, method || 'jenks', classes || 5);
-      entry.classification = { type, field, palette, paletteColors: colors, method, classes, breaks };
     }
 
-    rebuildLayer(entry, mapKey);
-    updateLegend();
-  }
-
-  function applyClassificationFromData(mapKey, classification) {
-    const entry = activeLayers[mapKey];
-    if (!entry) return;
-    entry.classification = classification;
-    rebuildLayer(entry, mapKey);
-    updateLegend();
-  }
-
-  function clearClassification(mapKey) {
-    const entry = activeLayers[mapKey];
-    if (!entry) return;
-    entry.classification = null;
-    rebuildLayer(entry, mapKey);
-    updateLegend();
-  }
-
-  // ── Renombrar capa desde leyenda ──────────────────────────────
-
-  let _layerRenameCallback = null;
-
-  function onLayerRename(cb) { _layerRenameCallback = cb; }
-
-  function _onLegendRename(input) {
-    const key      = input.dataset.key;
-    const newName  = input.value.trim();
-    const original = input.dataset.original || '';
-    if (!newName) { input.value = original; return; }
-    if (newName === original) return;
-    if (activeLayers[key]) {
-      activeLayers[key].titulo = newName;
-    }
-    if (_layerRenameCallback) _layerRenameCallback(key, newName);
-  }
-
-  function renameLayer(key, newName) {
-    if (activeLayers[key]) activeLayers[key].titulo = newName;
-    if (_layerRenameCallback) _layerRenameCallback(key, newName);
-  }
-
-  // ── Popup genérico ────────────────────────────────────────────
-
-  // ── Modo consulta (identify) ─────────────────────────────────
-
-  let _identifyMode             = false;
-  let _identifyHighlight        = null;
-  let _identifyClickedOnFeature = false;
-  let _lastIdentifyFeature      = null;
-  let _lastIdentifyMapKey       = null;
-  let _currentPopup             = null;
-
-  function setIdentifyMode(active) {
-    _identifyMode = active;
-    const container = leafletMap?.getContainer();
-    if (container) container.classList.toggle('identify-active', active);
-    if (!active) {
-      leafletMap?.closePopup();
-      clearHighlight();
-    } else {
-      // Cuando se activa: el próximo click en el mapa sin tocar un feature → desactivar
+    const activeLayers = window.MAP.getActiveLayers();
+    if (Object.keys(activeLayers).length > 0) {
+      emptyEl?.classList.add('hidden');
+      window.MAP.updateLegend();
       setTimeout(() => {
-        if (_identifyMode) leafletMap?.once('click', _onMapClickOutsideFeature);
-      }, 0);
+        window.MAP.getInstance()?.invalidateSize();
+        setTimeout(() => window.MAP.fitBounds(), 150);
+      }, 200);
+    } else if (emptyEl) {
+      emptyEl.classList.add('has-error');
+      emptyEl.innerHTML = `
+        <p style="color:var(--cream2);font-size:13px">No se pudieron cargar las capas.</p>
+        <button onclick="window.APP.newMap()" style="
+          margin-top:8px; padding:8px 20px; border-radius:30px;
+          background:transparent; border:0.5px solid var(--border-md);
+          color:var(--cream2); font-family:var(--font-sans); font-size:13px;
+          cursor:pointer; pointer-events:auto;
+        ">Volver al inicio</button>
+      `;
     }
+
+    if (errors.length) window.TOAST.show(errors.length === 1 ? errors[0] : `${errors.length} capas tuvieron problemas`, 5000);
+    else if (Object.keys(activeLayers).length > 0) window.TOAST.show('Mapa generado');
+
+    refreshBtn?.classList.remove('spinning');
   }
 
-  function _onMapClickOutsideFeature() {
-    if (!_identifyMode) return;
-    if (_identifyClickedOnFeature) {
-      _identifyClickedOnFeature = false;
-      setTimeout(() => {
-        if (_identifyMode) leafletMap?.once('click', _onMapClickOutsideFeature);
-      }, 0);
-    } else {
-      _deactivateIdentify();
-    }
-  }
+  // ── Aplicar estilos desde chat ────────────────────────────────
 
-  function _deactivateIdentify() {
-    _identifyMode = false;
-    const container = leafletMap?.getContainer();
-    if (container) container.classList.remove('identify-active');
-    leafletMap?.closePopup();
-    clearHighlight();
-    document.getElementById('popup-field-customizer')?.remove();
-    // Actualizar el botón en la UI
-    const btn = document.getElementById('btn-identify');
-    if (btn) {
-      btn.classList.remove('active');
-      btn.title = 'Consultar elementos';
-    }
-  }
+  function applyStylePlan(stylePlan) {
+    const activeLayers = window.MAP.getActiveLayers();
+    let changed = false;
 
-  function getIdentifyMode() { return _identifyMode; }
+    for (const s of stylePlan) {
+      // Buscar la capa por layerKey
+      const entry = Object.entries(activeLayers)
+        .find(([, v]) => v.layerKey === s.layerKey);
+      if (!entry) continue;
 
-  // ── Campos ocultos por defecto en el popup ────────────────────
-  // Campos siempre excluidos (técnicos/internos):
-  const POPUP_ALWAYS_EXCLUDE = new Set(['gid', 'fdc', 'sag', 'entidad', 'objeto', 'gna']);
+      const [mapKey, layer] = entry;
+      const { layerKey: _lk, ...styleChanges } = s;
+      const newStyle = { ...layer.style, ...styleChanges };
 
-  // Campos prioritarios que siempre se muestran (nombre, entidad política, clasificables):
-  const POPUP_PRIORITY_FIELDS = new Set([
-    'fna', 'nam', 'nom_pfi',                            // nombre
-    'nom_pcia', 'nom_depto', 'prov', 'pvecino',         // entidad política / país
-    'tipo_asent', 'cruce_pfi', 'gna', 'tap', 'jap',     // clasificación
-    'typ', 'rst', 'rtn', 'tup'                          // tipo/estado (rutas, puentes)
-  ]);
+      window.MAP.updateLayerStyle(mapKey, newStyle);
+      layer.style = newStyle;
 
-  // Preferencias de campos visibles: layerKey → Set de campos habilitados
-  const _popupFieldPrefs = {};
-  const POPUP_PREFS_KEY  = 'sm_popup_fields';
-
-  function _loadPopupPrefs() {
-    try {
-      const raw = localStorage.getItem(POPUP_PREFS_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      Object.entries(parsed).forEach(([lk, fields]) => {
-        _popupFieldPrefs[lk] = new Set(fields);
-      });
-    } catch {}
-  }
-
-  let _popupPrefsSaveCallback = null;
-  function onPopupPrefsSave(cb) { _popupPrefsSaveCallback = cb; }
-
-  function _savePopupPrefs() {
-    try {
-      const out = {};
-      Object.entries(_popupFieldPrefs).forEach(([lk, set]) => { out[lk] = [...set]; });
-      localStorage.setItem(POPUP_PREFS_KEY, JSON.stringify(out));
-      if (_popupPrefsSaveCallback) _popupPrefsSaveCallback(out);
-    } catch {}
-  }
-
-  _loadPopupPrefs();
-
-  function _getVisibleFields(layerKey, allFields) {
-    // Si el usuario ya configuró preferencias para esta capa, usar esas
-    if (_popupFieldPrefs[layerKey]) {
-      return allFields.filter(k => _popupFieldPrefs[layerKey].has(k));
-    }
-    // Por defecto: mostrar solo campos prioritarios que estén presentes
-    const priority = allFields.filter(k => POPUP_PRIORITY_FIELDS.has(k));
-    return priority.length ? priority : allFields.slice(0, 8);
-  }
-
-  // buildPopupEl: devuelve un elemento DOM con eventos ya wired.
-  // Leaflet acepta elementos DOM en setContent — así evitamos cualquier problema de timing.
-  function buildPopupEl(feature, mapKey) {
-    if (!feature.properties) return document.createElement('div');
-    const props = feature.properties;
-
-    const layerKey = activeLayers[mapKey]?.layerKey || mapKey;
-    const layerDef = window.LAYERS?.[layerKey] || {};
-
-    const allFields = Object.keys(props).filter(k =>
-      !POPUP_ALWAYS_EXCLUDE.has(k) &&
-      !k.endsWith('Type') &&
-      props[k] !== null && props[k] !== undefined &&
-      props[k] !== 'None' && props[k] !== ''
-    );
-
-    const visibleFields = _getVisibleFields(layerKey, allFields);
-    // Título: primer campo de nombre disponible
-    const name = props.fna || props.nom_pfi || props.nam || props.rtn || '';
-
-    // Filas: mostrar solo el nombre de campo (campo técnico), no el label
-    const dataRows = visibleFields
-      .map(k => `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`)
-      .join('');
-
-    const currentPref = _popupFieldPrefs[layerKey];
-    const isActive    = k => currentPref ? currentPref.has(k) : POPUP_PRIORITY_FIELDS.has(k);
-
-    const el = document.createElement('div');
-    el.className = 'map-popup';
-    el.dataset.layerKey = layerKey;
-    el.innerHTML = `
-      <div class="popup-header">
-        ${name ? `<span class="popup-name">${name}</span>` : '<span></span>'}
-        <button class="popup-close-btn"><span class="material-icons">close</span></button>
-      </div>
-      <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
-      <div class="popup-customize-btn adv-ramp-trigger" style="margin:8px 12px 0;border-radius:4px;cursor:pointer">
-        <span style="font-family:var(--font-sans);font-size:12px;color:var(--cream2);flex:1">Más campos</span>
-        <span class="pfc-chevron adv-ramp-arrow">▾</span>
-      </div>
-      <div class="pfc-accordion" style="display:none"></div>
-      <div class="pfc-footer" style="display:none">
-        <button class="pfc-btn pfc-apply" disabled>Aceptar</button>
-      </div>`;
-
-    const accordion = el.querySelector('.pfc-accordion');
-    const applyBtn  = el.querySelector('.pfc-apply');
-
-    allFields.forEach(k => {
-      const active = isActive(k);
-
-      const row = document.createElement('label');
-      row.className = 'pfc-row';
-
-      const cb = document.createElement('input');
-      cb.type             = 'checkbox';
-      cb.dataset.field    = k;
-      cb.dataset.original = active ? '1' : '0';
-      cb.checked          = active;
-
-      // Solo nombre de campo técnico, sin label interpretado
-      const keySpan = document.createElement('span');
-      keySpan.className   = 'pfc-label';
-      keySpan.textContent = k;
-
-      cb.addEventListener('change', () => {
-        const hasChange = [...accordion.querySelectorAll('input[type=checkbox]')]
-          .some(i => (i.checked ? '1' : '0') !== i.dataset.original);
-        applyBtn.toggleAttribute('disabled', !hasChange);
-      });
-
-      row.appendChild(cb);
-      row.appendChild(keySpan);
-      accordion.appendChild(row);
-    });
-
-    // Cerrar popup con X
-    el.querySelector('.popup-close-btn')?.addEventListener('click', () => {
-      leafletMap?.closePopup();
-    });
-
-    const toggleBtn = el.querySelector('.popup-customize-btn');
-    const footer    = el.querySelector('.pfc-footer');
-    const chevron   = el.querySelector('.pfc-chevron');
-
-    toggleBtn.addEventListener('click', () => {
-      const open = accordion.style.display !== 'none';
-      accordion.style.display = open ? 'none' : 'block';
-      footer.style.display    = open ? 'none' : 'flex';
-      toggleBtn.classList.toggle('pfc-open', !open);
-      chevron.textContent = open ? '▾' : '▲';
-      if (_currentPopup) {
-        const _ap = _currentPopup.options.autoPan;
-        _currentPopup.options.autoPan = false;
-        _currentPopup.update();
-        _currentPopup.options.autoPan = _ap;
+      // Persistir en el plan
+      if (currentPlan?.instrucciones) {
+        const inst = currentPlan.instrucciones.find(i => i.mapKey === mapKey);
+        if (inst) inst.style = { ...newStyle };
       }
-    });
-
-    // Aceptar
-    applyBtn.addEventListener('click', () => {
-      if (applyBtn.hasAttribute('disabled')) return;
-      const checked = [...accordion.querySelectorAll('input[type=checkbox]:checked')]
-        .map(i => i.dataset.field);
-      if (checked.length === 0) return;
-      _popupFieldPrefs[layerKey] = new Set(checked);
-      _savePopupPrefs();
-      _refreshOpenPopup(false);
-    });
-
-    return el;
-  }
-
-  // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo.
-  // keepAccordion=true → deja el acordeón abierto (usado internamente por _refreshOpenPopup)
-  function _refreshOpenPopup(keepAccordion = false) {
-    const openPopup = _currentPopup;
-    if (!openPopup || !_lastIdentifyFeature) return;
-
-    // Actualizar solo la tabla de datos visible — sin tocar el DOM del popup completo
-    const wrapper = openPopup.getElement?.();
-    if (!wrapper) return;
-    const popupEl   = wrapper.querySelector('.map-popup');
-    const tableEl   = popupEl?.querySelector('.popup-table');
-    const accordion = popupEl?.querySelector('.pfc-accordion');
-    const footer    = popupEl?.querySelector('.pfc-footer');
-    const toggleBtn = popupEl?.querySelector('.popup-customize-btn');
-    const chevron   = toggleBtn?.querySelector('.pfc-chevron');
-    if (!tableEl) return;
-
-    // Recalcular filas visibles con las preferencias ya guardadas
-    const props     = _lastIdentifyFeature.properties;
-    const layerKey  = activeLayers[_lastIdentifyMapKey]?.layerKey || _lastIdentifyMapKey;
-    const layerDef  = window.LAYERS?.[layerKey] || {};
-    const allFields = Object.keys(props).filter(k =>
-      !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type') &&
-      props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
-    );
-    const visibleFields = _getVisibleFields(layerKey, allFields);
-    tableEl.innerHTML = visibleFields.map(k =>
-      `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`
-    ).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
-
-    // Actualizar data-original de los checkboxes para reflejar el nuevo estado guardado
-    accordion?.querySelectorAll('input[type=checkbox]').forEach(cb => {
-      cb.dataset.original = cb.checked ? '1' : '0';
-    });
-    // Desactivar Aplicar (ya no hay cambios pendientes)
-    popupEl?.querySelector('.pfc-apply')?.toggleAttribute('disabled', true);
-
-    // Cerrar acordeón salvo que se pida mantenerlo abierto
-    if (!keepAccordion && accordion) {
-      accordion.style.display = 'none';
-      if (footer)    footer.style.display = 'none';
-      if (toggleBtn) toggleBtn.classList.remove('pfc-open');
-      if (chevron)   chevron.textContent  = '▾';
+      changed = true;
     }
 
-    // Recalcular tamaño del popup sin mover
-    const _ap = openPopup.options.autoPan;
-    openPopup.options.autoPan = false;
-    openPopup.update();
-    openPopup.options.autoPan = _ap;
+    if (!changed) return;
+
+    window.MAP.updateLegend();
+
+    // Persistir en Firestore
+    const user   = window.AUTH?.currentUser();
+    const chatId = window.CHAT?.getChatId?.();
+    _persistPlan();
   }
 
+  // ── Aplicar clasificación desde chat ─────────────────────────
 
-  function clearHighlight() {
-    if (_identifyHighlight) {
-      _identifyHighlight.remove();
-      _identifyHighlight = null;
-    }
-  }
-
-  function highlightFeature(feature, latlng) {
-    clearHighlight();
-    const geom = feature.geometry?.type?.toLowerCase() || '';
-    let hl;
-    if (geom.includes('point') || geom.includes('multipoint')) {
-      hl = L.circleMarker(latlng, {
-        radius: 14, color: '#f5c518', weight: 3,
-        fillColor: '#f5c518', fillOpacity: 0.2, opacity: 0.9
-      }).addTo(leafletMap);
-    } else if (geom.includes('line')) {
-      hl = L.geoJSON(feature, {
-        style: { color: '#f5c518', weight: 12, opacity: 0.75 }
-      }).addTo(leafletMap);
-    } else {
-      hl = L.geoJSON(feature, {
-        style: { color: '#f5c518', weight: 3, fillColor: '#f5c518', fillOpacity: 0.2, opacity: 0.9 }
-      }).addTo(leafletMap);
-    }
-    _identifyHighlight = hl;
-  }
-
-  function bindIdentify(feature, layer) {
-    layer.on('click', e => {
-      if (!_identifyMode) return;
-      L.DomEvent.stopPropagation(e);
-      _identifyClickedOnFeature = true;
-
-      // Buscar el mapKey de este layer para pasar al buildPopupContent
-      let mapKey = null;
-      Object.entries(activeLayers).forEach(([mk, entry]) => {
-        entry.leafletLayer?.eachLayer?.(l => { if (l === layer) mapKey = mk; });
-      });
-
-      highlightFeature(feature, e.latlng);
-      _lastIdentifyFeature = feature;
-      _lastIdentifyMapKey  = mapKey;
-
-      // offset positivo en Y: la punta queda debajo del click, el globo crece hacia abajo
-      _currentPopup = L.popup({
-        className: 'sm-popup',
-        offset: L.point(0, 6),
-        autoPan: true,
-        closeButton: false,
-        autoPanPaddingTopLeft:     L.point(60, 64),
-        autoPanPaddingBottomRight: L.point(60, 20)
-      })
-        .setLatLng(e.latlng)
-        .setContent(buildPopupEl(feature, mapKey))
-        .openOn(leafletMap);
-
-    });
-
-    // Cursor: solo cambiar a pointer cuando identify está activo
-    layer.on('mouseover', e => {
-      const el = e.originalEvent?.target;
-      if (!_identifyMode) {
-        // Asegurar cursor de mano grab, no pointer
-        if (el) el.style.cursor = '';
-        return;
+  function applyClassifyPlan(classifyPlan) {
+    const activeLayers = window.MAP.getActiveLayers();
+    let changed = false;
+    for (const c of classifyPlan) {
+      const entry = Object.entries(activeLayers).find(([, v]) => v.layerKey === c.layerKey);
+      if (!entry) continue;
+      const [mapKey] = entry;
+      const colors = window.PALETTES[c.palette] || window.PALETTES.qualitative;
+      window.MAP.applyClassification(mapKey, { ...c, paletteColors: colors });
+      if (currentPlan?.instrucciones) {
+        const inst = currentPlan.instrucciones.find(i => i.mapKey === mapKey);
+        if (inst) inst.classification = { ...c, paletteColors: colors };
       }
-    });
-  }
-
-  // ── Funciones de estilo ───────────────────────────────────────
-
-  function polygonStyle(s) {
-    return {
-      fillColor:   s.fillColor   || '#c8622a',
-      fillOpacity: s.fillOpacity ?? 0.2,
-      color:       s.color       || s.fillColor || '#c8622a',
-      weight:      s.weight      ?? 1.5,
-      opacity:     s.opacity     ?? 1
-    };
-  }
-
-  function lineStyle(s) {
-    const st = {
-      color:   s.color   || '#c8622a',
-      weight:  s.weight  ?? 2,
-      opacity: s.opacity ?? 1
-    };
-    if (s.dashArray) {
-      // Escalar el patrón proporcionalmente al grosor para que siempre se vea
-      const w      = st.weight;
-      const scale  = Math.max(1, w / 2);
-      const scaled = s.dashArray.split(',').map(n => Math.round(parseFloat(n) * scale)).join(',');
-      st.dashArray = scaled;
+      changed = true;
     }
-    return st;
+    if (!changed) return;
+    const user   = window.AUTH?.currentUser();
+    const chatId = window.CHAT?.getChatId?.();
+    _persistPlan();
   }
 
-  function pointStyle(s) {
-    return {
-      radius:      s.radius      ?? 5,
-      fillColor:   s.fillColor   || '#c8622a',
-      fillOpacity: s.fillOpacity ?? 0.85,
-      color:       s.color       || '#fff',
-      weight:      s.weight      ?? 1.5,
-      opacity:     s.opacity     ?? 1
-    };
-  }
+  async function restoreChat(chat) {
+    document.getElementById('screen-home')?.classList.remove('active');
+    document.getElementById('screen-work')?.classList.add('active');
+    window.MAP_CONTROLS.setMapVisible(false);
 
-  // ── API pública ───────────────────────────────────────────────
+    window.CHAT.restore(chat);
 
-  function toggleLayerVisibility(key) {
-    const layer = activeLayers[key];
-    if (!layer) return;
-    if (layer.visible === false) {
-      layer.visible = true;
-      if (layer.leafletLayer) leafletMap.addLayer(layer.leafletLayer);
-    } else {
-      layer.visible = false;
-      if (layer.leafletLayer) leafletMap.removeLayer(layer.leafletLayer);
+    const msgs = document.getElementById('chat-messages');
+    if (msgs) msgs.innerHTML = '';
+
+    for (const m of (chat.messages || [])) {
+      const meta = m.time ? { time: new Date(m.time), model: m.model || null } : null;
+      if (m.role === 'user') {
+        const el = window.UI.addMessage('user', m.content, meta);
+      } else {
+        const displayText = m.content
+          .replace(/```map[\s\S]*?```/g, '')
+          .replace(/```style[\s\S]*?```/g, '')
+          .replace(/```classify[\s\S]*?```/g, '')
+          .replace(/```chat-title[\s\S]*?```/g, '')
+          .trim();
+        window.UI.addMessage('assistant', displayText, meta);
+      }
     }
-    updateLegend();
+
+    if (chat.lastMap) {
+      // Restaurar preferencias de campos del popup desde Firestore
+      if (chat.popupPrefs) window.MAP.setPopupPrefs(chat.popupPrefs);
+      window.UI.showMapReady(chat.lastMap);
+      // Renderizar el mapa automáticamente al restaurar, no solo mostrar la tarjeta
+      await renderMap(chat.lastMap);
+    }
+
+    window.SIDEBAR.setChatId(chat.id);
+    window.CHAT_HEADER.setChatHeader(chat.titulo);
+    setTimeout(() => document.getElementById('chat-input')?.focus(), 200);
   }
+
+  // ── Nuevo mapa ────────────────────────────────────────────────
+
+  function newMap() {
+    window.MAP.clearAll();
+    window.MAP.updateLegend();
+    window.CHAT.reset();
+    window.MAP_CONTROLS.setMapVisible(false);
+    window.MAP_CONTROLS.resetDivider();
+    document.getElementById('chat-messages').innerHTML = '';
+    document.getElementById('screen-work')?.classList.remove('active');
+    document.getElementById('screen-home')?.classList.add('active');
+    document.getElementById('initial-prompt').value = '';
+    currentPlan = null;
+    window.history.replaceState(null, '', '/');
+    window.CHAT_HEADER.setChatHeader(null);
+  }
+
+  // ── Saludos dinámicos ─────────────────────────────────────────
+
+  function buildGreeting(nombre) {
+    const h = new Date().getHours();
+    const n = nombre;
+    const manana = h >= 6  && h < 12;
+    const tarde  = h >= 12 && h < 20;
+    const opciones = manana ? [
+      n ? `Buenos días, ${n}.`           : 'Buenos días.',
+      n ? `Buen día, ${n}.`              : 'Buen día.',
+      n ? `Hola, ${n}.`                  : 'Hola.',
+      n ? `¡Hola, ${n}! ¿Todo bien?`     : '¡Hola! ¿Todo bien?',
+      n ? `¿Cómo amaneciste, ${n}?`      : '¿Cómo amaneciste?',
+      n ? `Buen día, ${n}. ¿Arrancamos?` : 'Buen día. ¿Arrancamos?',
+    ] : tarde ? [
+      n ? `Buenas tardes, ${n}.`          : 'Buenas tardes.',
+      n ? `Hola, ${n}.`                   : 'Hola.',
+      n ? `¡Qué bueno verte, ${n}!`       : '¡Qué bueno verte!',
+      n ? `¿Qué vas a mapear hoy, ${n}?`  : '¿Qué vas a mapear hoy?',
+      n ? `Buenas, ${n}. ¿En qué andás?`  : 'Buenas. ¿En qué andás?',
+      n ? `Hola, ${n}. ¿Exploramos algo?` : 'Hola. ¿Exploramos algo?',
+    ] : [
+      n ? `Buenas noches, ${n}.`              : 'Buenas noches.',
+      n ? `Hola, ${n}.`                       : 'Hola.',
+      n ? `¡Qué bueno verte de nuevo, ${n}!`  : '¡Qué bueno verte de nuevo!',
+      n ? `Buenas, ${n}. ¿Un mapa nocturno?`  : 'Buenas. ¿Un mapa nocturno?',
+      n ? `Hola, ${n}. Trasnochando un poco.` : 'Hola. Trasnochando un poco.',
+    ];
+    return opciones[Math.floor(Math.random() * opciones.length)];
+  }
+
+  function buildGreetingAnon() {
+    const h = new Date().getHours();
+    const manana = h >= 6  && h < 12;
+    const tarde  = h >= 12 && h < 20;
+    const opciones = manana ? [
+      'Buenos días. ¿Arrancamos?',
+      'Buen día. Iniciá sesión para guardar tus mapas.',
+      'Buen día. ¿Por dónde empezamos?',
+      'Buenos días. ¿Qué tenemos hoy?',
+    ] : tarde ? [
+      'Buenas tardes. ¿Qué querés mapear?',
+      'Hola. Iniciá sesión para no perder tus mapas.',
+      'Buenas. El mapa te está esperando.',
+      'Hola. ¿Arrancamos?',
+    ] : [
+      'Buenas noches. ¿Un mapa nocturno?',
+      'Hola. Iniciá sesión para guardar lo que explorés.',
+      'Buenas. Todo listo cuando quieras.',
+      'Hola de nuevo. ¿Arrancamos?',
+    ];
+    return opciones[Math.floor(Math.random() * opciones.length)];
+  }
+
+  // ── Auth + routing ────────────────────────────────────────────
+
+  function initAuth() {
+    const authError = window.AUTH.handleAuthError();
+    if (authError) window.TOAST.show('Error de autenticación: ' + authError, 5000);
+
+    const newSession = window.AUTH.handleCallback();
+    if (newSession) console.log('[APP] Login OK:', newSession.email);
+
+    const user = window.AUTH.currentUser();
+    window.SIDEBAR.render();
+    window.SIDEBAR.setUser(user);
+
+    const greeting = document.getElementById('home-greeting');
+    if (greeting) {
+      greeting.textContent = user
+        ? buildGreeting(user.name?.split(' ')[0] || null)
+        : buildGreetingAnon();
+    }
+
+    handleURLRouting();
+  }
+
+  async function handleURLRouting() {
+    const hash = window.location.hash;
+    if (!hash.startsWith('#chat=')) return;
+    const chatId = hash.slice('#chat='.length);
+    if (!chatId) return;
+    const user = window.AUTH.currentUser();
+    if (!user) return;
+    try {
+      // Cargar directamente el chat por ID en vez de descargar todos los chats
+      const chat = await window.FB.getChat(user.uid, chatId);
+      if (chat) { goToWork(''); await restoreChat(chat); }
+    } catch (err) {
+      console.warn('[APP] No se pudo cargar el chat desde URL:', err.message);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    window.SETTINGS.init();
+    init();
+    initAuth();
+  });
 
   return {
-    init,
-    destroy,
-    addLayer,
-    removeLayer,
-    clearAll,
-    updateLayerStyle,
-    updateLayerClassification,
-    moveLayer,
-    fitBounds,
-    updateLegend,
-    toggleLayerVisibility,
-    setBasemap,
-    setLabels,
-    getCurrentBase,
-    getShowLabels,
-    hasLabels,
-    getBasemaps,
-    setIdentifyMode,
-    getIdentifyMode,
-    applyClassification,
-    applyClassificationFromData,
-    clearClassification,
-    setLayerLabels,
-    onLayerRename,
-    onLayerVisibilityChange,
-    onLayerOrderChange,
-    onPopupPrefsSave,
-    restoreLayerVisible,
-    setPopupPrefs,
-    getPopupPrefs,
-    renameLayer,
-    getActiveLayers: () => activeLayers,
-    getInstance:     () => leafletMap
+    renderMap,
+    goToWork,
+    newMap,
+    restoreChat,
+    applyStylePlan,
+    applyClassifyPlan,
+    setChatHeader: (t) => window.CHAT_HEADER.setChatHeader(t),
+    getCurrentPlan: () => currentPlan
   };
 
 })();
