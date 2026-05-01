@@ -17,7 +17,7 @@ window.CHAT = (() => {
 
     // Requerir sesión iniciada
     if (!window.AUTH?.currentUser()) {
-      TOAST.show('Iniciá sesión para chatear');
+      TOAST.info('Iniciá sesión para chatear.');
       // Abrir el dropdown de settings desde el avatar
       const userBtn = document.getElementById('sb-user-row-btn');
       if (userBtn) SETTINGS.openFromBtn(userBtn);
