@@ -593,7 +593,7 @@ window.EXPORT = (() => {
 
       const optionsHTML = geojsonFields.map(f => `
         <label class="html-csel-chk-row html-field-chk-row">
-          <input type="checkbox" class="html-field-chk" data-key="${escHtml(key)}" data-field="${escHtml(f)}" checked />
+          <input type="checkbox" class="html-field-chk" data-key="${escHtml(key)}" data-field="${escHtml(f)}" />
           <span class="html-csel-chk-label" style="font-family:var(--font-mono);font-size:12px">${escHtml(f)}</span>
         </label>`).join('');
 
@@ -779,6 +779,9 @@ window.EXPORT = (() => {
         e.stopPropagation();
         if (csel.classList.contains('html-identify-disabled')) return;
         const isOpen = !dd.classList.contains('hidden');
+        // Cerrar el dropdown de capas si está abierto
+        layersDd?.classList.add('hidden');
+        layersArrow?.classList.remove('open');
         // Cerrar todos los otros identify dropdowns
         modal.querySelectorAll('.html-identify-dd').forEach(d => {
           if (d !== dd) {
@@ -866,17 +869,17 @@ window.EXPORT = (() => {
       // Capas seleccionadas
       const selectedKeys = [...modal.querySelectorAll('.html-layer-chk:checked')].map(i => i.dataset.key);
 
-      // Campos seleccionados por capa (solo de capas activas)
-      // Formato: { [layerKey]: [field1, field2, ...] }  — array vacío = todos los campos
+      // Campos seleccionados por capa.
+      // Formato: { [layerKey]: [field1, field2, ...] }
+      // Solo se incluye la capa si tiene al menos un campo marcado.
+      // Si no se marcó ningún campo para una capa habilitada, esa capa no tiene consulta.
       const identifyFieldsByLayer = {};
       selectedKeys.forEach(key => {
-        const csel   = modal.querySelector(`#html-id-csel-${CSS.escape(key)}`);
+        const csel      = modal.querySelector(`#html-id-csel-${CSS.escape(key)}`);
         const isDisabled = csel?.classList.contains('html-identify-disabled');
-        if (isDisabled) return; // capa no seleccionada
+        if (isDisabled) return;
         const checked = [...(csel?.querySelectorAll('.html-field-chk:checked') || [])].map(c => c.dataset.field);
-        const total   = csel?.querySelectorAll('.html-field-chk').length || 0;
-        // Si todos están marcados, pasar array vacío (= mostrar todos)
-        identifyFieldsByLayer[key] = checked.length === total ? [] : checked;
+        if (checked.length > 0) identifyFieldsByLayer[key] = checked;
       });
 
       const hasIdentify = selectedKeys.some(k => !modal.querySelector(`#html-id-csel-${CSS.escape(k)}`)?.classList.contains('html-identify-disabled'));
