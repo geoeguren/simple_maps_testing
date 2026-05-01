@@ -523,7 +523,7 @@ window.EXPORT = (() => {
 
     modal.innerHTML = `
       <div class="adv-modal-header">
-        <span class="adv-modal-title">Exportar HTML</span>
+        <span class="adv-modal-title">Embebido (html)</span>
         <button class="popup-close-btn" id="html-modal-close"><span class="material-icons">close</span></button>
       </div>
       <div class="adv-modal-body" style="gap:0">
