@@ -723,7 +723,10 @@ window.MAP = (() => {
         <button class="popup-close-btn"><span class="material-icons">close</span></button>
       </div>
       <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
-      <button class="popup-customize-btn">Más campos<span class="pfc-chevron">expand_more</span></button>
+      <div class="popup-customize-btn adv-ramp-trigger" style="margin:8px 12px 0;border-radius:4px;cursor:pointer">
+        <span style="font-family:var(--font-sans);font-size:12px;color:var(--cream2);flex:1">Más campos</span>
+        <span class="pfc-chevron adv-ramp-arrow">▾</span>
+      </div>
       <div class="pfc-accordion" style="display:none"></div>
       <div class="pfc-footer" style="display:none">
         <button class="pfc-btn pfc-apply" disabled>Aceptar</button>
@@ -774,7 +777,7 @@ window.MAP = (() => {
       accordion.style.display = open ? 'none' : 'block';
       footer.style.display    = open ? 'none' : 'flex';
       toggleBtn.classList.toggle('pfc-open', !open);
-      chevron.textContent = open ? 'expand_more' : 'expand_less';
+      chevron.textContent = open ? '▾' : '▲';
       if (_currentPopup) {
         const _ap = _currentPopup.options.autoPan;
         _currentPopup.options.autoPan = false;
@@ -839,7 +842,7 @@ window.MAP = (() => {
       accordion.style.display = 'none';
       if (footer)    footer.style.display = 'none';
       if (toggleBtn) toggleBtn.classList.remove('pfc-open');
-      if (chevron)   chevron.textContent  = 'expand_more';
+      if (chevron)   chevron.textContent  = '▾';
     }
 
     // Recalcular tamaño del popup sin mover
@@ -899,6 +902,7 @@ window.MAP = (() => {
         className: 'sm-popup',
         offset: L.point(0, 6),
         autoPan: true,
+        closeButton: false,
         autoPanPaddingTopLeft:     L.point(60, 64),
         autoPanPaddingBottomRight: L.point(60, 20)
       })
