@@ -407,6 +407,14 @@ window.APP = (() => {
 
   async function renderMap(plan) {
     if (!plan?.instrucciones?.length) {
+      // Plan vacío explícito → limpiar el mapa
+      if (plan && Array.isArray(plan.instrucciones)) {
+        window.MAP.clearAll();
+        currentPlan = plan;
+        window.MAP.updateLegend();
+        _persistPlan();
+        return;
+      }
       window.TOAST.error('El plan de mapa no tiene capas.');
       return;
     }
