@@ -1051,16 +1051,17 @@ window.LAYERS_PANEL = (() => {
         addRow('Opacidad',
           `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${op}" /><span class="lea-val">${Math.round(op * 100)}%</span></div>`,
           'opacity', true);
-        // Patrón de línea — usa buildDashSelect
+        // Patrón de línea
         const dashRow = document.createElement('div');
         dashRow.className = 'adv-body-row';
-        dashRow.innerHTML = `<span class="adv-body-label">Patrón de línea</span>`;
-        const dashSel = buildDashSelect(dash, dashId);
-        dashRow.appendChild(dashSel);
+        dashRow.innerHTML = `<span class="adv-body-label">Patrón de línea</span>${buildDashSelect(dash, dashId)}`;
         wrap.appendChild(dashRow);
-        wireCsel(dashRow, dashId, dashVal => {
+        // Appendear wrap antes de wireCsel para que querySelector funcione
+        container.appendChild(wrap);
+        wireCsel(wrap, dashId, dashVal => {
           updateGlobalStyle({ dashArray: dashVal === 'none' ? null : dashVal });
         });
+        return;
 
       } else if (geom === 'polygon') {
         const w  = s.weight ?? 1.5;
