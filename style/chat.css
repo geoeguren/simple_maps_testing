@@ -49,6 +49,55 @@ body.day .chat-panel { background: var(--bg); border-right-color: var(--border);
 }
 body.day .msg.assistant { color: #1a1814; }
 
+/* ── Markdown en mensajes del asistente ──────────────────────── */
+.msg.assistant p  { margin: 0 0 .6rem; line-height: 1.65; }
+.msg.assistant p:last-child { margin-bottom: 0; }
+.msg.assistant ul,
+.msg.assistant ol { margin: 0 0 .6rem; padding-left: 1.4rem; }
+.msg.assistant li { margin-bottom: .2rem; line-height: 1.6; }
+.msg.assistant h1,
+.msg.assistant h2,
+.msg.assistant h3 {
+  font-weight: 600; margin: .8rem 0 .3rem; line-height: 1.3;
+}
+.msg.assistant h1 { font-size: 16px; }
+.msg.assistant h2 { font-size: 15px; }
+.msg.assistant h3 { font-size: 14px; }
+.msg.assistant strong { font-weight: 600; }
+.msg.assistant em { font-style: italic; }
+.msg.assistant code {
+  font-family: var(--font-mono); font-size: 12px;
+  background: var(--bg3); border: 0.5px solid var(--border-md);
+  border-radius: 3px; padding: 1px 5px;
+}
+body.day .msg.assistant code { background: rgba(0,0,0,0.06); }
+.msg.assistant pre {
+  background: var(--bg3); border: 0.5px solid var(--border-md);
+  border-radius: 6px; padding: 10px 14px;
+  overflow-x: auto; margin: .5rem 0 .7rem;
+}
+.msg.assistant pre code {
+  background: none; border: none; padding: 0;
+  font-size: 12px; line-height: 1.6;
+}
+body.day .msg.assistant pre { background: rgba(0,0,0,0.05); }
+.msg.assistant blockquote {
+  border-left: 2px solid var(--border-md);
+  margin: 0 0 .6rem; padding: 2px 0 2px 12px;
+  color: var(--cream2);
+}
+.msg.assistant hr {
+  border: none; border-top: 0.5px solid var(--border-md); margin: .8rem 0;
+}
+.msg.assistant a { color: var(--accent); text-decoration: none; }
+.msg.assistant a:hover { text-decoration: underline; }
+
+/* Confirmación de exportación */
+.msg-export-confirm {
+  font-size: 13px; color: var(--cream2); padding: 4px 0;
+}
+body.day .msg-export-confirm { color: #6a6560; }
+
 .msg.user {
   background: var(--bg2); border: none; color: var(--cream);
   align-self: flex-end; padding: 10px 16px; border-radius: 14px;
