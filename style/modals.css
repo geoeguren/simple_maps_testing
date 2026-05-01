@@ -80,7 +80,7 @@ body.day .delete-confirm-box { background: #f0ede8; border-color: #c8c4be; }
 body.day .delete-confirm-title { color: #1a1814; }
 .delete-confirm-divider { height: 0.5px; background: var(--border); margin: 10px -24px 10px; width: calc(100% + 48px); }
 body.day .delete-confirm-divider { background: #c8c4be; }
-.delete-confirm-body { font-size: 13px; color: var(--cream2); margin: 0; line-height: 1.6; }
+.delete-confirm-body { font-size: 16px; color: var(--cream2); margin: 0; line-height: 1.7; }
 .delete-confirm-btns { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; width: 100%; }
 .delete-confirm-cancel,
 .delete-confirm-ok {
