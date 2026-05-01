@@ -218,7 +218,7 @@ window.SIDEBAR = (() => {
       render();
       if (chatId === currentChatId) window.APP && window.APP.setChatHeader(newTitulo.trim());
     } catch (e) {
-      TOAST.error('Error al renombrar.');
+      TOAST.error('Error al renombrar el chat.');
     }
   }
 
@@ -243,7 +243,7 @@ window.SIDEBAR = (() => {
       render();
       TOAST.success('Chat eliminado.');
     } catch (e) {
-      TOAST.error('Error al eliminar.');
+      TOAST.error('Error al eliminar el chat.');
     }
   }
 
