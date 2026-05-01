@@ -300,7 +300,7 @@ body.day .lea-hex-input { color: #1a1814; background: rgba(0,0,0,0.05); }
 .lea-mode-tab:hover:not(.active) { background: var(--cream3); color: var(--cream); }
 body.day .lea-mode-tab { background: rgba(0,0,0,0.04); color: #5a5650; }
 body.day .lea-mode-tab.active { background: var(--accent); color: #fff; }
-.lea-mode-content { padding-top: 4px; }
+.lea-mode-content { padding-top: 4px; padding-bottom: 4px; }
 
 /* Items clasificados en acordeón */
 .lea-cat-items, .lea-grad-items { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
