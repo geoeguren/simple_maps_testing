@@ -365,7 +365,7 @@ window.MAP = (() => {
             const valStyle = cl.styleMap?.[val] || {};
             const fill   = valStyle.fillColor || color;
             const border = valStyle.color     || (geom === 'line' ? fill : darkenHex(fill));
-            const svg = makeSVG(geom, border, fill, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1, s.dashArray);
+            const svg = makeSVG(geom, fill, border, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1, s.dashArray);
             html += `<div class="legend-item legend-item-classified">${svg}<span>${val}</span></div>`;
           });
           return html;
@@ -380,7 +380,7 @@ window.MAP = (() => {
           for (let i = 0; i < cl.breaks.length - 1; i++) {
             const fill   = colors[Math.min(i, colors.length-1)];
             const border = geom === 'line' ? fill : darkenHex(fill);
-            const svg   = makeSVG(geom, border, fill, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1);
+            const svg   = makeSVG(geom, fill, border, s.fillOpacity ?? 0.85, s.weight ?? 1.5, s.opacity ?? 1);
             const from  = Number(cl.breaks[i]).toLocaleString('es-AR', {maximumFractionDigits: 1});
             const to    = Number(cl.breaks[i+1]).toLocaleString('es-AR', {maximumFractionDigits: 1});
             html += `<div class="legend-item legend-item-classified">${svg}<span>${from} – ${to}</span></div>`;
