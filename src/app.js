@@ -557,9 +557,12 @@ window.APP = (() => {
   }
 
   async function restoreChat(chat) {
+    // Transición completa de pantalla (antes dependía de goToWork('') para esto,
+    // lo que causaba CHAT.reset() y potencial pérdida del chatId si fallaba a mitad)
     document.getElementById('screen-home')?.classList.remove('active');
     document.getElementById('screen-work')?.classList.add('active');
     window.MAP_CONTROLS.setMapVisible(false);
+    currentPlan = null;
 
     window.CHAT.restore(chat);
 
@@ -696,9 +699,12 @@ window.APP = (() => {
     const user = window.AUTH.currentUser();
     if (!user) return;
     try {
-      // Cargar directamente el chat por ID en vez de descargar todos los chats
+      // Cargar directamente el chat por ID en vez de descargar todos los chats.
+      // Nota: restoreChat maneja su propia transición de pantalla — no llamar
+      // goToWork('') antes porque CHAT.reset() borraría el currentChatId
+      // y si restoreChat falla a mitad los cambios subsiguientes no se persisten.
       const chat = await window.FB.getChat(user.uid, chatId);
-      if (chat) { goToWork(''); await restoreChat(chat); }
+      if (chat) await restoreChat(chat);
     } catch (err) {
       console.warn('[APP] No se pudo cargar el chat desde URL:', err.message);
     }
