@@ -188,9 +188,12 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
 
   <!-- ── Módulos de datos y capas ────────────────────────────────── -->
-  <script src="src/palettes.js"></script>               <!-- window.PALETTES, window.PALETTE_LABELS -->
-  <script src="src/layers/sources.js"></script>         <!-- window.SOURCES  — registro de fuentes  -->
-  <script type="module" src="src/layers/index.js"></script> <!-- window.LAYERS, window.PROVINCIAS_MAP   -->
+  <script src="src/palettes.js"></script>           <!-- window.PALETTES, window.PALETTE_LABELS -->
+  <script src="src/layers/sources.js"></script>     <!-- window.SOURCES  — registro de fuentes  -->
+  <script src="src/layers/ar/ign.js"></script>      <!-- window.LAYERS, window.PROVINCIAS_MAP   -->
+  <!-- Al agregar un nuevo organismo o país, agregar su script acá:  -->
+  <!-- <script src="src/layers/ar/indec.js"></script>                -->
+  <!-- <script src="src/layers/cl/ign.js"></script>                  -->
 
   <!-- ── Módulos de red / geo ─────────────────────────────────────── -->
   <script src="src/wfs.js"></script>       <!-- window.WFS   — fetch WFS con caché     -->
@@ -222,7 +225,7 @@
   <script>
     (function checkModules() {
       const required = [
-        'PALETTES', 'LAYERS', 'PROVINCIAS_MAP',
+        'PALETTES', 'LAYERS', 'PROVINCIAS_MAP', 'SOURCES',
         'WFS', 'CLIP',
         'MAP', 'EXPORT',
         'CHAT', 'UI', 'SETTINGS', 'AUTH', 'FB',
