@@ -146,12 +146,12 @@ body.day .sidebar.expanded .sb-chat-row.active { background: rgba(0,0,0,0.07); }
   width: 24px; height: 24px; flex-shrink: 0;
   background: transparent; border: none; color: transparent;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; margin-right: 4px; border-radius: var(--radius-sm);
+  cursor: pointer; margin-right: 4px; border-radius: 4px;
   transition: color var(--transition), background var(--transition);
 }
 .sb-chat-delete .material-icons { font-size: 15px; }
 .sidebar.expanded .sb-chat-row:hover .sb-chat-delete { color: var(--cream2); }
-.sidebar.expanded .sb-chat-delete:hover { color: #e06060 !important; background: rgba(200,80,80,0.1); }
+.sidebar.expanded .sb-chat-delete:hover { color: #e06060 !important; background: rgba(200,80,80,0.12); }
 
 /* Botón "Cargar más" — visible sólo cuando el sidebar está expandido */
 .sb-load-more {
