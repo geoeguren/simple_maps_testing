@@ -49,26 +49,59 @@ body.day .chat-panel { background: var(--bg); border-right-color: var(--border);
 }
 body.day .msg.assistant { color: #1a1814; }
 
-/* Mensaje de error de sistema — capa que no pudo cargarse */
-.msg.system-error {
-  align-self: flex-start;
-  max-width: 90%;
-  padding: 9px 13px;
-  background: rgba(180, 60, 60, 0.08);
-  border: 0.5px solid rgba(200, 80, 80, 0.28);
-  border-radius: 8px;
-  font-family: var(--font-sans);
-  font-size: 13px;
-  line-height: 1.55;
-  color: #d08080;
-}
-body.day .msg.system-error {
+/* Tarjeta de error de capa — misma estructura que msg-map-card */
+.msg-error-card {
+  width: 100%;
   background: rgba(180, 60, 60, 0.06);
-  border-color: rgba(180, 60, 60, 0.22);
-  color: #a04040;
+  border: 0.5px solid rgba(200, 80, 80, 0.25);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  box-sizing: border-box;
 }
-.msg.system-error strong { font-weight: 600; color: #e09090; }
-body.day .msg.system-error strong { color: #b05050; }
+body.day .msg-error-card {
+  background: rgba(180, 60, 60, 0.04);
+  border-color: rgba(180, 60, 60, 0.18);
+}
+
+.error-card-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+
+.error-card-icon {
+  font-size: 24px !important;
+  color: #c07070;
+  flex-shrink: 0;
+}
+body.day .error-card-icon { color: #a04040; }
+
+.error-card-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.error-card-title {
+  font-size: 15px; font-weight: 600;
+  color: #d08080;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+body.day .error-card-title { color: #a04040; }
+
+.error-card-desc {
+  font-size: 13px; color: var(--cream2); line-height: 1.4;
+}
+body.day .error-card-desc { color: #6a6560; }
+
+.error-card-btn {
+  flex-shrink: 0; padding: 0 12px; height: 30px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #c07070;
+  border: 0.5px solid rgba(200, 80, 80, 0.35);
+  font-size: 11px; font-family: var(--font-sans);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+}
+.error-card-btn:hover { background: rgba(200, 80, 80, 0.1); color: #e06060; }
+body.day .error-card-btn { color: #a04040; border-color: rgba(160, 60, 60, 0.3); }
+body.day .error-card-btn:hover { background: rgba(180, 60, 60, 0.08); }
 
 /* ── Markdown en mensajes del asistente ──────────────────────── */
 .msg.assistant p  { margin: 0 0 .6rem; line-height: 1.65; }
