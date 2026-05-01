@@ -25,12 +25,11 @@ window.CHAT_HEADER = (() => {
         const title = document.getElementById('chat-header-title');
         if (title) title.dataset.original = newName;
         window.SIDEBAR.refreshChats();
-        window.TOAST.show('Chat renombrado');
       })
       .catch(() => {
         const title = document.getElementById('chat-header-title');
         if (title) title.value = title.dataset.original || '';
-        window.TOAST.show('Error al renombrar');
+        window.TOAST.error('Error al renombrar.');
       });
   }
 
@@ -44,8 +43,8 @@ window.CHAT_HEADER = (() => {
         await window.FB.deleteChat(user.uid, chatId);
         window.SIDEBAR.refreshChats();
         window.APP.newMap();
-        window.TOAST.show('Chat eliminado');
-      } catch { window.TOAST.show('Error al eliminar'); }
+        window.TOAST.success('Chat eliminado.');
+      } catch { window.TOAST.error('Error al eliminar.'); }
     });
   }
 
