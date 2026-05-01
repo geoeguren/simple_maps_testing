@@ -723,7 +723,7 @@ window.EXPORT = (() => {
         }));
 
       try {
-        const code = buildHTMLString(titulo, layers, baseKey, showLegend, collapsedDef, showNorth, allowZoom, mapInst);
+        const code = buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, mapInst);
         const target = modal.querySelector('#html-code-box') || modal.querySelector('#html-code-wrapper');
         renderCodeBox(target, code);
       } catch (err) {
@@ -750,7 +750,7 @@ window.EXPORT = (() => {
 
   // ── Constructor del HTML ──────────────────────────────────────
 
-  function buildHTMLString(titulo, layers, baseKey, showLegend, collapsedDef, showNorth, allowZoom, mapInst) {
+  function buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, mapInst) {
     const center = mapInst.getCenter();
     const zoom   = mapInst.getZoom();
 
@@ -763,9 +763,7 @@ window.EXPORT = (() => {
     const tileUrl = BASEMAP_URLS[baseKey] || null;
 
     const layersJSON      = JSON.stringify(layers);
-    const legendInit      = collapsedDef ? 'collapsed' : '';
     const legendDisplay   = showLegend   ? '' : 'display:none';
-    const northDisplay    = showNorth    ? '' : 'display:none';
     const zoomOpts        = allowZoom    ? 'true' : 'false';
     const dragOpts        = allowZoom    ? '' : 'dragging.disable(); map.scrollWheelZoom.disable(); map.doubleClickZoom.disable(); map.touchZoom.disable();';
     const tileBlock       = tileUrl
@@ -794,15 +792,11 @@ window.EXPORT = (() => {
     .legend-swatch{width:14px;height:14px;border-radius:2px;flex-shrink:0;border:0.5px solid rgba(0,0,0,0.15)}
     .legend-label{font-size:12px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #legend-footer{padding:6px 12px 8px;border-top:0.5px solid rgba(0,0,0,0.06);font-size:10px;color:#999;line-height:1.5}
-    #north-arrow{position:absolute;top:12px;left:12px;z-index:1000;background:rgba(255,255,255,0.9);border:0.5px solid rgba(0,0,0,0.12);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:0 1px 6px rgba(0,0,0,0.12);${northDisplay}}
-    #north-arrow .arrow{font-size:16px;color:#1a1814;line-height:1}
-    #north-arrow .n-label{font-size:8px;font-weight:700;color:#1a1814;line-height:1}
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <div id="north-arrow"><span class="arrow">↑</span><span class="n-label">N</span></div>
-  <div id="legend-panel" class="${legendInit}">
+  <div id="legend-panel" style="${legendDisplay}">
     <div id="legend-header" onclick="toggleLegend()">
       <span id="legend-title">${escHtml(titulo)}</span>
       <span id="legend-toggle">▾</span>
