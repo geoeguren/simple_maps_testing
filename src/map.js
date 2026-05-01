@@ -776,10 +776,12 @@ window.MAP = (() => {
           <span class="pfc-trigger-label">Más campos</span>
           <span class="pfc-chevron adv-ramp-arrow">▾</span>
         </div>
-        <div class="pfc-dropdown adv-ramp-dropdown hidden"></div>
       </div>`;
 
-    const dropdown = el.querySelector('.pfc-dropdown');
+    // Dropdown appended to body to escape Leaflet overflow:hidden
+    const dropdown = document.createElement('div');
+    dropdown.className = 'pfc-dropdown adv-ramp-dropdown hidden';
+    document.body.appendChild(dropdown);
 
     // Build dropdown options — immediate apply on checkbox change
     allFields.forEach(k => {
@@ -827,14 +829,17 @@ window.MAP = (() => {
       chevron.textContent = isOpen ? '▾' : '▲';
       trigger.classList.toggle('pfc-open', !isOpen);
       if (!isOpen) {
-        // Position the fixed dropdown above the trigger
         const rect = trigger.getBoundingClientRect();
-        dropdown.style.left  = rect.left + 'px';
-        dropdown.style.width = rect.width + 'px';
-        dropdown.style.bottom = (window.innerHeight - rect.top + 3) + 'px';
-        dropdown.style.top = 'auto';
+        dropdown.style.position = 'fixed';
+        dropdown.style.left     = rect.left + 'px';
+        dropdown.style.width    = rect.width + 'px';
+        dropdown.style.bottom   = (window.innerHeight - rect.top + 3) + 'px';
+        dropdown.style.top      = 'auto';
       }
     });
+
+    // Clean up body-appended dropdown when popup closes
+    leafletMap?.once('popupclose', () => dropdown.remove());
 
     return el;
   }
@@ -848,7 +853,7 @@ window.MAP = (() => {
     if (!wrapper) return;
     const popupEl  = wrapper.querySelector('.map-popup');
     const tableEl  = popupEl?.querySelector('.popup-table');
-    const dropdown = popupEl?.querySelector('.pfc-dropdown');
+    const dropdown = document.querySelector('.pfc-dropdown');
     const trigger  = popupEl?.querySelector('.pfc-trigger');
     const chevron  = popupEl?.querySelector('.pfc-chevron');
     if (!tableEl) return;
