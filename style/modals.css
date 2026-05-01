@@ -307,6 +307,13 @@ body.day .adv-pill:hover:not([disabled]):not(.active) { background: rgba(0,0,0,0
 }
 body.day .adv-body-note { color: #6a6560; }
 
+.adv-all-disabled-hint {
+  padding: 6px 16px 10px;
+  font-size: 12px; color: var(--cream2); font-family: var(--font-sans);
+  display: flex; align-items: center; gap: 4px; line-height: 1.4;
+}
+body.day .adv-all-disabled-hint { color: #8a8580; }
+
 /* Filas del body — mismo estilo que .lea-row */
 .adv-body-row {
   display: flex; flex-direction: column; gap: 4px;
