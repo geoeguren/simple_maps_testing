@@ -92,6 +92,7 @@ window.CHAT = (() => {
                 .replace(/```classify[\s\S]*?```/g, '')
                 .replace(/```export-choice[\s\S]*?```/g, '')
                 .replace(/```export[\s\S]*?```/g, '')
+                .replace(/```export-choice`{0,2}/g, '')  // bloque vacío o mal cerrado
                 .replace(/```\w*[\s\S]*$/g, '')  // bloque abierto sin cerrar
                 .trimEnd();
               UI.setMessageText(msgEl, display || '');
@@ -113,6 +114,7 @@ window.CHAT = (() => {
                 .replace(/```chat-title[\s\S]*?```/g, '')
                 .replace(/```export-choice[\s\S]*?```/g, '')
                 .replace(/```export[\s\S]*?```/g, '')
+                .replace(/```export-choice`{0,2}/g, '')  // bloque vacío o mal cerrado
                 .trim();
 
               UI.setMessageText(msgEl, displayText || '');
@@ -324,13 +326,16 @@ window.UI = (() => {
   }
 
   function setMessageText(el, text, collapse) {
+    const isUser = el.classList.contains('user') ||
+                   el.closest?.('.msg-user-wrap') !== null;
+
     const escape = s => s
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/\n/g, '<br>');
 
-    const fullHTML = escape(text);
+    const fullHTML = isUser ? escape(text) : renderMarkdown(text);
 
     if (!collapse) {
       el.innerHTML = fullHTML;
@@ -496,9 +501,33 @@ window.UI = (() => {
     scrollBottom();
   }
 
+  // ── Markdown ──────────────────────────────────────────────────
+  function renderMarkdown(text) {
+    if (typeof marked === 'undefined') {
+      // Fallback si marked no cargó: solo escapar y saltos de línea
+      return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
+    }
+    marked.setOptions({
+      breaks: true,    // \n → <br> dentro de párrafos
+      gfm: true,
+      mangle: false,
+      headerIds: false
+    });
+    return marked.parse(text);
+  }
+
   function showExportChoice(msgEl) {
     const card = document.createElement('div');
     card.className = 'msg-export-choice';
+
+    const labels = {
+      geojson: 'Capa vectorial',
+      jpeg:    'Imagen',
+      pdf:     'Archivo portable',
+      html:    'Embebido',
+    };
 
     const exports = [
       { key: 'geojson', label: 'Capa vectorial', sub: 'geojson' },
@@ -516,6 +545,12 @@ window.UI = (() => {
     card.querySelectorAll('.export-choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const fmt = btn.dataset.fmt;
+        // Reemplazar la card por confirmación
+        const confirm = document.createElement('div');
+        confirm.className = 'msg assistant msg-export-confirm';
+        confirm.textContent = `Exportando como ${labels[fmt] || fmt}…`;
+        card.replaceWith(confirm);
+
         if      (fmt === 'pdf')     window.EXPORT?.toPDF?.();
         else if (fmt === 'jpeg')    window.EXPORT?.toJPEG?.();
         else if (fmt === 'geojson') window.EXPORT?.toGeoJSON?.();
@@ -523,7 +558,6 @@ window.UI = (() => {
       });
     });
 
-    // Append after msgEl if given, else at bottom of messages
     if (msgEl) msgEl.after(card);
     else $msgs()?.appendChild(card);
     scrollBottom();
