@@ -543,18 +543,25 @@ window.UI = (() => {
       </button>`).join('');
 
     card.querySelectorAll('.export-choice-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const fmt = btn.dataset.fmt;
-        // Reemplazar la card por confirmación
+
         const confirm = document.createElement('div');
         confirm.className = 'msg assistant msg-export-confirm';
         confirm.textContent = `Exportando como ${labels[fmt] || fmt}…`;
         card.replaceWith(confirm);
 
-        if      (fmt === 'pdf')     window.EXPORT?.toPDF?.();
-        else if (fmt === 'jpeg')    window.EXPORT?.toJPEG?.();
-        else if (fmt === 'geojson') window.EXPORT?.toGeoJSON?.();
-        else if (fmt === 'html')    window.EXPORT?.toHTML?.();
+        try {
+          if      (fmt === 'pdf')     await window.EXPORT?.toPDF?.();
+          else if (fmt === 'jpeg')    await window.EXPORT?.toJPEG?.();
+          else if (fmt === 'geojson') await window.EXPORT?.toGeoJSON?.();
+          else if (fmt === 'html')  { window.EXPORT?.toHTML?.(); return; } // modal: no confirmar
+
+          confirm.textContent = `${labels[fmt]} exportado.`;
+        } catch {
+          confirm.textContent = `Error al exportar ${labels[fmt].toLowerCase()}.`;
+          confirm.style.color = 'var(--color-error, #c08080)';
+        }
       });
     });
 
