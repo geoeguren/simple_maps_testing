@@ -580,6 +580,7 @@ window.LAYERS_PANEL = (() => {
       closeEditAccordion(sec);
       const row = sec.querySelector(`.layers-data-row[data-key="${k}"]`);
       row?.remove();
+      window.TOAST?.success('Capa eliminada.');
       const plan   = window.APP?.getCurrentPlan?.();
       const user   = window.AUTH?.currentUser();
       const chatId = window.CHAT?.getChatId?.();
