@@ -494,3 +494,59 @@ body.day .adv-cancel,
 body.day .adv-apply  { color: #5a5650; }
 body.day .adv-cancel:hover,
 body.day .adv-apply:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
+
+/* ── HTML Export modal — elementos nuevos ────────────────────── */
+
+/* Fila de checkbox dentro de un dropdown (capas o campos) */
+.html-csel-chk-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px; cursor: pointer;
+  transition: background var(--transition);
+}
+.html-csel-chk-row:hover { background: var(--cream3); }
+body.day .html-csel-chk-row:hover { background: rgba(0,0,0,0.04); }
+
+.html-csel-chk-label {
+  font-family: var(--font-sans); font-size: 13px;
+  color: var(--cream); user-select: none;
+}
+body.day .html-csel-chk-label { color: #1a1814; }
+
+/* El selector de capas extiende el estilo adv-field-csel */
+.html-layers-csel .adv-ramp-dropdown {
+  max-height: 200px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
+}
+.html-layers-csel .adv-ramp-dropdown::-webkit-scrollbar { width: 3px; }
+.html-layers-csel .adv-ramp-dropdown::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+
+/* Selector de consulta de elementos — uno por capa */
+.html-identify-row {
+  width: 100%;
+}
+
+/* Estado deshabilitado del selector de consulta */
+.html-identify-csel.html-identify-disabled {
+  opacity: 0.38;
+  pointer-events: none;
+}
+.html-identify-csel.html-identify-disabled .adv-field-trigger {
+  cursor: default;
+}
+
+/* Dropdown de campos del identify — scrollable */
+.html-identify-dd {
+  max-height: 180px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
+}
+.html-identify-dd::-webkit-scrollbar { width: 3px; }
+.html-identify-dd::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+
+/* Fila de campo dentro del identify dropdown */
+.html-field-chk-row {
+  padding: 5px 12px;
+}
+.html-field-chk-row .html-csel-chk-label {
+  font-family: var(--font-mono); font-size: 12px; color: var(--cream2);
+}
+body.day .html-field-chk-row .html-csel-chk-label { color: #6a6560; }
