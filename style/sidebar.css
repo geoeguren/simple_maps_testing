@@ -164,6 +164,7 @@ body.day .sidebar.expanded .sb-chat-row.active { background: rgba(0,0,0,0.07); }
   font-family: var(--font-sans);
   background: transparent;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
   transition: color var(--transition);
   opacity: 0.7;
