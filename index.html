@@ -208,8 +208,10 @@
   <script src="src/search.js"></script>    <!-- window.SEARCH                          -->
   <script src="src/chat-header.js"></script>  <!-- window.CHAT_HEADER                  -->
   <script src="src/map-controls.js"></script> <!-- window.MAP_CONTROLS                 -->
-  <script src="src/layers-panel.js"></script> <!-- window.LAYERS_PANEL                 -->
-  <!-- TODO refactor: layers-panel-utils.js → layers-panel-style.js → layers-panel-modal.js → layers-panel.js -->
+  <script src="src/layers-panel-utils.js"></script>  <!-- window.LP_UTILS  — helpers compartidos     -->
+  <script src="src/layers-panel-style.js"></script>  <!-- window.LP_STYLE  — acordeón y estilos      -->
+  <script src="src/layers-panel-modal.js"></script>  <!-- window.LP_MODAL  — modal avanzado           -->
+  <script src="src/layers-panel.js"></script>        <!-- window.LP_PANEL, window.LAYERS_PANEL        -->
 
   <!-- ── Orquestador principal (debe ir último) ───────────────────── -->
   <script src="src/app.js"></script>       <!-- window.APP, window.TOAST, window.THEME -->
@@ -223,7 +225,8 @@
         'WFS', 'CLIP',
         'MAP', 'EXPORT',
         'CHAT', 'UI', 'SETTINGS', 'AUTH', 'FB',
-        'SIDEBAR', 'SEARCH', 'CHAT_HEADER', 'MAP_CONTROLS', 'LAYERS_PANEL',
+        'SIDEBAR', 'SEARCH', 'CHAT_HEADER', 'MAP_CONTROLS',
+        'LP_UTILS', 'LP_STYLE', 'LP_MODAL', 'LP_PANEL', 'LAYERS_PANEL',
         'APP', 'TOAST', 'THEME'
       ];
       const missing = required.filter(m => !window[m]);
