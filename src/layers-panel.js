@@ -109,9 +109,9 @@ window.LAYERS_PANEL = (() => {
     if (geom === 'point' || geom === 'polygon') {
       const w  = s.weight ?? 1.5;
       const fo = s.fillOpacity ?? 0.5;
-      rows += leaRow('Grosor borde', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" ${p} type="range" min="0" max="10" step="0.5" value="${w}" /><span class="lea-val">${w}</span></div>`);
-      rows += leaRow('Borde',   colorPickerHTML('color',     toH(s.color), p));
-      rows += leaRow('Relleno', colorPickerHTML('fillColor', toH(s.fillColor || s.color), p));
+      rows += leaRow('Grosor del borde', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" ${p} type="range" min="0" max="10" step="0.5" value="${w}" /><span class="lea-val">${w}</span></div>`);
+      rows += leaRow('Color del borde',   colorPickerHTML('color',     toH(s.color), p));
+      rows += leaRow('Color del relleno', colorPickerHTML('fillColor', toH(s.fillColor || s.color), p));
       const foVal = Math.round(fo * 100);
       rows += leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" ${p} type="range" min="0" max="1" step="0.05" value="${fo}" /><span class="lea-val">${foVal}%</span></div>`);
     }
@@ -385,16 +385,16 @@ window.LAYERS_PANEL = (() => {
           extraControls += `
             <div class="lea-cat-controls">
               <div class="lea-cat-ctrl-row">${leaRow('Tamaño', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="radius" type="range" min="1" max="25" step="0.5" value="${radius}" /><span class="lea-val">${radius}</span></div>`)}</div>
-              <div class="lea-cat-ctrl-row">${leaRow('Borde', colorPickerHTML('color', toHex(s.color)))}</div>
-              <div class="lea-cat-ctrl-row">${leaRow('Grosor borde', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight ?? 1.5}" /><span class="lea-val">${s.weight ?? 1.5}</span></div>`)}</div>
+              <div class="lea-cat-ctrl-row">${leaRow('Color del borde', colorPickerHTML('color', toHex(s.color)))}</div>
+              <div class="lea-cat-ctrl-row">${leaRow('Grosor del borde', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight ?? 1.5}" /><span class="lea-val">${s.weight ?? 1.5}</span></div>`)}</div>
               <div class="lea-cat-ctrl-row">${leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${fo}" /><span class="lea-val">${Math.round(fo*100)}%</span></div>`)}</div>
             </div>`;
         } else if (geom === 'polygon') {
           const fo = s.fillOpacity ?? 0.5;
           extraControls += `
             <div class="lea-cat-controls">
-              <div class="lea-cat-ctrl-row">${leaRow('Borde', colorPickerHTML('color', toHex(s.color)))}</div>
-              <div class="lea-cat-ctrl-row">${leaRow('Grosor borde', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight ?? 1.5}" /><span class="lea-val">${s.weight ?? 1.5}</span></div>`)}</div>
+              <div class="lea-cat-ctrl-row">${leaRow('Color del borde', colorPickerHTML('color', toHex(s.color)))}</div>
+              <div class="lea-cat-ctrl-row">${leaRow('Grosor del borde', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight ?? 1.5}" /><span class="lea-val">${s.weight ?? 1.5}</span></div>`)}</div>
               <div class="lea-cat-ctrl-row">${leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${fo}" /><span class="lea-val">${Math.round(fo*100)}%</span></div>`)}</div>
             </div>`;
         } else if (geom === 'line') {
@@ -1107,12 +1107,12 @@ window.LAYERS_PANEL = (() => {
       let rows = '';
       if (geom === 'point') {
         rows += leaRow('Tamaño', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="radius" type="range" min="1" max="25" step="0.5" value="${s.radius??5}" /><span class="lea-val">${s.radius??5}</span></div>`);
-        rows += leaRow('Borde',  colorPickerHTML('color', toHex(s.color)));
+        rows += leaRow('Color del borde',  colorPickerHTML('color', toHex(s.color)));
         rows += leaRow('Grosor', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
         rows += leaRow('Opacidad', `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${s.fillOpacity??0.85}" /><span class="lea-val">${Math.round((s.fillOpacity??0.85)*100)}%</span></div>`);
       } else if (geom === 'polygon') {
-        rows += leaRow('Relleno', colorPickerHTML('fillColor', toHex(s.fillColor)));
-        rows += leaRow('Borde',   colorPickerHTML('color',     toHex(s.color)));
+        rows += leaRow('Color del relleno', colorPickerHTML('fillColor', toHex(s.fillColor)));
+        rows += leaRow('Color del borde',   colorPickerHTML('color',     toHex(s.color)));
         rows += leaRow('Grosor',  `<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="weight" type="range" min="0" max="10" step="0.5" value="${s.weight??1.5}" /><span class="lea-val">${s.weight??1.5}</span></div>`);
         rows += leaRow('Opacidad',`<div class="lea-slider-wrap"><input class="lea-range-input" data-prop="fillOpacity" type="range" min="0" max="1" step="0.05" value="${s.fillOpacity??0.5}" /><span class="lea-val">${Math.round((s.fillOpacity??0.5)*100)}%</span></div>`);
       } else {
