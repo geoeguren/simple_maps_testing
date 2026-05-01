@@ -59,7 +59,33 @@ function capasAContexto(capas) {
   }).join('\n\n');
 }
 
-function buildSystemPrompt(capasRelevantes, todasLasCapas, tone, activeMap) {
+/**
+ * Genera el catálogo de capas agrupado por fuente/país.
+ * Se construye dinámicamente desde el objeto layers recibido del cliente,
+ * que proviene de window.LAYERS (generado por layers/index.js).
+ * Al agregar nuevos países u organismos, aparecen aquí automáticamente.
+ */
+function buildCatalogo(todasLasCapas, sources) {
+  // Agrupar capas por fuente
+  const grupos = {};
+  for (const [key, capa] of Object.entries(todasLasCapas)) {
+    const sourceKey = capa.source || 'desconocida';
+    if (!grupos[sourceKey]) grupos[sourceKey] = [];
+    grupos[sourceKey].push({ key, ...capa });
+  }
+
+  // Construir texto del catálogo agrupado
+  return Object.entries(grupos).map(([sourceKey, capas]) => {
+    const src = sources?.[sourceKey];
+    const header = src
+      ? `## ${src.countryLabel || src.country?.toUpperCase() || sourceKey} — ${src.label}`
+      : `## ${sourceKey}`;
+    const lista = capas.map(c => `  ${c.key}: ${c.titulo}`).join('\n');
+    return `${header}\n${lista}`;
+  }).join('\n\n');
+}
+
+function buildSystemPrompt(capasRelevantes, todasLasCapas, tone, activeMap, sources, userLang) {
   const toneInstructions = {
     default:    'Dialogá con el usuario, hacé preguntas cuando haya ambigüedad, tono cálido y natural.',
     eficiente:  'Sé muy breve y directo. Máximo 1-2 oraciones antes de generar el mapa. No hagas preguntas salvo que sea absolutamente necesario. Priorizá la velocidad.',
@@ -68,25 +94,48 @@ function buildSystemPrompt(capasRelevantes, todasLasCapas, tone, activeMap) {
     creativo:   'Sugerí combinaciones de capas no obvias, hacé preguntas interesantes sobre el territorio, proponé perspectivas alternativas. Pensá fuera de lo convencional.'
   };
   const toneGuide = toneInstructions[tone] || toneInstructions.default;
-  const listaCompleta = Object.entries(todasLasCapas).map(([k,v]) => `${k}:${v.titulo}`).join(', ');
+
+  const catalogo = buildCatalogo(todasLasCapas, sources);
+
   const activeMapContext = activeMap
     ? `\nMAPA ACTIVO EN ESTE MOMENTO:\nTítulo: ${activeMap.titulo}\nCapas: ${activeMap.capas}\nCualquier pedido de cambio de estilo, nombre o eliminación de capa se refiere a ESTE mapa.\n`
     : '';
 
-  return `Sos el asistente de Simple Maps, una herramienta para generar mapas de Argentina.${activeMapContext}
-Tu personalidad: curioso, amigable, conversacional. Te interesa entender bien qué quiere el usuario antes de generar el mapa. Hacés preguntas cuando algo no está claro. Respondés en español rioplatense, de forma natural y cálida — como si fuese una conversación real.
+  // Instrucción de idioma: detectar del browser como base, adaptarse al texto del usuario
+  const langInstruction = userLang
+    ? `El idioma del browser del usuario es "${userLang}". Respondé en ese idioma salvo que el usuario escriba en otro — en ese caso adaptate al idioma que usa el usuario.`
+    : `Detectá el idioma del usuario por su mensaje y respondé en ese idioma.`;
 
-CAPAS DISPONIBLES: ${listaCompleta}
+  return `Sos el asistente de Simple Maps, una herramienta para generar mapas interactivos a partir de servicios WFS.${activeMapContext}
+
+IDIOMA: ${langInstruction}
+
+PERSONALIDAD: ${toneGuide}
+
+CATÁLOGO DE CAPAS DISPONIBLES:
+${catalogo}
 
 CAPAS RELEVANTES PARA ESTA CONSULTA (con atributos):
 ${capasAContexto(capasRelevantes)}
 
+ESTILOS VISUALES:
+Siempre incluí un bloque "style" junto al bloque "map". Elegí colores temáticamente coherentes:
+- Rutas/transporte → tonos naranjas o grises (#d4720f, #888888)
+- Agua/puertos → azules (#023e8a, #4cc9f0)
+- Vegetación/áreas protegidas → verdes (#40916c, #52b788)
+- División política → neutros cálidos (#c8622a, #4a7fa5)
+- Puntos de interés → púrpuras o llamativos (#6a0572, #c77dff)
+Si el usuario pidió un color específico, usá ese. Si el usuario no especificó color, elegí uno apropiado al tema.
+
 Cuando tengas suficiente información para generar el mapa, respondé con tu mensaje + estos bloques al final:
 \`\`\`map
-[{"layerKey":"...","filtro":"CQL o vacío","clipArea":"provincia en minúsculas sin tildes, o vacío","descripcion":"texto breve"}]
+[{"layerKey":"...","filtro":"CQL o vacío","clipArea":"nombre del área en minúsculas sin tildes, o vacío","descripcion":"texto breve"}]
+\`\`\`
+\`\`\`style
+[{"layerKey":"...","color":"#hex","fillColor":"#hex","fillOpacity":0.5,"weight":2,"opacity":1,"radius":6}]
 \`\`\`
 \`\`\`chat-title
-Título geográfico del mapa: qué capas y/o qué lugar. Máximo 6 palabras. Ejemplos: "Puertos y rutas de Santa Cruz", "Áreas protegidas de Patagonia", "Pasos fronterizos con Chile". NUNCA uses el texto del usuario como título — siempre describí el contenido del mapa.
+Título geográfico del mapa. Máximo 6 palabras. Ejemplos: "Puertos y rutas de Santa Cruz", "Áreas protegidas de Patagonia". NUNCA uses el texto del usuario como título.
 \`\`\`
 
 REGLAS DE FILTROS CQL:
@@ -133,12 +182,10 @@ Cuando el usuario pida exportar a un formato específico, respondé con texto br
 {"format":"pdf"}
 \`\`\`
 Formatos válidos: "pdf", "jpeg", "geojson", "html"
-Ejemplos: "exportar en pdf", "quiero la imagen", "bajar el geojson", "exportar como html"
 
 Cuando el usuario pida exportar sin especificar el formato, respondé con texto + bloque export-choice (sin contenido):
 \`\`\`export-choice
-\`\`\`
-Ejemplo: "quiero exportar el mapa", "cómo descargo esto", "exportar"`;
+\`\`\``;
 }
 
 // ── Streaming con OpenAI-compatible API (Cerebras/Groq) ───────────
@@ -251,12 +298,12 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'No hay API keys configuradas' });
   }
 
-  const { messages, layers, model, tone, activeMap } = req.body || {};
+  const { messages, layers, sources, model, tone, activeMap, userLang } = req.body || {};
   if (!messages?.length) return res.status(400).json({ error: 'Se requiere messages' });
 
   const textoUsuario    = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
   const capasRelevantes = buscarCapasRelevantes(textoUsuario, layers || {});
-  const systemPrompt    = buildSystemPrompt(capasRelevantes, layers || {}, tone || 'conversacional', activeMap);
+  const systemPrompt    = buildSystemPrompt(capasRelevantes, layers || {}, tone || 'default', activeMap, sources || {}, userLang || null);
 
   // Configurar SSE
   res.setHeader('Content-Type', 'text/event-stream');
