@@ -133,7 +133,7 @@ body.day .map-legend.basemap-dark { background: rgba(20,20,20,0.97); border-colo
 }
 .map-legend.legend-collapsed .legend-header { margin-bottom: 0; }
 .legend-title {
-  font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+  font-family: var(--font-sans); font-size: 11px; font-weight: 400;
   color: var(--cream2); text-transform: uppercase; letter-spacing: .04em;
   text-align: left; flex: 1;
 }
@@ -649,11 +649,11 @@ body.day .popup-val { color: #1a1814; }
 body.day .pfc-trigger-label { color: #6a6560; }
 
 .pfc-dropdown {
-  position: absolute; left: 0; right: 0; bottom: calc(100% + 3px);
+  position: fixed;
   background: var(--bg2); border: 0.5px solid var(--border-md);
   border-radius: 4px; z-index: 9999;
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
-  max-height: 200px; overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  max-height: 220px; overflow-y: auto;
   scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
 }
 .pfc-dropdown::-webkit-scrollbar { width: 4px; }
