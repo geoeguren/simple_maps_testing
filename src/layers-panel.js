@@ -929,14 +929,26 @@ window.LAYERS_PANEL = (() => {
       const cl      = nl?.classification;
       const itemsEl = bodyEl.querySelector('.adv-cat-items, .adv-grad-items');
       if (!itemsEl || !cl?.colorMap) return;
+      const isGraduated = itemsEl.classList.contains('adv-grad-items');
       itemsEl.innerHTML = '';
 
       Object.entries(cl.colorMap).forEach(([val, color]) => {
         const item = document.createElement('div');
         item.className = 'adv-cat-item';
+        item.dataset.val = val;
 
         const header = document.createElement('div');
         header.className = 'adv-cat-header';
+
+        // Handle de drag (solo categorizado)
+        if (!isGraduated) {
+          item.draggable = true;
+          const handle = document.createElement('span');
+          handle.className = 'adv-cat-drag material-icons';
+          handle.textContent = 'drag_indicator';
+          handle.title = 'Arrastrar para reordenar';
+          header.appendChild(handle);
+        }
 
         // Swatch con color picker
         const swatch = document.createElement('label');
@@ -1016,6 +1028,55 @@ window.LAYERS_PANEL = (() => {
           }
         });
       });
+
+      // Drag-to-reorder (solo categorizado)
+      if (!isGraduated) {
+        let _dragSrc = null;
+        itemsEl.querySelectorAll('.adv-cat-item').forEach(item => {
+          item.addEventListener('dragstart', e => {
+            _dragSrc = item;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => item.classList.add('adv-cat-dragging'), 0);
+          });
+          item.addEventListener('dragend', () => {
+            item.classList.remove('adv-cat-dragging');
+            itemsEl.querySelectorAll('.adv-cat-item').forEach(i => i.classList.remove('adv-cat-drag-over'));
+          });
+          item.addEventListener('dragover', e => {
+            e.preventDefault();
+            if (item === _dragSrc) return;
+            itemsEl.querySelectorAll('.adv-cat-item').forEach(i => i.classList.remove('adv-cat-drag-over'));
+            item.classList.add('adv-cat-drag-over');
+          });
+          item.addEventListener('drop', e => {
+            e.preventDefault();
+            if (!_dragSrc || _dragSrc === item) return;
+            item.classList.remove('adv-cat-drag-over');
+            // Reordenar colorMap según nueva posición DOM
+            const allItems = [...itemsEl.querySelectorAll('.adv-cat-item')];
+            const fromIdx  = allItems.indexOf(_dragSrc);
+            const toIdx    = allItems.indexOf(item);
+            // Insertar antes o después según dirección
+            if (fromIdx < toIdx) itemsEl.insertBefore(_dragSrc, item.nextSibling);
+            else                 itemsEl.insertBefore(_dragSrc, item);
+            // Reconstruir colorMap en el nuevo orden
+            const nl2 = window.MAP.getActiveLayers()[k];
+            if (!nl2?.classification?.colorMap) return;
+            const newOrder  = [...itemsEl.querySelectorAll('.adv-cat-item')].map(i => i.dataset.val);
+            const oldMap    = nl2.classification.colorMap;
+            const oldStyle  = nl2.classification.styleMap || {};
+            const newMap    = {};
+            const newStyle  = {};
+            newOrder.forEach(v => {
+              if (oldMap[v] !== undefined) newMap[v] = oldMap[v];
+              if (oldStyle[v] !== undefined) newStyle[v] = oldStyle[v];
+            });
+            nl2.classification.colorMap  = newMap;
+            nl2.classification.styleMap  = newStyle;
+            window.MAP.applyClassificationFromData(k, nl2.classification);
+          });
+        });
+      }
     }
 
     function renameCatValue(oldVal, newVal) {
