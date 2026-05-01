@@ -883,9 +883,9 @@ window.MAP = (() => {
         const rect = trigger.getBoundingClientRect();
         dropdown.style.position = 'fixed';
         dropdown.style.left     = rect.left + 'px';
-        dropdown.style.width    = rect.width + 'px';
-        dropdown.style.bottom   = (window.innerHeight - rect.top + 3) + 'px';
-        dropdown.style.top      = 'auto';
+        dropdown.style.width    = '220px';
+        dropdown.style.top      = (rect.bottom + 3) + 'px';
+        dropdown.style.bottom   = 'auto';
       }
     });
 
