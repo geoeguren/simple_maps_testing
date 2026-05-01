@@ -219,9 +219,10 @@
   <script src="src/app.js"></script>       <!-- window.APP, window.TOAST, window.THEME -->
 
   <!-- ── Verificación de módulos en desarrollo ────────────────────── -->
-  <!-- Detecta módulos faltantes temprano, antes de que fallen silenciosamente en runtime -->
+  <!-- Detecta módulos faltantes. Usa setTimeout para esperar a que    -->
+  <!-- layers/index.js (type="module", asíncrono) termine de ejecutar. -->
   <script>
-    (function checkModules() {
+    setTimeout(function checkModules() {
       const required = [
         'PALETTES', 'LAYERS', 'PROVINCIAS_MAP', 'SOURCES',
         'WFS', 'CLIP',
@@ -235,7 +236,7 @@
       if (missing.length) {
         console.error('[simple maps] Módulos no cargados:', missing.join(', '));
       }
-    })();
+    }, 0);
   </script>
 </body>
 </html>
