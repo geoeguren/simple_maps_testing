@@ -1,18 +1,15 @@
 /**
- * src/layers/ar/ign.js — Capas del IGN Argentina
+ * layers/ar/ign.js — Capas del IGN Argentina
  *
  * Instituto Geográfico Nacional — https://wms.ign.gob.ar/geoserver/ows
  * Un único WFS, todas las capas disponibles acá.
  *
- * Para agregar una capa nueva del IGN: agregar una entrada al Object.assign de abajo.
- * Para agregar otro organismo de Argentina: crear src/layers/ar/indec.js, etc.
- * Para agregar otro país: crear src/layers/cl/ign.js, etc.
- * En todos los casos, agregar el <script> correspondiente en index.html.
+ * Para agregar una capa nueva del IGN: agregar una entrada a IGN_AR.
+ * Para agregar otro organismo de Argentina: crear layers/ar/indec.js, etc.
+ * Para agregar otro país: crear layers/cl/ign.js, etc.
  */
 
-window.LAYERS = window.LAYERS || {};
-
-Object.assign(window.LAYERS, {
+export const IGN_AR = {
 
   // ── División político-administrativa ──────────────────────────
 
@@ -232,11 +229,9 @@ Object.assign(window.LAYERS, {
     ]
   },
 
-});
+};
 
-// ── Mapa de variantes de nombre de provincia ──────────────────
-// Usado por clip.js para normalizar lo que escribe el usuario.
-window.PROVINCIAS_MAP = {
+export const PROVINCIAS_MAP_AR = {
   'buenos aires':           'Buenos Aires',
   'bsas':                   'Buenos Aires',
   'caba':                   'Ciudad Autónoma de Buenos Aires',
@@ -270,5 +265,3 @@ window.PROVINCIAS_MAP = {
   'tucumán':                'Tucumán',
   'tucuman':                'Tucumán',
 };
-
-console.log('[layers] IGN Argentina: ' + Object.keys(window.LAYERS).length + ' capas cargadas');
