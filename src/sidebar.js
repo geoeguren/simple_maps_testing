@@ -4,10 +4,14 @@
 
 window.SIDEBAR = (() => {
 
-  let expanded      = false;
-  let currentUser   = null;
-  let currentChatId = null;
-  let chats         = [];
+  const PAGE_SIZE    = 50;  // chats visibles inicialmente
+  const PAGE_LOAD    = 50;  // cuantos se cargan al presionar 'Cargar mas'
+
+  let expanded       = false;
+  let currentUser    = null;
+  let currentChatId  = null;
+  let chats          = [];       // todos los chats cargados del servidor
+  let _visibleCount  = PAGE_SIZE; // cuantos se muestran actualmente
   let _pendingChatId = null;
 
   function render() {
@@ -55,7 +59,11 @@ window.SIDEBAR = (() => {
   function buildChatsList() {
     if (!currentUser) return '<button class="sb-chat-item" style="pointer-events:none;opacity:0">—</button>';
     if (!chats.length) return '<span class="sb-section-title" style="text-transform:none;font-size:13px">No hay chats todavía</span>';
-    return chats.map(chat => `
+
+    const visible = chats.slice(0, _visibleCount);
+    const hasMore = chats.length > _visibleCount;
+
+    const items = visible.map(chat => `
       <div class="sb-chat-row ${chat.id === currentChatId ? 'active' : ''}" data-chatid="${chat.id}">
         <button class="sb-chat-item sb-action"
                 data-action="loadchat" data-id="${chat.id}">
@@ -71,6 +79,14 @@ window.SIDEBAR = (() => {
         </button>
       </div>
     `).join('');
+
+    const loadMoreBtn = hasMore
+      ? `<button class="sb-load-more sb-action" data-action="loadmore">
+           Cargar más (${chats.length - _visibleCount})
+         </button>`
+      : '';
+
+    return items + loadMoreBtn;
   }
 
   function buildUserArea() {
@@ -115,6 +131,7 @@ window.SIDEBAR = (() => {
         case 'loadchat':   loadChat(btn.dataset.id); break;
         case 'renamechat': renameChatInline(btn.dataset.id, btn.dataset.titulo); break;
         case 'deletechat': confirmDeleteModal(btn.dataset.id, btn.dataset.titulo); break;
+        case 'loadmore':   loadMore(); break;
       }
     });
 
@@ -172,7 +189,11 @@ window.SIDEBAR = (() => {
 
   async function loadUserChats(user) {
     try {
-      chats = await window.FB.getUserChats(user.uid);
+      // Pedimos hasta 500 chats al servidor; la paginación es sólo visual.
+      // Así "Cargar más" es instantáneo (sin roundtrip extra) y la búsqueda
+      // sigue funcionando sobre todos los chats.
+      chats = await window.FB.getUserChats(user.uid, 500);
+      _visibleCount = PAGE_SIZE;
       render();
       if (_pendingChatId) {
         var pending = _pendingChatId;
@@ -183,6 +204,11 @@ window.SIDEBAR = (() => {
       console.error('[SIDEBAR] Error cargando chats:', err);
       TOAST.error('No se pudieron cargar los chats.');
     }
+  }
+
+  function loadMore() {
+    _visibleCount = Math.min(_visibleCount + PAGE_LOAD, chats.length);
+    render();
   }
 
   async function loadChat(chatId) {
@@ -247,7 +273,7 @@ window.SIDEBAR = (() => {
     }
   }
 
-  function refreshChats() { if (currentUser) loadUserChats(currentUser); }
+  function refreshChats() { if (currentUser) loadUserChats(currentUser); }  // resetea _visibleCount internamente
 
   function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
