@@ -762,7 +762,6 @@ window.EXPORT = (() => {
     #legend-body{padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
     #legend-panel.collapsed #legend-body{display:none}
     .legend-item{display:flex;align-items:center;gap:8px}
-    .legend-swatch{width:14px;height:14px;border-radius:2px;flex-shrink:0;border:0.5px solid rgba(0,0,0,0.15)}
     .legend-label{font-size:12px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #legend-footer{padding:6px 12px 8px;border-top:0.5px solid rgba(0,0,0,0.06);font-size:10px;color:#999;line-height:1.5}
     /* Controles de zoom — arriba a la derecha, debajo de la leyenda */
@@ -823,7 +822,13 @@ window.EXPORT = (() => {
 
     // Leyenda
     const lb=document.getElementById('legend-body');
-    function ai(c,l){const i=document.createElement('div');i.className='legend-item';i.innerHTML='<span class="legend-swatch" style="background:'+c+'"></span><span class="legend-label">'+l+'</span>';lb.appendChild(i)}
+    function mkSVG(g,fill,stroke,fo,w,op,da){
+      w=Math.min(w??1.5,3);
+      if(g==='line'){const d=da?'stroke-dasharray="'+da+'"':'';return '<svg viewBox="0 0 14 14" width="14" height="14" style="flex-shrink:0"><line x1="1" y1="7" x2="13" y2="7" stroke="'+stroke+'" stroke-width="'+(w*1.5)+'" stroke-opacity="'+op+'" stroke-linecap="round" '+d+'/></svg>';}
+      if(g==='point')return '<svg viewBox="0 0 14 14" width="14" height="14" style="flex-shrink:0"><circle cx="7" cy="7" r="5" fill="'+fill+'" fill-opacity="'+fo+'" stroke="'+stroke+'" stroke-width="'+w+'" stroke-opacity="'+op+'"/></svg>';
+      return '<svg viewBox="0 0 14 14" width="14" height="14" style="flex-shrink:0"><rect x="1" y="1" width="12" height="12" rx="2" fill="'+fill+'" fill-opacity="'+fo+'" stroke="'+stroke+'" stroke-width="'+w+'" stroke-opacity="'+op+'"/></svg>';
+    }
+    function ai(svg,label){const i=document.createElement('div');i.className='legend-item';i.innerHTML=svg+'<span class="legend-label">'+label+'</span>';lb.appendChild(i)}
 
     // Capas + consulta
     let identifyMode=false;
@@ -878,10 +883,26 @@ window.EXPORT = (() => {
       if(!on){map.closePopup();clearHL();}
     }
 
+    function darken(hex,a){a=a??0.22;const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;if(mx===mn){h=s=0;}else{const d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;default:h=((r-g)/d+4)/6;}}l=Math.max(0,l-a);const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q;function h2r(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;}function t2h(n){return Math.round(n*255).toString(16).padStart(2,'0');}return'#'+t2h(h2r(p,q,h+1/3))+t2h(h2r(p,q,h))+t2h(h2r(p,q,h-1/3));}
+
     D.forEach(l=>{
-      if(!l.classification?.colorMap)ai(l.style?.fillColor||l.style?.color||'#888',l.titulo);
-      else Object.entries(l.classification.colorMap).forEach(([v,c])=>ai(c,v));
-      const gl=L.geoJSON(l.geojson,{
+      const g=l.geomType||'polygon';
+      const s=l.style||{};
+      if(!l.classification?.colorMap){
+        const fill=s.fillColor||s.color||'#888';
+        const stroke=g==='line'?fill:(s.color||darken(fill));
+        const fo=s.fillOpacity??0.5,w=s.weight??1.5,op=s.opacity??1,da=s.dashArray||null;
+        ai(mkSVG(g,fill,stroke,fo,w,op,da),l.titulo);
+      } else {
+        Object.entries(l.classification.colorMap).forEach(([v,c])=>{
+          const vs=l.classification.styleMap?.[v]||{};
+          const fill=vs.fillColor||c;
+          const stroke=g==='line'?(vs.color||fill):(vs.color||darken(fill));
+          const fo=s.fillOpacity??0.5,w=s.weight??1.5,op=s.opacity??1;
+          ai(mkSVG(g,fill,stroke,fo,w,op,null),v);
+        });
+      }
+      L.geoJSON(l.geojson,{
         style:f=>fs(l.geomType,l.style,l.classification,f.properties),
         pointToLayer:(f,ll)=>L.circleMarker(ll,fs('point',l.style,l.classification,f.properties)),
         onEachFeature:(f,layer)=>bindIdentify(f,layer,l.titulo)
