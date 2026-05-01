@@ -596,7 +596,7 @@ body.day .btn-export-text:hover { background: rgba(0,0,0,0.06); color: #1a1814; 
 .sm-popup .leaflet-popup-content { margin: 0; }
 body.day .sm-popup .leaflet-popup-content-wrapper { background: #f0ede8; border-color: #c8c4be; }
 
-.map-popup { min-width: 180px; max-width: 280px; }
+.map-popup { width: 224px; }
 
 /* Título — mismo estilo que cabecera de dropdown */
 .popup-header {
@@ -641,6 +641,7 @@ body.day .popup-val { color: #1a1814; }
 /* "Más campos" — selector flotante igual que adv-ramp-csel */
 .pfc-csel-wrap {
   position: relative; margin: 8px 12px 8px;
+  width: calc(100% - 24px);
 }
 .pfc-trigger {
   display: flex; align-items: center; gap: 8px; cursor: pointer;
