@@ -180,25 +180,3 @@ body:not(.day) #screen-home .prompt-textarea::placeholder { color: rgba(200,196,
 .prompt-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
 /* ── Chips ───────────────────────────────────────────────── */
-.home-chips {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-.ex-chip {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  padding: 8px 18px;
-  border-radius: 30px;
-  border: 0.5px solid var(--border-md);
-  background: transparent;
-  color: var(--cream2);
-  transition: all var(--transition);
-}
-.ex-chip:hover {
-  border-color: rgba(74,143,196,0.6);
-  color: var(--cream);
-  background: rgba(74,143,196,0.08);
-}
