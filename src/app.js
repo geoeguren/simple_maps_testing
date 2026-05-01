@@ -450,6 +450,15 @@ window.APP = (() => {
 
     for (let i = 0; i < plan.instrucciones.length; i++) {
       const inst = plan.instrucciones[i];
+
+      // Saltear capas que ya fallaron en un intento anterior.
+      // _failed se persiste en Firestore para que no se reintenten al restaurar el chat.
+      // El usuario puede volver a pedirlas explícitamente en el chat.
+      if (inst._failed) {
+        console.log(`[APP] Saltando capa fallida: ${inst.layerKey}`);
+        continue;
+      }
+
       try {
         // Sanear layerKey: en versiones anteriores podía persistirse con el sufijo
         // del mapKey (ej: "pasos_frontera_1" en lugar de "pasos_frontera").
@@ -482,6 +491,29 @@ window.APP = (() => {
           window.MAP.applyClassification(mapKey, { ...cl, paletteColors });
         }
       } catch (err) {
+        const layerDef = window.LAYERS[inst.layerKey];
+        const titulo   = inst.titulo || inst.descripcion || layerDef?.titulo || inst.layerKey;
+
+        // Marcar como fallida para no reintentar automáticamente
+        inst._failed = true;
+
+        // Persistir el flag en Firestore
+        const plan2  = window.APP?.getCurrentPlan?.() || plan;
+        const user   = window.AUTH?.currentUser();
+        const chatId = window.CHAT?.getChatId?.();
+        if (user && chatId && plan2) {
+          window.FB.updateChat(user.uid, chatId, { lastMap: plan2 })
+            .catch(e => console.warn('[APP] Error persistiendo _failed:', e));
+        }
+
+        // Toast: aviso inmediato
+        window.TOAST?.error(`No se pudo cargar "${titulo}". Podés volver a pedirla en el chat.`);
+
+        // Mensaje en chat: queda como registro y permite al usuario volver a pedirla
+        window.UI?.addMessage('system-error',
+          `⚠ No se pudo cargar la capa **${titulo}**.\nEl servidor del IGN no respondió después de varios intentos. Podés volver a pedirla cuando quieras.`
+        );
+
         errors.push(err.message);
         console.error(`[APP] Error cargando capa ${inst.layerKey}:`, err);
       }
