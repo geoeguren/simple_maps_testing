@@ -178,14 +178,14 @@ body.day .adv-modal-header { border-color: #c8c4be; }
 body.day .adv-modal-title { color: #1a1814; }
 
 .adv-modal-close {
-  width: 28px; height: 28px; border-radius: 50%;
-  background: transparent; border: none; color: var(--cream2);
+  width: 26px; height: 26px; flex-shrink: 0;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--cream2); border-radius: 4px;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0;
   transition: background var(--transition), color var(--transition);
 }
 .adv-modal-close:hover { background: var(--cream3); color: var(--cream); }
-.adv-modal-close .material-icons { font-size: 18px; }
+.adv-modal-close .material-icons { font-size: 16px; pointer-events: none; }
 
 /* Pills de modo */
 .adv-modal-pills {
