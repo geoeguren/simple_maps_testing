@@ -263,28 +263,41 @@ module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  // Intentar proveedores según selección del usuario
+  // ── Selección de proveedores ──────────────────────────────────
+  //
+  // Gemini no tiene streaming nativo compatible con SSE, así que se
+  // maneja separado: primero intentamos los proveedores streaming
+  // (Cerebras/Groq) y Gemini queda como fallback final —o como
+  // proveedor único si el usuario lo seleccionó explícitamente.
+  //
+  // useGeminiOnly: el usuario eligió Gemini → saltar Cerebras/Groq
+  // useGeminiFallback: modo auto → usar Gemini si los otros fallan
+
+  const useGeminiOnly     = model === 'gemini';
+  const useGeminiFallback = !useGeminiOnly; // en auto y en selección de cerebras/groq
+
   const proveedores = [];
-  if (model === 'cerebras' && cerebrasKey) {
-    proveedores.push({ nombre: 'Cerebras', fn: () => streamOpenAI(CEREBRAS_URL, CEREBRAS_MODEL, cerebrasKey, systemPrompt, messages, res) });
-  } else if (model === 'groq' && groqKey) {
-    proveedores.push({ nombre: 'Groq', fn: () => streamOpenAI(GROQ_URL, GROQ_MODEL, groqKey, systemPrompt, messages, res) });
-  } else if (model === 'gemini') {
-    // Gemini directo sin streaming local
-  } else {
-    // Auto: Cerebras → Groq con fallback
-    if (cerebrasKey) proveedores.push({ nombre: 'Cerebras', fn: () => streamOpenAI(CEREBRAS_URL, CEREBRAS_MODEL, cerebrasKey, systemPrompt, messages, res) });
-    if (groqKey)     proveedores.push({ nombre: 'Groq',     fn: () => streamOpenAI(GROQ_URL, GROQ_MODEL, groqKey, systemPrompt, messages, res) });
+  if (!useGeminiOnly) {
+    if (model === 'cerebras' && cerebrasKey) {
+      proveedores.push({ nombre: 'Cerebras', fn: () => streamOpenAI(CEREBRAS_URL, CEREBRAS_MODEL, cerebrasKey, systemPrompt, messages, res) });
+    } else if (model === 'groq' && groqKey) {
+      proveedores.push({ nombre: 'Groq', fn: () => streamOpenAI(GROQ_URL, GROQ_MODEL, groqKey, systemPrompt, messages, res) });
+    } else {
+      // Auto: Cerebras → Groq con fallback
+      if (cerebrasKey) proveedores.push({ nombre: 'Cerebras', fn: () => streamOpenAI(CEREBRAS_URL, CEREBRAS_MODEL, cerebrasKey, systemPrompt, messages, res) });
+      if (groqKey)     proveedores.push({ nombre: 'Groq',     fn: () => streamOpenAI(GROQ_URL, GROQ_MODEL, groqKey, systemPrompt, messages, res) });
+    }
   }
 
-  let fullText = '';
-  let success  = false;
+  let fullText  = '';
+  let success   = false;
   let usedModel = 'auto';
 
+  // Intentar proveedores streaming
   for (const p of proveedores) {
     try {
-      fullText = await p.fn();
-      success  = true;
+      fullText  = await p.fn();
+      success   = true;
       usedModel = p.nombre.toLowerCase();
       console.log(`[llm] Streaming OK: ${p.nombre}`);
       break;
@@ -297,12 +310,11 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // Fallback Gemini (sin streaming) — también cuando se selecciona explícitamente
-  if ((!success || model === 'gemini') && geminiKey && !success) {
+  // Gemini: usarlo si fue seleccionado explícitamente o si todos los anteriores fallaron
+  if (!success && (useGeminiOnly || useGeminiFallback) && geminiKey) {
     try {
       fullText = await callGemini(geminiKey, systemPrompt, messages);
-      // Simular streaming para Gemini: enviar de a chunks de chars
-      // (no por palabras, para no cortar tokens ni bloques de código)
+      // Simular streaming para Gemini enviando chunks de 8 chars con delay mínimo
       const CHUNK = 8;
       for (let i = 0; i < fullText.length; i += CHUNK) {
         res.write(`data: ${JSON.stringify({ token: fullText.slice(i, i + CHUNK) })}\n\n`);
