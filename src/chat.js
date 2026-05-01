@@ -90,6 +90,8 @@ window.CHAT = (() => {
                 .replace(/```chat-title[\s\S]*?```/g, '')
                 .replace(/```style[\s\S]*?```/g, '')
                 .replace(/```classify[\s\S]*?```/g, '')
+                .replace(/```export-choice[\s\S]*?```/g, '')
+                .replace(/```export[\s\S]*?```/g, '')
                 .replace(/```\w*[\s\S]*$/g, '')  // bloque abierto sin cerrar
                 .trimEnd();
               UI.setMessageText(msgEl, display || '');
@@ -109,6 +111,8 @@ window.CHAT = (() => {
                 .replace(/```style[\s\S]*?```/g, '')
                 .replace(/```classify[\s\S]*?```/g, '')
                 .replace(/```chat-title[\s\S]*?```/g, '')
+                .replace(/```export-choice[\s\S]*?```/g, '')
+                .replace(/```export[\s\S]*?```/g, '')
                 .trim();
 
               UI.setMessageText(msgEl, displayText || '');
@@ -118,6 +122,18 @@ window.CHAT = (() => {
 
               if (stylePlan?.length) window.APP?.applyStylePlan?.(stylePlan);
               if (classifyPlan?.length) window.APP?.applyClassifyPlan?.(classifyPlan);
+
+              const exportPlan  = extractExportPlan(fullText);
+              const exportChoice = extractExportChoice(fullText);
+              if (exportPlan) {
+                const fmt = exportPlan.format;
+                if      (fmt === 'pdf')     window.EXPORT?.toPDF?.();
+                else if (fmt === 'jpeg')    window.EXPORT?.toJPEG?.();
+                else if (fmt === 'geojson') window.EXPORT?.toGeoJSON?.();
+                else if (fmt === 'html')    window.EXPORT?.toHTML?.();
+              } else if (exportChoice) {
+                UI.showExportChoice(msgEl);
+              }
 
               if (mapPlan) {
                 if (mapPlan[0]?.error) {
@@ -232,6 +248,16 @@ window.CHAT = (() => {
       const parsed = JSON.parse(match[1].trim());
       return Array.isArray(parsed) ? parsed : null;
     } catch { return null; }
+  }
+
+  function extractExportPlan(text) {
+    const match = text.match(/```export\s*([\s\S]*?)```/);
+    if (!match) return null;
+    try { return JSON.parse(match[1].trim()); } catch { return null; }
+  }
+
+  function extractExportChoice(text) {
+    return /```export-choice[\s\S]*?```/.test(text);
   }
 
   function generarTitulo(texto) {
@@ -470,6 +496,42 @@ window.UI = (() => {
     scrollBottom();
   }
 
-  return { addMessage, setMessageText, setMessageMeta, showThinking, hideThinking, showMapReady, setSendEnabled };
+  function showExportChoice(msgEl) {
+    const card = document.createElement('div');
+    card.className = 'msg-export-choice';
+
+    const exports = [
+      { key: 'geojson', icon: 'polyline',       label: 'Capa vectorial',    sub: 'GeoJSON' },
+      { key: 'jpeg',    icon: 'image',           label: 'Imagen',            sub: 'JPEG' },
+      { key: 'pdf',     icon: 'picture_as_pdf',  label: 'Archivo portable',  sub: 'PDF' },
+      { key: 'html',    icon: 'code',            label: 'Embebido',          sub: 'HTML' },
+    ];
+
+    card.innerHTML = exports.map(e => `
+      <button class="export-choice-btn" data-fmt="${e.key}">
+        <span class="material-icons export-choice-icon">${e.icon}</span>
+        <span class="export-choice-text">
+          <span class="export-choice-label">${e.label}</span>
+          <span class="export-choice-sub">${e.sub}</span>
+        </span>
+      </button>`).join('');
+
+    card.querySelectorAll('.export-choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const fmt = btn.dataset.fmt;
+        if      (fmt === 'pdf')     window.EXPORT?.toPDF?.();
+        else if (fmt === 'jpeg')    window.EXPORT?.toJPEG?.();
+        else if (fmt === 'geojson') window.EXPORT?.toGeoJSON?.();
+        else if (fmt === 'html')    window.EXPORT?.toHTML?.();
+      });
+    });
+
+    // Append after msgEl if given, else at bottom of messages
+    if (msgEl) msgEl.after(card);
+    else $msgs()?.appendChild(card);
+    scrollBottom();
+  }
+
+  return { addMessage, setMessageText, setMessageMeta, showThinking, hideThinking, showMapReady, showExportChoice, setSendEnabled };
 
 })();
