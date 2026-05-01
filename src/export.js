@@ -555,18 +555,16 @@ window.EXPORT = (() => {
 
     // Construir HTML de los selectores de campos por capa
     const identifySelectorsHTML = layerEntries.map(([key, l]) => {
-      const layerDef  = window.LAYERS[l.layerKey] || {};
-      const attrNames = (layerDef.attributes || [])
-        .filter(a => a.campo && !EXCL_FIELDS.has(a.campo))
-        .map(a => a.campo);
-      // Si no hay attrs en el catálogo, leer del geojson
-      const fallbackFields = attrNames.length ? attrNames : [...new Set(
+      // Leer siempre del geojson: es la fuente de verdad de los campos reales cargados.
+      // El catálogo (layerDef.attributes) tiene solo un subconjunto curado — no usarlo
+      // para esta lista porque el geojson puede tener más campos que el catálogo define.
+      const geojsonFields = [...new Set(
         (l.geojson?.features || []).flatMap(f =>
           Object.keys(f.properties || {}).filter(k => !EXCL_FIELDS.has(k) && !k.endsWith('Type'))
         )
       )];
 
-      const optionsHTML = fallbackFields.map(f => `
+      const optionsHTML = geojsonFields.map(f => `
         <label class="html-csel-chk-row html-field-chk-row">
           <input type="checkbox" class="html-field-chk" data-key="${escHtml(key)}" data-field="${escHtml(f)}" checked />
           <span class="html-csel-chk-label" style="font-family:var(--font-mono);font-size:12px">${escHtml(f)}</span>
@@ -778,14 +776,17 @@ window.EXPORT = (() => {
     setTimeout(() => {
       document.addEventListener('click', function outsideHandler(e) {
         if (!modal.contains(e.target)) return;
-        // Solo cerrar dropdowns si el click no fue dentro de uno
-        if (!e.target.closest('.adv-ramp-dropdown') && !e.target.closest('.adv-ramp-trigger') &&
-            !e.target.closest('.adv-field-trigger') && !e.target.closest('.html-identify-trigger')) {
-          modal.querySelectorAll('.adv-ramp-dropdown, .html-identify-dd').forEach(d => {
-            d.classList.add('hidden');
-            d.previousElementSibling?.querySelector('.adv-ramp-arrow')?.classList.remove('open');
-          });
-        }
+        // No cerrar si el click fue dentro de un dropdown o en un trigger
+        const insideDropdown = e.target.closest('.adv-ramp-dropdown') ||
+                               e.target.closest('.html-identify-dd');
+        const insideTrigger  = e.target.closest('.adv-ramp-trigger') ||
+                               e.target.closest('.adv-field-trigger') ||
+                               e.target.closest('.html-identify-trigger');
+        if (insideDropdown || insideTrigger) return;
+        modal.querySelectorAll('.adv-ramp-dropdown, .html-identify-dd').forEach(d => {
+          d.classList.add('hidden');
+          d.previousElementSibling?.querySelector('.adv-ramp-arrow')?.classList.remove('open');
+        });
       }, { passive: true });
     }, 0);
 
