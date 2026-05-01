@@ -160,8 +160,7 @@ Cuando el usuario pida cambiar el estilo de una capa existente en el mapa, respo
 \`\`\`style
 [{"layerKey":"...","color":"#hex","fillColor":"#hex","fillOpacity":0.5,"weight":2,"opacity":1,"radius":6}]
 \`\`\`
-Solo incluí los campos que el usuario quiera cambiar. layerKey es la clave de la capa (ej: puertos, vial_nacional).
-Parámetros disponibles: color (borde), fillColor (relleno), fillOpacity (0-1), weight (grosor borde), opacity (0-1), radius (solo puntos).
+Solo incluí los campos que el usuario quiera cambiar. layerKey es SIEMPRE la clave del catálogo (ej: "provincia", "puertos", "vial_nacional") — nunca uses identificadores internos como "provincia_0".
 
 Cuando el usuario pida clasificar una capa por un atributo, respondé con texto + bloque classify:
 \`\`\`classify
