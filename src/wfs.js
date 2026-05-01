@@ -132,6 +132,11 @@ window.WFS = (() => {
     }
   }
 
+  // ── Deduplicación de requests en vuelo ───────────────────────
+  // Si dos llamadas piden la misma capa simultáneamente, la segunda
+  // espera a que la primera termine en lugar de hacer otro fetch.
+  const _inFlight = new Map();
+
   // ── Fetch principal ───────────────────────────────────────────
 
   /**
@@ -165,29 +170,38 @@ window.WFS = (() => {
       }
     }
 
-    // 2. Fetch con reintentos
+    // 2. Si ya hay un fetch en vuelo para esta misma clave, reutilizarlo
+    if (_inFlight.has(key)) {
+      console.log(`[WFS] Reutilizando fetch en vuelo: ${typename}`);
+      return _inFlight.get(key);
+    }
+
+    // 3. Fetch con reintentos
     const url = buildUrl(wfsBase, typename, wfsVersion, cqlFilter, maxFeatures);
     console.log(`[WFS] Fetching: ${typename}${cqlFilter ? ' | ' + cqlFilter : ''} (${wfsBase})`);
 
-    try {
-      const geojson = await fetchConReintentos(url);
-      cacheSet(key, geojson);
-      console.log(`[WFS] OK: ${typename} → ${geojson.features.length} features`);
-      return geojson;
+    const fetchPromise = fetchConReintentos(url)
+      .then(geojson => {
+        cacheSet(key, geojson);
+        console.log(`[WFS] OK: ${typename} → ${geojson.features.length} features`);
+        return geojson;
+      })
+      .catch(err => {
+        console.warn(`[WFS] Todos los intentos fallaron para ${typename}: ${err.message}`);
+        const stale = cacheGet(key);
+        if (stale) {
+          console.warn(`[WFS] Usando caché vencida para ${typename}`);
+          window.TOAST?.warning('Sin conexión, usando caché.');
+          return stale.data;
+        }
+        throw new Error(`No se pudo obtener "${typename}" (${err.message}). El servidor puede estar caído, intentá en unos minutos.`);
+      })
+      .finally(() => {
+        _inFlight.delete(key);
+      });
 
-    } catch (err) {
-      console.warn(`[WFS] Todos los intentos fallaron para ${typename}: ${err.message}`);
-
-      // 3. Fallback: caché vencida
-      const stale = cacheGet(key);
-      if (stale) {
-        console.warn(`[WFS] Usando caché vencida para ${typename}`);
-        window.TOAST?.warning('Sin conexión, usando caché.');
-        return stale.data;
-      }
-
-      throw new Error(`No se pudo obtener "${typename}" (${err.message}). El servidor puede estar caído, intentá en unos minutos.`);
-    }
+    _inFlight.set(key, fetchPromise);
+    return fetchPromise;
   }
 
   // ── API pública ───────────────────────────────────────────────
