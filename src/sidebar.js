@@ -181,6 +181,7 @@ window.SIDEBAR = (() => {
       }
     } catch (err) {
       console.error('[SIDEBAR] Error cargando chats:', err);
+      TOAST.error('No se pudieron cargar los chats.');
     }
   }
 
@@ -198,6 +199,7 @@ window.SIDEBAR = (() => {
       window.APP && window.APP.restoreChat(chat);
     } catch (e) {
       console.error('[SIDEBAR] Error cargando chat:', e);
+      TOAST.error('No se pudo cargar el chat.');
     }
   }
 
