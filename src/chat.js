@@ -148,7 +148,7 @@ window.CHAT = (() => {
               UI.setMessageMeta(msgEl, { time: msgTime, model: _lastModel });
               history.push({ role: 'assistant', content: fullText, time: msgTime.toISOString(), model: _lastModel });
 
-              if (stylePlan?.length) window.APP?.applyStylePlan?.(stylePlan);
+              // classifyPlan se aplica siempre que venga (no depende del mapa)
               if (classifyPlan?.length) window.APP?.applyClassifyPlan?.(classifyPlan);
 
               const exportPlan  = extractExportPlan(fullText);
@@ -171,17 +171,20 @@ window.CHAT = (() => {
                     titulo:        chatTitle || generarTitulo(userText),
                     instrucciones: mapPlan
                   };
-                  // Siempre mostrar la tarjeta
                   UI.showMapReady(plan);
-                  // Si el mapa ya está abierto, actualizar directamente también
                   const mapPanel = document.getElementById('map-panel');
                   if (mapPanel && mapPanel.style.display !== 'none') {
-                    window.APP.renderMap(plan);
+                    await window.APP.renderMap(plan);
                   }
+                  // Aplicar estilo DESPUÉS de renderMap — las capas ya existen
+                  if (stylePlan?.length) window.APP?.applyStylePlan?.(stylePlan);
                   await saveToFirestore(userText, plan);
                   return;
                 }
               }
+
+              // stylePlan sin mapPlan = cambio de estilo sobre capas existentes
+              if (stylePlan?.length) window.APP?.applyStylePlan?.(stylePlan);
 
               await saveToFirestore(userText, null);
             }
