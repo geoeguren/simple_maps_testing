@@ -136,11 +136,32 @@ body.day .map-legend.basemap-dark {
   border-color: rgba(255,255,255,0.08);
 }
 
+.legend-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
 .legend-title {
   font-family: var(--font-mono); font-size: 10px; font-weight: 500;
   color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: .6px;
-  margin-bottom: 8px; text-align: center;
+  text-align: left; flex: 1;
 }
+.legend-collapse-btn {
+  width: 18px; height: 18px; flex-shrink: 0;
+  background: transparent; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center;
+  border-radius: 3px; padding: 0;
+  transition: background var(--transition), color var(--transition);
+}
+.legend-collapse-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+.legend-collapse-btn .material-icons { font-size: 14px; pointer-events: none; }
+.map-legend.basemap-light .legend-collapse-btn,
+body.day .legend-collapse-btn { color: rgba(0,0,0,0.3); }
+.map-legend.basemap-light .legend-collapse-btn:hover,
+body.day .legend-collapse-btn:hover { background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.6); }
+
+.legend-items-wrap { display: flex; flex-direction: column; }
+.map-legend.legend-collapsed .legend-items-wrap { display: none; }
+
 .map-legend.basemap-light .legend-title,
 body.day .legend-title { color: rgba(0,0,0,0.4); }
 body.day .map-legend.basemap-dark .legend-title { color: rgba(255,255,255,0.5); }
@@ -621,28 +642,30 @@ body.day .popup-close-btn:hover { background: rgba(0,0,0,0.06); color: #1a1814; 
 body.day .popup-key { color: #6a6560; }
 body.day .popup-val { color: #1a1814; }
 
-/* Botón "Más campos" */
+/* Botón "Más campos" — mismo estilo que adv-ramp-trigger */
 .popup-customize-btn {
   display: flex; align-items: center; justify-content: space-between;
-  width: 100%; padding: 9px 16px;
-  background: transparent; border: none;
-  border-top: 0.5px solid var(--border);
-  font-family: var(--font-sans); font-size: 13px; color: var(--cream2);
-  cursor: pointer; transition: background var(--transition), color var(--transition);
+  margin: 8px 12px 0; padding: 5px 8px;
+  background: var(--bg2); border: 0.5px solid var(--border-md);
+  border-radius: 4px; gap: 8px;
+  font-family: var(--font-sans); font-size: 12px; color: var(--cream2);
+  cursor: pointer; transition: border-color var(--transition), color var(--transition);
+  width: calc(100% - 24px);
 }
-.popup-customize-btn:hover { background: var(--cream3); color: var(--cream); }
-body.day .popup-customize-btn { color: #6a6560; border-color: #c8c4be; }
-body.day .popup-customize-btn:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
+.popup-customize-btn:hover { border-color: var(--accent); }
+body.day .popup-customize-btn { background: rgba(0,0,0,0.04); color: #6a6560; }
+body.day .popup-customize-btn:hover { border-color: var(--accent); }
 
 .pfc-chevron {
-  font-family: 'Material Icons'; font-size: 16px;
-  color: var(--cream2); transition: transform 0.2s; line-height: 1;
+  font-size: 12px; color: var(--cream2);
+  transition: transform 0.2s; flex-shrink: 0;
 }
 .pfc-open .pfc-chevron { transform: rotate(180deg); }
 
 .pfc-accordion {
-  background: var(--bg); border-top: 0.5px solid var(--border);
-  max-height: 116px; overflow-y: auto;
+  background: var(--bg); border: 0.5px solid var(--border-md);
+  border-top: none; border-radius: 0 0 4px 4px;
+  margin: 0 12px; max-height: 116px; overflow-y: auto;
   scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
 }
 .pfc-accordion::-webkit-scrollbar { width: 4px; }
@@ -661,7 +684,9 @@ body.day .pfc-row:hover { background: rgba(0,0,0,0.04); }
 body.day .pfc-label { color: #6a6560; }
 
 .pfc-footer {
-  padding: 8px 16px; border-top: 0.5px solid var(--border);
+  padding: 8px 12px; margin: 0 12px 8px;
+  border: 0.5px solid var(--border-md); border-top: none;
+  border-radius: 0 0 4px 4px;
   background: var(--bg); display: flex; justify-content: flex-end;
 }
 body.day .pfc-footer { border-color: #c8c4be; background: rgba(0,0,0,0.02); }
