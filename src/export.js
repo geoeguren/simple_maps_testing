@@ -480,6 +480,260 @@ window.EXPORT = (() => {
     return { r: parseInt(h.slice(0,2), 16), g: parseInt(h.slice(2,4), 16), b: parseInt(h.slice(4,6), 16) };
   }
 
+  // ── HTML embebible — modal de configuración ─────────────────
+
+  function toHTML() {
+    const mapInst = window.MAP.getInstance();
+    if (!mapInst) { window.TOAST.show('No hay mapa activo'); return; }
+
+    const activeLayers = window.MAP.getActiveLayers();
+    if (!Object.keys(activeLayers).length) { window.TOAST.show('No hay capas para exportar'); return; }
+
+    const titulo    = document.getElementById('map-title')?.value || 'Mapa';
+    const BASEMAPS  = window.MAP.getBasemaps();
+    const curBase   = window.MAP.getCurrentBase?.() || 'gray';
+
+    // ── Abrir modal ───────────────────────────────────────────
+    document.getElementById('html-export-modal')?.remove();
+    document.getElementById('html-export-backdrop')?.remove();
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'html-export-backdrop';
+    backdrop.className = 'adv-modal-backdrop';
+    document.body.appendChild(backdrop);
+
+    const modal = document.createElement('div');
+    modal.id = 'html-export-modal';
+    modal.className = 'adv-modal';
+
+    // Opciones de mapa base
+    const basemapOpts = [
+      { key: 'gray',      label: 'Gris (ArcGIS)' },
+      { key: 'dark',      label: 'Oscuro (ArcGIS)' },
+      { key: 'satellite', label: 'Satelital (ArcGIS)' },
+      { key: 'none',      label: 'Sin mapa base' },
+    ].map(b => `<option value="${b.key}" ${b.key === curBase ? 'selected' : ''}>${b.label}</option>`).join('');
+
+    // Filas de capas
+    const layerRows = Object.entries(activeLayers).map(([key, l]) => `
+      <label class="pfc-row html-layer-row" style="padding:5px 0">
+        <input type="checkbox" data-key="${key}" checked />
+        <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">${escHtml(l.titulo || key)}</span>
+      </label>`).join('');
+
+    modal.innerHTML = `
+      <div class="adv-modal-header">
+        <span class="adv-modal-title">Exportar HTML</span>
+        <button class="adv-modal-close" id="html-modal-close"><span class="material-icons">close</span></button>
+      </div>
+      <div class="adv-modal-body" style="gap:0">
+
+        <div class="adv-body-row" style="padding-bottom:2px">
+          <span class="adv-body-label">Capas a incluir</span>
+          <div style="display:flex;flex-direction:column;gap:0;width:100%">${layerRows}</div>
+        </div>
+
+        <div class="adv-body-row">
+          <span class="adv-body-label">Mapa base</span>
+          <select id="html-basemap" class="lea-field-select">${basemapOpts}</select>
+        </div>
+
+        <div class="adv-body-row" style="gap:8px">
+          <span class="adv-body-label">Interfaz</span>
+          <label class="pfc-row" style="padding:3px 0">
+            <input type="checkbox" id="html-legend" checked />
+            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Mostrar leyenda</span>
+          </label>
+          <label class="pfc-row" style="padding:3px 0">
+            <input type="checkbox" id="html-legend-collapsed" />
+            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Leyenda colapsada por defecto</span>
+          </label>
+          <label class="pfc-row" style="padding:3px 0">
+            <input type="checkbox" id="html-north" checked />
+            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Mostrar flecha de norte</span>
+          </label>
+          <label class="pfc-row" style="padding:3px 0">
+            <input type="checkbox" id="html-zoom" checked />
+            <span class="pfc-label" style="font-family:var(--font-sans);font-size:13px;color:var(--cream)">Permitir zoom y pan</span>
+          </label>
+        </div>
+
+        <div class="adv-body-row">
+          <span class="adv-body-label">Código generado</span>
+          <div style="position:relative;width:100%">
+            <textarea id="html-code-box" readonly
+              style="width:100%;height:80px;resize:none;
+                     background:var(--bg);border:0.5px solid var(--border-md);
+                     border-radius:4px;padding:8px;
+                     font-family:var(--font-mono);font-size:11px;color:var(--cream2);
+                     outline:none;scrollbar-width:thin"
+              placeholder="Generando código…"></textarea>
+            <button id="html-copy-btn"
+              style="position:absolute;top:6px;right:6px;
+                     padding:3px 8px;border-radius:4px;border:0.5px solid var(--border-md);
+                     background:var(--bg2);color:var(--cream2);
+                     font-family:var(--font-sans);font-size:11px;cursor:pointer">
+              Copiar
+            </button>
+          </div>
+          <p style="font-size:11px;color:var(--cream2);margin-top:4px;font-family:var(--font-sans)">
+            Para embeber en tu sitio, subí el archivo a un servidor y usá:
+            <code style="font-family:var(--font-mono);font-size:10px">&lt;iframe src="tu-mapa.html" width="800" height="500"&gt;&lt;/iframe&gt;</code>
+          </p>
+        </div>
+
+      </div>
+      <div class="adv-modal-footer" style="justify-content:flex-end;gap:8px">
+        <button class="adv-footer-btn adv-cancel" id="html-cancel-btn">Cerrar</button>
+        <button class="adv-footer-btn adv-accept" id="html-download-btn">
+          <span class="material-icons" style="font-size:15px;vertical-align:middle;margin-right:4px">download</span>
+          Descargar HTML
+        </button>
+      </div>`;
+
+    document.body.appendChild(modal);
+
+    function closeModal() { modal.remove(); backdrop.remove(); }
+    modal.querySelector('#html-modal-close').addEventListener('click', closeModal);
+    modal.querySelector('#html-cancel-btn').addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+
+    // Generar código al cambiar opciones
+    function buildAndShow() {
+      const selectedKeys = [...modal.querySelectorAll('.html-layer-row input:checked')].map(i => i.dataset.key);
+      const baseKey      = modal.querySelector('#html-basemap').value;
+      const showLegend   = modal.querySelector('#html-legend').checked;
+      const collapsedDef = modal.querySelector('#html-legend-collapsed').checked;
+      const showNorth    = modal.querySelector('#html-north').checked;
+      const allowZoom    = modal.querySelector('#html-zoom').checked;
+
+      const layers = selectedKeys
+        .map(k => activeLayers[k])
+        .filter(Boolean)
+        .map((l, i, arr) => ({
+          key:            Object.keys(activeLayers).find(k => activeLayers[k] === l),
+          titulo:         l.titulo || '',
+          geomType:       l.geomType || 'polygon',
+          geojson:        l.geojson,
+          style:          l.style || {},
+          classification: l.classification || null
+        }));
+
+      const code = buildHTMLString(titulo, layers, baseKey, showLegend, collapsedDef, showNorth, allowZoom, mapInst);
+      modal.querySelector('#html-code-box').value = code;
+    }
+
+    // Wirear cambios
+    modal.querySelectorAll('input, select').forEach(el => el.addEventListener('change', buildAndShow));
+    buildAndShow(); // Generar al abrir
+
+    // Copiar
+    modal.querySelector('#html-copy-btn').addEventListener('click', () => {
+      const box = modal.querySelector('#html-code-box');
+      box.select();
+      navigator.clipboard?.writeText(box.value).catch(() => document.execCommand('copy'));
+      window.TOAST.show('Código copiado');
+    });
+
+    // Descargar
+    modal.querySelector('#html-download-btn').addEventListener('click', () => {
+      const code = modal.querySelector('#html-code-box').value;
+      if (!code) return;
+      const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+      downloadBlob(blob, sanitizeFilename(titulo) + '.html');
+      window.TOAST.show('HTML descargado');
+    });
+  }
+
+  // ── Constructor del HTML ──────────────────────────────────────
+
+  function buildHTMLString(titulo, layers, baseKey, showLegend, collapsedDef, showNorth, allowZoom, mapInst) {
+    const center = mapInst.getCenter();
+    const zoom   = mapInst.getZoom();
+
+    const BASEMAP_URLS = {
+      gray:      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      dark:      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      none:      null
+    };
+    const tileUrl = BASEMAP_URLS[baseKey] || null;
+
+    const layersJSON      = JSON.stringify(layers);
+    const legendInit      = collapsedDef ? 'collapsed' : '';
+    const legendDisplay   = showLegend   ? '' : 'display:none';
+    const northDisplay    = showNorth    ? '' : 'display:none';
+    const zoomOpts        = allowZoom    ? 'true' : 'false';
+    const dragOpts        = allowZoom    ? '' : 'dragging.disable(); map.scrollWheelZoom.disable(); map.doubleClickZoom.disable(); map.touchZoom.disable();';
+    const tileBlock       = tileUrl
+      ? `L.tileLayer('${tileUrl}', { attribution: '© Esri', maxZoom: 19 }).addTo(map);`
+      : '';
+
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escHtml(titulo)}</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    #map{width:100%;height:100%;background:#e8e4de}
+    #legend-panel{position:absolute;top:12px;right:12px;z-index:1000;background:rgba(255,255,255,0.96);border:0.5px solid rgba(0,0,0,0.12);border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);min-width:180px;max-width:240px;overflow:hidden;${legendDisplay}}
+    #legend-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;user-select:none;border-bottom:0.5px solid rgba(0,0,0,0.08)}
+    #legend-title{font-size:13px;font-weight:600;color:#1a1814;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #legend-toggle{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#888;font-size:14px;transition:transform 0.2s}
+    #legend-panel.collapsed #legend-toggle{transform:rotate(180deg)}
+    #legend-body{padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
+    #legend-panel.collapsed #legend-body{display:none}
+    .legend-item{display:flex;align-items:center;gap:8px}
+    .legend-swatch{width:14px;height:14px;border-radius:2px;flex-shrink:0;border:0.5px solid rgba(0,0,0,0.15)}
+    .legend-label{font-size:12px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #legend-footer{padding:6px 12px 8px;border-top:0.5px solid rgba(0,0,0,0.06);font-size:10px;color:#999;line-height:1.5}
+    #north-arrow{position:absolute;top:12px;left:12px;z-index:1000;background:rgba(255,255,255,0.9);border:0.5px solid rgba(0,0,0,0.12);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:0 1px 6px rgba(0,0,0,0.12);${northDisplay}}
+    #north-arrow .arrow{font-size:16px;color:#1a1814;line-height:1}
+    #north-arrow .n-label{font-size:8px;font-weight:700;color:#1a1814;line-height:1}
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="north-arrow"><span class="arrow">↑</span><span class="n-label">N</span></div>
+  <div id="legend-panel" class="${legendInit}">
+    <div id="legend-header" onclick="toggleLegend()">
+      <span id="legend-title">${escHtml(titulo)}</span>
+      <span id="legend-toggle">▾</span>
+    </div>
+    <div id="legend-body"></div>
+    <div id="legend-footer">EPSG 4326 · Instituto Geográfico Nacional</div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+  <script>
+    const D=${layersJSON};
+    const map=L.map('map',{center:[${center.lat.toFixed(6)},${center.lng.toFixed(6)}],zoom:${zoom},zoomControl:${zoomOpts}});
+    ${dragOpts}
+    ${tileBlock}
+    function ps(s){return{fillColor:s.fillColor||'#c8622a',fillOpacity:s.fillOpacity??0.5,color:s.color||s.fillColor||'#c8622a',weight:s.weight??1.5,opacity:s.opacity??1}}
+    function ls(s){const t={color:s.color||'#c8622a',weight:s.weight??2,opacity:s.opacity??1};if(s.dashArray)t.dashArray=s.dashArray;return t}
+    function pts(s){return{radius:s.radius??5,fillColor:s.fillColor||'#c8622a',fillOpacity:s.fillOpacity??0.85,color:s.color||'#fff',weight:s.weight??1.5,opacity:s.opacity??1}}
+    function fs(g,b,cl,p){if(!cl?.colorMap)return g==='point'?pts(b):g==='line'?ls(b):ps(b);const c=cl.colorMap[p?.[cl.field]];if(!c)return{opacity:0,fillOpacity:0,weight:0,radius:0};const m={...b,...(cl.styleMap?.[p?.[cl.field]]||{}),fillColor:c,color:c};return g==='point'?pts(m):g==='line'?ls(m):ps(m)}
+    const lb=document.getElementById('legend-body');
+    function ai(c,l){const i=document.createElement('div');i.className='legend-item';i.innerHTML='<span class="legend-swatch" style="background:'+c+'"></span><span class="legend-label">'+l+'</span>';lb.appendChild(i)}
+    D.forEach(l=>{
+      if(!l.classification?.colorMap)ai(l.style?.fillColor||l.style?.color||'#888',l.titulo);
+      else Object.entries(l.classification.colorMap).forEach(([v,c])=>ai(c,v));
+      L.geoJSON(l.geojson,{style:f=>fs(l.geomType,l.style,l.classification,f.properties),pointToLayer:(f,ll)=>L.circleMarker(ll,fs('point',l.style,l.classification,f.properties))}).addTo(map);
+    });
+    function toggleLegend(){document.getElementById('legend-panel').classList.toggle('collapsed')}
+  <\/script>
+</body>
+</html>`;
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a   = document.createElement('a');
@@ -495,6 +749,6 @@ window.EXPORT = (() => {
                .substring(0, 80);
   }
 
-  return { toGeoJSON, toJPEG, toPDF };
+  return { toGeoJSON, toJPEG, toPDF, toHTML };
 
 })();
