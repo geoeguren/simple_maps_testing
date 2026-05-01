@@ -631,6 +631,78 @@ window.EXPORT = (() => {
     }, 0);
     backdrop.addEventListener('click', closeModal);
 
+    // Syntax highlighting en el bloque de código
+    function renderCodeBox(textarea, code) {
+      // Reemplazar textarea por un contenedor con highlighting si no existe aún
+      let wrapper = modal.querySelector('#html-code-wrapper');
+      if (!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.id = 'html-code-wrapper';
+        wrapper.style.cssText = `
+          position: relative; width: 100%;
+          background: #0d0d0d; border: 0.5px solid rgba(226,221,212,0.18);
+          border-radius: 6px; overflow: hidden;
+        `;
+        const header = document.createElement('div');
+        header.style.cssText = `
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 6px 12px;
+          background: #1a1a1a; border-bottom: 0.5px solid #2a2a2a;
+        `;
+        header.innerHTML = `
+          <span style="font-family:var(--font-mono);font-size:11px;color:#666">html</span>
+          <button id="html-copy-btn" style="
+            font-size:11px;font-family:var(--font-sans);color:#888;
+            background:none;border:none;cursor:pointer;padding:0;
+            display:flex;align-items:center;gap:4px;
+          ">
+            <span class="material-icons" style="font-size:13px">content_copy</span>
+            Copiar
+          </button>
+        `;
+        const pre = document.createElement('pre');
+        pre.id = 'html-code-pre';
+        pre.style.cssText = `
+          margin: 0; padding: 12px 14px;
+          font-family: var(--font-mono); font-size: 11.5px; line-height: 1.65;
+          color: #e2ddd4; overflow-x: auto; max-height: 260px; overflow-y: auto;
+          white-space: pre; scrollbar-width: thin; scrollbar-color: #333 transparent;
+        `;
+        wrapper.appendChild(header);
+        wrapper.appendChild(pre);
+        textarea.replaceWith(wrapper);
+
+        // Rewire copy button
+        wrapper.querySelector('#html-copy-btn').addEventListener('click', () => {
+          navigator.clipboard?.writeText(wrapper.dataset.raw || '').catch(() => {});
+          window.TOAST.success('Código copiado.');
+        });
+      }
+
+      wrapper.dataset.raw = code;
+
+      // Highlight básico para HTML
+      function hl(str) {
+        return str
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          // Tags
+          .replace(/(&lt;\/?)([\w!-]+)/g, '<span style="color:#f07178">$1$2</span>')
+          // Atributos
+          .replace(/\s([\w-]+)=/g, ' <span style="color:#ffcb6b">$1</span>=')
+          // Strings con comillas
+          .replace(/=(&quot;|&#39;|")(.*?)(\1)/g, '=<span style="color:#c3e88d">$1$2$3</span>')
+          // Comentarios
+          .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span style="color:#546e7a;font-style:italic">$1</span>')
+          // JS keywords dentro de script
+          .replace(/\b(const|let|var|function|return|if|else|for|new|true|false|null)\b/g,
+            '<span style="color:#c792ea">$1</span>')
+          // Números
+          .replace(/\b(\d+\.?\d*)\b/g, '<span style="color:#f78c6c">$1</span>');
+      }
+
+      modal.querySelector('#html-code-pre').innerHTML = hl(code);
+    }
+
     // Generar código al cambiar opciones
     function buildAndShow() {
       const selectedKeys = [...modal.querySelectorAll('.html-layer-row input:checked')].map(i => i.dataset.key);
@@ -650,25 +722,25 @@ window.EXPORT = (() => {
           classification: l.classification || null
         }));
 
-      const code = buildHTMLString(titulo, layers, baseKey, showLegend, collapsedDef, showNorth, allowZoom, mapInst);
-      modal.querySelector('#html-code-box').value = code;
+      try {
+        const code = buildHTMLString(titulo, layers, baseKey, showLegend, collapsedDef, showNorth, allowZoom, mapInst);
+        const target = modal.querySelector('#html-code-box') || modal.querySelector('#html-code-wrapper');
+        renderCodeBox(target, code);
+      } catch (err) {
+        console.error('[EXPORT] Error generando HTML:', err);
+        const pre = modal.querySelector('#html-code-pre');
+        if (pre) pre.textContent = '// Error al generar el código: ' + err.message;
+        window.TOAST.error('Error al generar el código.');
+      }
     }
 
     // Wirear cambios
     modal.querySelectorAll('input, select').forEach(el => el.addEventListener('change', buildAndShow));
-    buildAndShow(); // Generar al abrir
-
-    // Copiar
-    modal.querySelector('#html-copy-btn').addEventListener('click', () => {
-      const box = modal.querySelector('#html-code-box');
-      box.select();
-      navigator.clipboard?.writeText(box.value).catch(() => document.execCommand('copy'));
-      window.TOAST.success('Código copiado.');
-    });
+    setTimeout(buildAndShow, 0); // Diferir para que el modal aparezca antes de calcular
 
     // Descargar
     modal.querySelector('#html-download-btn').addEventListener('click', () => {
-      const code = modal.querySelector('#html-code-box').value;
+      const code = modal.querySelector('#html-code-wrapper')?.dataset.raw || '';
       if (!code) return;
       const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
       downloadBlob(blob, sanitizeFilename(titulo) + '.html');
