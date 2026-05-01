@@ -264,6 +264,12 @@ window.APP = (() => {
         document.getElementById('btn-export').classList.remove('open');
         window.EXPORT.toJPEG();
       });
+    document.getElementById('export-pdf')
+      ?.addEventListener('click', () => {
+        document.getElementById('export-dropdown').classList.remove('open');
+        document.getElementById('btn-export').classList.remove('open');
+        window.EXPORT.toPDF();
+      });
     document.addEventListener('click', e => {
       if (!e.target.closest('.export-wrapper')) {
         document.getElementById('export-dropdown')?.classList.remove('open');
