@@ -164,6 +164,7 @@ window.WFS = (() => {
       const stale = cacheGet(key);
       if (stale) {
         console.warn(`[WFS] Usando caché vencida para ${typename}`);
+        window.TOAST?.warning('Sin conexión, usando caché.');
         return stale.data;
       }
 
