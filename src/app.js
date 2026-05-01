@@ -760,10 +760,25 @@ window.APP = (() => {
     }
   }
 
+  // Esperar a que window.LAYERS esté disponible antes de inicializar.
+  // Es necesario porque layers/index.js se carga como ES module (asíncrono)
+  // y puede no haber terminado cuando DOMContentLoaded dispara.
+  function waitForLayers(callback, intentos = 0) {
+    if (window.LAYERS && Object.keys(window.LAYERS).length > 0) {
+      callback();
+    } else if (intentos < 50) {
+      setTimeout(() => waitForLayers(callback, intentos + 1), 100);
+    } else {
+      console.error('[APP] window.LAYERS no disponible después de 5s — verificá layers/index.js');
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     window.SETTINGS.init();
-    init();
-    initAuth();
+    waitForLayers(() => {
+      init();
+      initAuth();
+    });
   });
 
   return {
