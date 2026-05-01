@@ -514,12 +514,10 @@ window.APP = (() => {
         }
 
         // Toast: aviso inmediato
-        window.TOAST?.error(`No se pudo cargar "${titulo}". Podés volver a pedirla en el chat.`);
+        window.TOAST?.error(`No se pudo cargar "${titulo}".`);
 
-        // Mensaje en chat: queda como registro y permite al usuario volver a pedirla
-        window.UI?.addMessage('system-error',
-          `⚠ No se pudo cargar la capa **${titulo}**.\nEl servidor del IGN no respondió después de varios intentos. Podés volver a pedirla cuando quieras.`
-        );
+        // Tarjeta de error en chat
+        window.UI?.showErrorCard?.(titulo, inst.layerKey);
 
         errors.push(err.message);
         console.error(`[APP] Error cargando capa ${inst.layerKey}:`, err);
