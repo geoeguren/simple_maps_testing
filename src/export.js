@@ -933,8 +933,43 @@ window.EXPORT = (() => {
   // ── Constructor del HTML ──────────────────────────────────────
 
   function buildHTMLString(titulo, layers, baseKey, showLegend, allowZoom, allowIdentify, identifyFieldsByLayer, mapInst) {
-    const center = mapInst.getCenter();
-    const zoom   = mapInst.getZoom();
+
+    // Centro y zoom calculados a partir del bounding box de las capas seleccionadas,
+    // no de la vista actual del usuario — así el embebido siempre muestra las capas completas.
+    let center, zoom;
+    try {
+      let minLat =  90, maxLat = -90, minLng =  180, maxLng = -180;
+      let hasCoords = false;
+      for (const l of layers) {
+        for (const f of (l.geojson?.features || [])) {
+          const coords = JSON.stringify(f.geometry?.coordinates || []);
+          const pairs  = coords.match(/-?\d+\.?\d*,-?\d+\.?\d*/g) || [];
+          for (const pair of pairs) {
+            const [lng, lat] = pair.split(',').map(Number);
+            if (isFinite(lat) && isFinite(lng)) {
+              minLat = Math.min(minLat, lat); maxLat = Math.max(maxLat, lat);
+              minLng = Math.min(minLng, lng); maxLng = Math.max(maxLng, lng);
+              hasCoords = true;
+            }
+          }
+        }
+      }
+      if (hasCoords) {
+        center = { lat: (minLat + maxLat) / 2, lng: (minLng + maxLng) / 2 };
+        // Estimar zoom a partir del tamaño del bbox
+        const latSpan = maxLat - minLat;
+        const lngSpan = maxLng - minLng;
+        const span    = Math.max(latSpan, lngSpan);
+        zoom = span > 20 ? 4 : span > 10 ? 5 : span > 5 ? 6 : span > 2 ? 7 : span > 1 ? 8 : span > 0.5 ? 9 : 10;
+      } else {
+        // Fallback a la vista actual si no hay coordenadas
+        center = mapInst.getCenter();
+        zoom   = mapInst.getZoom();
+      }
+    } catch {
+      center = mapInst.getCenter();
+      zoom   = mapInst.getZoom();
+    }
 
     const BASEMAP_URLS = {
       gray:      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
@@ -1077,7 +1112,7 @@ window.EXPORT = (() => {
   <div id="legend-panel">
     <div id="legend-header" onclick="toggleLegend()">
       <span id="legend-title">${escHtml(titulo)}</span>
-      <span id="legend-toggle">▾</span>
+      <span id="legend-toggle">▴</span>
     </div>
     <div id="legend-body"></div>
     <div id="legend-footer">${escHtml(footerText)}</div>
