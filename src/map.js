@@ -718,7 +718,10 @@ window.MAP = (() => {
     el.className = 'map-popup';
     el.dataset.layerKey = layerKey;
     el.innerHTML = `
-      ${name ? `<div class="popup-name">${name}</div>` : ''}
+      <div class="popup-header">
+        ${name ? `<span class="popup-name">${name}</span>` : '<span></span>'}
+        <button class="popup-close-btn"><span class="material-icons">close</span></button>
+      </div>
       <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
       <button class="popup-customize-btn">Más campos<span class="pfc-chevron">expand_more</span></button>
       <div class="pfc-accordion" style="display:none"></div>
@@ -755,6 +758,11 @@ window.MAP = (() => {
       row.appendChild(cb);
       row.appendChild(keySpan);
       accordion.appendChild(row);
+    });
+
+    // Cerrar popup con X
+    el.querySelector('.popup-close-btn')?.addEventListener('click', () => {
+      leafletMap?.closePopup();
     });
 
     const toggleBtn = el.querySelector('.popup-customize-btn');
@@ -815,11 +823,9 @@ window.MAP = (() => {
       props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
     );
     const visibleFields = _getVisibleFields(layerKey, allFields);
-    tableEl.innerHTML = visibleFields.map(k => {
-      const attrDef = (layerDef.attributes || []).find(a => a.campo === k);
-      const label   = attrDef?.label || k;
-      return `<tr><td class="popup-key">${label}</td><td class="popup-val">${props[k]}</td></tr>`;
-    }).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
+    tableEl.innerHTML = visibleFields.map(k =>
+      `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`
+    ).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
 
     // Actualizar data-original de los checkboxes para reflejar el nuevo estado guardado
     accordion?.querySelectorAll('input[type=checkbox]').forEach(cb => {
