@@ -690,6 +690,70 @@ window.LAYERS_PANEL = (() => {
       return wrap;
     }
 
+    // ── Selector de campo/opción genérico (mismo estilo que buildRampCsel) ──
+    // options: [{value, label, disabled}]
+    // onChange(value) se llama cuando el usuario elige una opción
+    function buildFieldCsel(options, currentValue, onChange) {
+      const wrap = document.createElement('div');
+      wrap.className = 'adv-ramp-csel adv-field-csel';
+
+      const curOpt = options.find(o => o.value === currentValue) || options.find(o => !o.disabled) || options[0];
+      const curLabel = curOpt?.label || curOpt?.value || '';
+
+      wrap.innerHTML = `
+        <div class="adv-ramp-trigger adv-field-trigger">
+          <span class="adv-field-selected">${curLabel}</span>
+          <span class="adv-ramp-arrow">▾</span>
+        </div>
+        <div class="adv-ramp-dropdown hidden adv-field-dropdown">
+          ${options.map(o => `
+            <div class="adv-ramp-option adv-field-option ${o.value===currentValue?'selected':''} ${o.disabled?'adv-field-disabled':''}"
+                 data-value="${o.value}">
+              <span class="adv-ramp-option-label">${o.label}</span>
+              ${o.disabled ? '<span class="adv-field-badge">+15</span>' : ''}
+            </div>`).join('')}
+        </div>`;
+
+      const trigger  = wrap.querySelector('.adv-field-trigger');
+      const dropdown = wrap.querySelector('.adv-field-dropdown');
+      const arrow    = wrap.querySelector('.adv-ramp-arrow');
+      const selected = wrap.querySelector('.adv-field-selected');
+
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = !dropdown.classList.contains('hidden');
+        // Cerrar otros dropdowns abiertos
+        document.querySelectorAll('.adv-field-dropdown:not(.hidden), .adv-ramp-dropdown:not(.hidden)')
+          .forEach(d => { d.classList.add('hidden'); d.previousElementSibling?.querySelector('.adv-ramp-arrow')?.classList.remove('open'); });
+        dropdown.classList.toggle('hidden', isOpen);
+        arrow.classList.toggle('open', !isOpen);
+      });
+
+      wrap.querySelectorAll('.adv-field-option:not(.adv-field-disabled)').forEach(opt => {
+        opt.addEventListener('click', e => {
+          e.stopPropagation();
+          wrap.querySelectorAll('.adv-field-option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          selected.textContent = opt.querySelector('.adv-ramp-option-label').textContent;
+          dropdown.classList.add('hidden');
+          arrow.classList.remove('open');
+          onChange(opt.dataset.value);
+        });
+      });
+
+      setTimeout(() => {
+        document.addEventListener('click', function handler(e) {
+          if (!wrap.contains(e.target)) {
+            dropdown.classList.add('hidden');
+            arrow.classList.remove('open');
+          }
+        }, { passive: true });
+      }, 0);
+
+      wrap.getValue = () => wrap.querySelector('.adv-field-option.selected')?.dataset.value || currentValue;
+      return wrap;
+    }
+
     function deselectRamp() {
       selPalette = null;
       modal.querySelectorAll('.adv-ramp-option').forEach(o => o.classList.remove('selected'));
@@ -727,23 +791,21 @@ window.LAYERS_PANEL = (() => {
         const fieldLabel = document.createElement('span');
         fieldLabel.className = 'adv-body-label';
         fieldLabel.textContent = 'Campo';
-        const sel = document.createElement('select');
-        sel.className = 'lea-field-select adv-field';
-        allFields.forEach(a => {
+        const fieldOpts = allFields.map(a => {
           const vals = [...new Set(
             (l.geojson?.features || []).map(f => f.properties?.[a.campo]).filter(v => v != null)
           )];
-          const opt = document.createElement('option');
-          opt.value = a.campo;
-          opt.textContent = a.campo + (vals.length > MAX_UNIQUE ? ` (${vals.length})` : '');
-          opt.disabled = vals.length > MAX_UNIQUE;
-          if (a.campo === initField) opt.selected = true;
-          sel.appendChild(opt);
+          return { value: a.campo, label: a.campo, disabled: vals.length > MAX_UNIQUE };
         });
+        let curField = initField || (fieldOpts.find(o => !o.disabled)?.value || '');
+        const fieldCsel = buildFieldCsel(fieldOpts, curField, val => { curField = val; applyPreview(); });
+        fieldCsel.classList.add('adv-field');
         fieldRow.appendChild(fieldLabel);
-        fieldRow.appendChild(sel);
+        fieldRow.appendChild(fieldCsel);
         bodyEl.appendChild(fieldRow);
 
+        // Helper para leer el campo seleccionado
+        const getField = () => fieldCsel.getValue();
 
         // Rampa
         const rampRow = document.createElement('div');
@@ -762,7 +824,6 @@ window.LAYERS_PANEL = (() => {
         itemsWrap.className = 'adv-cat-items';
         bodyEl.appendChild(itemsWrap);
 
-        sel.addEventListener('change', () => applyPreview());
         applyPreview();
         return;
       }
@@ -782,17 +843,14 @@ window.LAYERS_PANEL = (() => {
         const fieldLabel = document.createElement('span');
         fieldLabel.className = 'adv-body-label';
         fieldLabel.textContent = 'Campo';
-        const sel = document.createElement('select');
-        sel.className = 'lea-field-select adv-field';
-        numericFields.forEach(a => {
-          const opt = document.createElement('option');
-          opt.value = a.campo; opt.textContent = a.campo;
-          if (a.campo === initField) opt.selected = true;
-          sel.appendChild(opt);
-        });
+        const fieldOpts = numericFields.map(a => ({ value: a.campo, label: a.campo }));
+        let curField = initField || fieldOpts[0]?.value || '';
+        const fieldCsel = buildFieldCsel(fieldOpts, curField, val => { curField = val; applyPreview(); });
+        fieldCsel.classList.add('adv-field');
         fieldRow.appendChild(fieldLabel);
-        fieldRow.appendChild(sel);
+        fieldRow.appendChild(fieldCsel);
         bodyEl.appendChild(fieldRow);
+        const getField = () => fieldCsel.getValue();
 
         // Método
         const methodRow = document.createElement('div');
@@ -800,17 +858,15 @@ window.LAYERS_PANEL = (() => {
         const methodLabel = document.createElement('span');
         methodLabel.className = 'adv-body-label';
         methodLabel.textContent = 'Método';
-        const methodSel = document.createElement('select');
-        methodSel.className = 'lea-field-select adv-method';
-        [{v:'jenks',l:'Natural Breaks'},{v:'equal',l:'Intervalos iguales'},{v:'quantile',l:'Cuantiles'}]
-          .forEach(m => {
-            const opt = document.createElement('option');
-            opt.value = m.v; opt.textContent = m.l;
-            if (m.v === initMethod) opt.selected = true;
-            methodSel.appendChild(opt);
-          });
+        const methodOpts = [{v:'jenks',l:'Natural Breaks'},{v:'equal',l:'Intervalos iguales'},{v:'quantile',l:'Cuantiles'}];
+        let curMethod = initMethod;
+        const methodCsel = buildFieldCsel(
+          methodOpts.map(m => ({ value: m.v, label: m.l })),
+          curMethod, val => { curMethod = val; applyPreview(); }
+        );
+        methodCsel.classList.add('adv-method');
         methodRow.appendChild(methodLabel);
-        methodRow.appendChild(methodSel);
+        methodRow.appendChild(methodCsel);
         bodyEl.appendChild(methodRow);
 
         // Clases
@@ -843,8 +899,6 @@ window.LAYERS_PANEL = (() => {
           if (valEl) valEl.textContent = e.target.value;
           applyPreview();
         });
-        sel.addEventListener('change', () => applyPreview());
-        methodSel.addEventListener('change', () => applyPreview());
         applyPreview();
       }
     }
@@ -853,9 +907,12 @@ window.LAYERS_PANEL = (() => {
 
     function applyPreview() {
       if (curMode === 'single') { window.MAP.clearClassification(k); return; }
-      const field   = bodyEl.querySelector('.adv-field')?.value;
+      // getField() es definida por cada modo al construir el csel
+      const fieldEl = bodyEl.querySelector('.adv-field');
+      const field   = fieldEl?.getValue ? fieldEl.getValue() : (fieldEl?.value || '');
       const palette = selPalette || (curMode === 'graduated' ? 'seq_blues' : 'cat_tableau');
-      const method  = bodyEl.querySelector('.adv-method')?.value  || 'jenks';
+      const methodEl = bodyEl.querySelector('.adv-method');
+      const method  = methodEl?.getValue ? methodEl.getValue() : (methodEl?.value || 'jenks');
       const classes = parseInt(bodyEl.querySelector('.adv-classes')?.value || 5);
       if (!field) return;
       window.MAP.applyClassification(k, {
