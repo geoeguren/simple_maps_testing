@@ -605,11 +605,13 @@ window.APP = (() => {
   }
 
   async function restoreChat(chat) {
-    // Transición completa de pantalla (antes dependía de goToWork('') para esto,
-    // lo que causaba CHAT.reset() y potencial pérdida del chatId si fallaba a mitad)
     document.getElementById('screen-home')?.classList.remove('active');
     document.getElementById('screen-work')?.classList.add('active');
     window.MAP_CONTROLS.setMapVisible(false);
+
+    // Limpiar el mapa antes de cargar el nuevo chat — evita mezclar capas
+    window.MAP.clearAll();
+    window.MAP.updateLegend();
     currentPlan = null;
 
     window.CHAT.restore(chat);
