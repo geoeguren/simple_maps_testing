@@ -572,7 +572,22 @@ body.day .btn-export-text:hover { background: rgba(0,0,0,0.06); color: #1a1814; 
 .sm-popup .leaflet-popup-content { margin: 0; }
 body.day .sm-popup .leaflet-popup-content-wrapper { background: #f0ede8; border-color: #c8c4be; }
 
-.map-popup { width: 224px; }
+.map-popup {
+  width: 224px;
+  /* Altura máxima fija: el popup nunca crece más allá de esto, así Leaflet
+     no necesita reposicionarlo al expandir el acordeón de campos.        */
+  display: flex; flex-direction: column;
+  max-height: 340px;
+}
+
+/* La tabla de datos cede espacio y scrollea si hay muchas filas visibles */
+.popup-table-wrap {
+  overflow-y: auto; flex: 1; min-height: 0;
+  overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
+}
+.popup-table-wrap::-webkit-scrollbar { width: 3px; }
+.popup-table-wrap::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
 
 /* Título — mismo estilo que cabecera de dropdown */
 .popup-header {
