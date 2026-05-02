@@ -437,6 +437,39 @@ window.APP = (() => {
     const refreshBtn = document.getElementById('btn-refresh-map');
     refreshBtn?.classList.add('spinning');
 
+    // ── Barra de progreso ─────────────────────────────────────
+    const progressEl = document.getElementById('map-progress');
+    const progressBar = document.getElementById('map-progress-bar');
+    const instrucciones = plan.instrucciones.filter(i => !i._failed);
+    const total = instrucciones.length;
+    let cargadas = 0;
+
+    function _setProgress(pct) {
+      if (!progressBar) return;
+      progressBar.style.width = pct + '%';
+    }
+    function _startProgress() {
+      if (!progressEl) return;
+      progressEl.classList.remove('done');
+      progressEl.classList.add('active');
+      _setProgress(0);
+    }
+    function _stepProgress() {
+      cargadas++;
+      _setProgress(total > 0 ? Math.round((cargadas / total) * 100) : 100);
+    }
+    function _endProgress() {
+      _setProgress(100);
+      // Esperar a que la transición de width termine, luego fade out
+      setTimeout(() => progressEl?.classList.add('done'), 400);
+      setTimeout(() => {
+        progressEl?.classList.remove('active', 'done');
+        _setProgress(0);
+      }, 750);
+    }
+
+    _startProgress();
+
     const emptyEl = document.getElementById('map-empty');
     emptyEl?.classList.remove('hidden');
     if (emptyEl) emptyEl.innerHTML = `
@@ -483,6 +516,7 @@ window.APP = (() => {
         const geojson = await window.CLIP.ejecutar(inst);
         if (!geojson.features?.length) {
           errors.push(`"${inst.descripcion || layerDef.titulo}" no devolvió datos`);
+          _stepProgress();
           continue;
         }
         const mapKey = `${inst.layerKey}_${i}`;
@@ -506,6 +540,7 @@ window.APP = (() => {
           const paletteColors = cl.paletteColors || window.PALETTES[cl.palette] || window.PALETTES.qualitative;
           window.MAP.applyClassification(mapKey, { ...cl, paletteColors });
         }
+        _stepProgress();
       } catch (err) {
         const layerDef = window.LAYERS[inst.layerKey];
         const titulo   = inst.titulo || inst.descripcion || layerDef?.titulo || inst.layerKey;
@@ -530,8 +565,11 @@ window.APP = (() => {
 
         errors.push(err.message);
         console.error(`[APP] Error cargando capa ${inst.layerKey}:`, err);
+        _stepProgress();
       }
     }
+
+    _endProgress();
 
     const activeLayers = window.MAP.getActiveLayers();
     if (Object.keys(activeLayers).length > 0) {
