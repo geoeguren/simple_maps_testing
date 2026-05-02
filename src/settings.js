@@ -64,7 +64,6 @@ window.SETTINGS = (() => {
       label: 'Idioma',
       options: [
         { val: 'en-US',  label: 'English',    disabled: true  },
-        { val: 'es-ES',  label: 'Español',    disabled: true  },
         { val: 'es-419', label: 'Español',    disabled: false },
         { val: 'fr-FR',  label: 'Français',   disabled: true  },
         { val: 'pt-BR',  label: 'Português',  disabled: true  },
