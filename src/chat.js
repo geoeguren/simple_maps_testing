@@ -479,6 +479,12 @@ window.UI = (() => {
     const panel = document.getElementById('chat-panel');
     if (msgs)  msgs.scrollTop  = msgs.scrollHeight;
     if (panel) panel.scrollTop = panel.scrollHeight;
+    // Actualizar botón de scroll: cuando se baja hasta el fondo debe ocultarse
+    const scrollBtn = document.getElementById('btn-scroll-bottom');
+    if (scrollBtn && msgs) {
+      const dist = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight;
+      scrollBtn.classList.toggle('visible', dist > 120);
+    }
   }
 
   function setMessageMeta(el, meta) {
