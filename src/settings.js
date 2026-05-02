@@ -8,9 +8,10 @@ window.SETTINGS = (() => {
   const KEY = 'sm_settings';
 
   const defaults = {
-    theme: 'auto',
-    tone:  'default',
-    model: 'auto'
+    theme:  'auto',
+    lang:   'es-419',
+    model:  'auto',
+    tone:   'default',
   };
 
   function load() {
@@ -46,7 +47,97 @@ window.SETTINGS = (() => {
 
   function init() { applyTheme(get('theme')); }
 
-  // ── Dropdown ──────────────────────────────────────────────────
+  // ── Opciones de cada sección ──────────────────────────────────
+
+  const SECTIONS = [
+    {
+      key: 'theme',
+      label: 'Aspecto',
+      options: [
+        { val: 'auto',  icon: 'access_time', label: 'Sistema' },
+        { val: 'light', icon: 'light_mode',  label: 'Claro'   },
+        { val: 'dark',  icon: 'dark_mode',   label: 'Oscuro'  },
+      ]
+    },
+    {
+      key: 'lang',
+      label: 'Idioma',
+      options: [
+        { val: 'en-US',  label: 'English (United States)',  disabled: true  },
+        { val: 'es-ES',  label: 'Español (España)',         disabled: true  },
+        { val: 'es-419', label: 'Español (Latinoamérica)',  disabled: false },
+        { val: 'fr-FR',  label: 'Français (France)',        disabled: true  },
+        { val: 'pt-BR',  label: 'Português (Brasil)',       disabled: true  },
+      ]
+    },
+    {
+      key: 'model',
+      label: 'Modelo de IA',
+      options: [
+        { val: 'auto',     label: 'Auto'                    },
+        { val: 'cerebras', label: 'qwen-3-235b'             },
+        { val: 'groq',     label: 'llama-3.3-70b-versatile' },
+        { val: 'gemini',   label: 'gemini-2.5-flash'        },
+      ]
+    },
+    {
+      key: 'tone',
+      label: 'Estilo de respuesta',
+      options: [
+        { val: 'default',    icon: 'lightbulb',     label: 'Predeterminado' },
+        { val: 'eficiente',  icon: 'bolt',          label: 'Eficiente'      },
+        { val: 'detallista', icon: 'biotech',       label: 'Detallista'     },
+        { val: 'creativo',   icon: 'auto_fix_high', label: 'Creativo'       },
+      ]
+    },
+  ];
+
+  // ── Helpers ───────────────────────────────────────────────────
+
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function labelFor(key, val) {
+    const sec = SECTIONS.find(s => s.key === key);
+    const opt = sec?.options.find(o => o.val === val);
+    return opt ? opt.label : val;
+  }
+
+  // ── Construir sección acordeón ────────────────────────────────
+
+  function buildSection(sec, prefs) {
+    const current = prefs[sec.key] ?? defaults[sec.key];
+    const currentOpt = sec.options.find(o => o.val === current);
+    const currentLabel = currentOpt?.label || current;
+    const currentIcon  = currentOpt?.icon
+      ? `<span class="material-icons sd-acc-icon">${currentOpt.icon}</span>` : '';
+
+    const optionsHtml = sec.options.map(o => {
+      const active  = o.val === current ? ' active' : '';
+      const dis     = o.disabled ? ' sd-acc-opt-disabled' : '';
+      const iconHtml = o.icon ? `<span class="material-icons sd-acc-icon">${o.icon}</span>` : '';
+      return `<div class="sd-acc-option${active}${dis}" data-key="${sec.key}" data-val="${esc(o.val)}">
+        ${iconHtml}<span>${esc(o.label)}</span>
+      </div>`;
+    }).join('');
+
+    return `
+      <div class="sd-acc-section" data-key="${sec.key}">
+        <div class="sd-acc-header">
+          <span class="sd-acc-label">${esc(sec.label)}</span>
+          <div class="sd-acc-value">
+            ${currentIcon}<span>${esc(currentLabel)}</span>
+            <span class="sd-acc-arrow material-icons">expand_more</span>
+          </div>
+        </div>
+        <div class="sd-acc-body hidden">
+          ${optionsHtml}
+        </div>
+      </div>`;
+  }
+
+  // ── Dropdown principal ────────────────────────────────────────
 
   function openFromBtn(btnEl) {
     const existing = document.getElementById('settings-dropdown');
@@ -56,7 +147,7 @@ window.SETTINGS = (() => {
     const user  = window.AUTH?.currentUser();
 
     const dropdown = document.createElement('div');
-    dropdown.id = 'settings-dropdown';
+    dropdown.id        = 'settings-dropdown';
     dropdown.className = 'settings-dropdown';
 
     dropdown.innerHTML = `
@@ -66,27 +157,8 @@ window.SETTINGS = (() => {
         <span class="sd-user-email">${esc(user.email || '')}</span>
       </div>` : ''}
 
-      <div class="sd-section">
-        <p class="sd-section-label">Aspecto</p>
-        ${radio('theme', 'auto',  'access_time', 'Sistema',  prefs)}
-        ${radio('theme', 'light', 'light_mode', 'Claro',    prefs)}
-        ${radio('theme', 'dark',  'dark_mode',  'Oscuro',   prefs)}
-      </div>
-
-      <div class="sd-section">
-        <p class="sd-section-label">Modelo de IA</p>
-        ${radio('model', 'auto',     '', 'Auto',                   prefs)}
-        ${radio('model', 'cerebras', '', 'qwen-3-235b',            prefs)}
-        ${radio('model', 'groq',     '', 'llama-3.3-70b-versatile', prefs)}
-        ${radio('model', 'gemini',   '', 'gemini-2.5-flash',        prefs)}
-      </div>
-
-      <div class="sd-section">
-        <p class="sd-section-label">Estilo</p>
-        ${radio('tone', 'default',    'lightbulb',      'Predeterminado', prefs)}
-        ${radio('tone', 'eficiente',  'bolt',           'Eficiente',      prefs)}
-        ${radio('tone', 'detallista', 'biotech',        'Detallista',     prefs)}
-        ${radio('tone', 'creativo',   'auto_fix_high',  'Creativo',       prefs)}
+      <div class="sd-acc-wrap">
+        ${SECTIONS.map(s => buildSection(s, prefs)).join('')}
       </div>
 
       <div class="sd-divider"></div>
@@ -109,17 +181,53 @@ window.SETTINGS = (() => {
     dropdown.style.top  = top + 'px';
     dropdown.style.left = left + 'px';
 
-    // Eventos de radio
-    dropdown.querySelectorAll('.sd-radio-row').forEach(row => {
-      row.addEventListener('click', () => {
-        const k = row.dataset.key;
-        const v = row.dataset.val;
-        // Desmarcar otros del mismo grupo
-        dropdown.querySelectorAll(`.sd-radio-row[data-key="${k}"]`).forEach(r => {
-          r.querySelector('.sd-toggle')?.classList.remove('on');
+    // ── Wire acordeones ───────────────────────────────────────
+    dropdown.querySelectorAll('.sd-acc-section').forEach(sec => {
+      const header = sec.querySelector('.sd-acc-header');
+      const body   = sec.querySelector('.sd-acc-body');
+      const arrow  = sec.querySelector('.sd-acc-arrow');
+
+      header.addEventListener('click', () => {
+        const isOpen = !body.classList.contains('hidden');
+
+        // Cerrar todos los acordeones
+        dropdown.querySelectorAll('.sd-acc-section').forEach(s => {
+          s.querySelector('.sd-acc-body').classList.add('hidden');
+          s.querySelector('.sd-acc-arrow').classList.remove('open');
+          s.querySelector('.sd-acc-header').classList.remove('active');
         });
-        row.querySelector('.sd-toggle')?.classList.add('on');
-        set(k, v);
+
+        // Si estaba cerrado, abrir este
+        if (!isOpen) {
+          body.classList.remove('hidden');
+          arrow.classList.add('open');
+          header.classList.add('active');
+        }
+      });
+
+      // Wire opciones
+      body.querySelectorAll('.sd-acc-option:not(.sd-acc-opt-disabled)').forEach(opt => {
+        opt.addEventListener('click', () => {
+          const key = opt.dataset.key;
+          const val = opt.dataset.val;
+          set(key, val);
+
+          // Actualizar valor mostrado en el header
+          const secDef    = SECTIONS.find(s => s.key === key);
+          const selOpt    = secDef?.options.find(o => o.val === val);
+          const iconHtml  = selOpt?.icon
+            ? `<span class="material-icons sd-acc-icon">${selOpt.icon}</span>` : '';
+          sec.querySelector('.sd-acc-value').innerHTML =
+            `${iconHtml}<span>${esc(selOpt?.label || val)}</span>
+             <span class="sd-acc-arrow material-icons open">expand_more</span>`;
+
+          // Re-wirear la flecha
+          sec.querySelector('.sd-acc-arrow').classList.add('open');
+
+          // Marcar opción activa
+          body.querySelectorAll('.sd-acc-option').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+        });
       });
     });
 
@@ -128,38 +236,17 @@ window.SETTINGS = (() => {
       window.AUTH?.logout();
     });
 
+    // Cerrar al click afuera
     const openedAt = Date.now();
     setTimeout(() => {
       document.addEventListener('click', function handler(e) {
-        if (Date.now() - openedAt < 150) return; // ignorar el click de apertura
+        if (Date.now() - openedAt < 150) return;
         if (!dropdown.contains(e.target) && e.target !== btnEl && !btnEl.contains(e.target)) {
           dropdown.remove();
           document.removeEventListener('click', handler);
         }
       });
     }, 0);
-  }
-
-  function radio(key, val, icon, label, prefs, hint) {
-    const on = prefs[key] === val ? 'on' : '';
-    const iconHtml = icon ? `<span class="material-icons sd-row-icon">${icon}</span>` : '';
-    const hintHtml = hint ? `<span class="sd-row-hint">${hint}</span>` : '';
-    return `
-      <div class="sd-radio-row" data-key="${key}" data-val="${val}">
-        <div class="sd-row-left">
-          ${iconHtml}
-          <div class="sd-row-text">
-            <span class="sd-row-label">${label}</span>
-            ${hintHtml}
-          </div>
-        </div>
-        <div class="sd-toggle ${on}"></div>
-      </div>
-    `;
-  }
-
-  function esc(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   return { open: openFromBtn, openFromBtn, get, set, init, load };
