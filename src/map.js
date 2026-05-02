@@ -825,8 +825,7 @@ window.MAP = (() => {
       const active  = isActive(k);
       return `<label class="pfc-acc-row">
         <span class="pfc-acc-field">${k}</span>
-        <input type="checkbox" class="pfc-acc-chk" data-field="${k}" ${active ? 'checked' : ''}
-          style="flex-shrink:0;accent-color:var(--accent);cursor:pointer"/>
+        <input type="checkbox" class="pfc-acc-chk" data-field="${k}" ${active ? 'checked' : ''}/>
       </label>`;
     }).join('');
 
@@ -902,11 +901,8 @@ window.MAP = (() => {
       `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`
     ).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
 
-    // Recalcular tamaño sin mover (dropdown permanece abierto)
-    const _ap = openPopup.options.autoPan;
-    openPopup.options.autoPan = false;
-    openPopup.update();
-    openPopup.options.autoPan = _ap;
+    // Recalcular tamaño sin disparar reposicionamiento de Leaflet.
+    // No llamar update() — movería el popup igual que al expandir el acordeón.
   }
 
 
