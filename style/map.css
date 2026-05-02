@@ -659,7 +659,6 @@ body.day .pfc-acc-label { color: #6a6560; }
   overscroll-behavior: contain;
   scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
   border-top: 0.5px solid var(--border);
-  background: var(--bg);
 }
 .pfc-acc-body::-webkit-scrollbar { width: 3px; }
 .pfc-acc-body::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
@@ -671,12 +670,14 @@ body.day .pfc-acc-body { background: rgba(0,0,0,0.02); }
   padding: 7px 10px; cursor: pointer;
   font-family: var(--font-sans); font-size: 12px; color: var(--cream2);
   border-bottom: 0.5px solid var(--border);
-  transition: background var(--transition);
+  transition: background var(--transition), color var(--transition);
 }
 .pfc-acc-row:last-child { border-bottom: none; }
 .pfc-acc-row:hover { background: var(--cream3); }
+.pfc-acc-row:has(.pfc-acc-chk:checked) { background: rgba(59,130,246,0.10); color: var(--cream); }
 body.day .pfc-acc-row { color: #6a6560; }
 body.day .pfc-acc-row:hover { background: rgba(0,0,0,0.05); }
+body.day .pfc-acc-row:has(.pfc-acc-chk:checked) { background: rgba(59,130,246,0.10); color: #1a1814; }
 
 .pfc-acc-field {
   flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
