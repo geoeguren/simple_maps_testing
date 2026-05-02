@@ -32,14 +32,18 @@ body.day .map-title-input { color: #1a1814; }
 
 /* ── Barra de progreso de carga de capas ────────────────────── */
 .map-progress {
-  height: 3px; flex-shrink: 0;
+  height: 0; flex-shrink: 0;
   background: transparent;
   overflow: hidden;
   opacity: 0;
-  transition: opacity .3s ease;
+  transition: opacity .3s ease, height 0s .75s;
 }
-.map-progress.active { opacity: 1; }
-.map-progress.done   { opacity: 0; }
+.map-progress.active {
+  height: 3px;
+  opacity: 1;
+  transition: opacity .3s ease, height 0s 0s;
+}
+.map-progress.done { opacity: 0; }
 
 .map-progress-bar {
   height: 100%; width: 0%;
