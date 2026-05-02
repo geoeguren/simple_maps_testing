@@ -5,20 +5,18 @@
  * Un único WFS en /geoserver/wfs sirve todos los workspaces.
  *
  * Convenciones:
- *  - Todas las keys llevan sufijo _uy para consistencia entre países.
+ *  - Keys con sufijo _uy para consistencia entre países.
  *  - special: false          → capa general de uso público
  *  - special: 'historico'    → límites según leyes históricas (1835–1934)
+ *  - special: 'administrativo' → regionalizaciones internas (secciones judiciales)
+ *  - visible: true  → se muestra por defecto en el catálogo de la UI
+ *  - visible: false → disponible para el LLM, oculta en la UI por defecto
  *  - titulo y keywords en español — llm.js traduce al idioma del usuario.
- *
- * Campos descartados por ser internos/técnicos:
- *  objectid_1, sde_state_id, shape_star, shape_stle, shape_leng,
- *  st_area_shape, st_perimeter, globalid_1, acc, bst, fcode, f_code,
- *  nm3, nm4, mn3, mn4, escala, hoja, loc, txt, obs, use_, [typename]Type
  */
 
 export const IGM_UY = {
 
-  // ── División político-administrativa ──────────────────────────
+  // ── División político-administrativa ──────────────────────────────────────────
 
   departamento_uy: {
     source:       'igm_uy',
@@ -26,14 +24,14 @@ export const IGM_UY = {
     titulo:       'Departamentos de Uruguay',
     geomType:     'polygon',
     labelField:   'depto',
-    clipStrategy: null,           // Uruguay es pequeño — se carga completo
+    clipStrategy: null,
     special:      false,
+    visible:      true,
     keywords:     ['departamento', 'departamentos', 'división política', 'límite departamental', 'uruguay'],
     attributes: [
       { campo: 'depto',      label: 'Nombre' },
       { campo: 'codigo',     label: 'Código ISO' },
       { campo: 'descripcio', label: 'Descripción' },
-      { campo: 'def',        label: 'Definición' },
     ]
   },
 
@@ -45,16 +43,19 @@ export const IGM_UY = {
     labelField:   'nombre',
     clipStrategy: null,
     special:      false,
+    visible:      true,
     keywords:     ['municipio', 'municipios', 'ciudad', 'localidad', 'división municipal', 'uruguay'],
     attributes: [
-      { campo: 'nombre',      label: 'Nombre' },
-      { campo: 'codigo',      label: 'Código' },
-      { campo: 'cod',         label: 'Código departamento' },
-      { campo: 'poblacion',   label: 'Población', numeric: true },
-      { campo: 'descriptio',  label: 'Descripción' },
-      { campo: 'alias',       label: 'Alias' },
+      { campo: 'nombre',     label: 'Nombre' },
+      { campo: 'codigo',     label: 'Código' },
+      { campo: 'cod',        label: 'Código departamento' },
+      { campo: 'poblacion',  label: 'Población', numeric: true },
+      { campo: 'descriptio', label: 'Descripción' },
+      { campo: 'alias',      label: 'Alias' },
     ]
   },
+
+  // ── Administrativo ────────────────────────────────────────────────────────────
 
   seccion_judicial_uy: {
     source:       'igm_uy',
@@ -63,7 +64,8 @@ export const IGM_UY = {
     geomType:     'polygon',
     labelField:   'numero',
     clipStrategy: null,
-    special:      false,
+    special:      'administrativo',
+    visible:      false,
     keywords:     ['sección judicial', 'secciones judiciales', 'judicial', 'jurisdicción', 'juzgado', 'uruguay'],
     attributes: [
       { campo: 'numero',     label: 'Número de sección', numeric: true },
@@ -73,7 +75,7 @@ export const IGM_UY = {
     ]
   },
 
-  // ── Límites nacionales ────────────────────────────────────────
+  // ── Límites nacionales ────────────────────────────────────────────────────────
 
   limite_terrestre_uy: {
     source:       'igm_uy',
@@ -83,10 +85,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      false,
+    visible:      true,
     keywords:     ['límite', 'límite nacional', 'frontera', 'límite terrestre', 'uruguay'],
     attributes: [
       { campo: 'def', label: 'Definición' },
-      { campo: 'obs', label: 'Observación' },
     ]
   },
 
@@ -98,6 +100,7 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      false,
+    visible:      true,
     keywords:     ['límite marino', 'límite marítimo', 'mar territorial', 'zona económica exclusiva', 'uruguay'],
     attributes: [
       { campo: 'def', label: 'Definición' },
@@ -105,7 +108,7 @@ export const IGM_UY = {
     ]
   },
 
-  // ── Hidrografía ───────────────────────────────────────────────
+  // ── Hidrografía ───────────────────────────────────────────────────────────────
 
   rio_area_uy: {
     source:       'igm_uy',
@@ -115,6 +118,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      false,
+    visible:      true,
     keywords:     ['río', 'ríos', 'arroyo', 'arroyos', 'cañada', 'hidrografía', 'agua', 'cuenca', 'uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -132,6 +136,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      false,
+    visible:      true,
     keywords:     ['río', 'ríos', 'arroyo', 'arroyos', 'cañada', 'hidrografía', 'agua', 'cuenca', 'uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -141,9 +146,7 @@ export const IGM_UY = {
     ]
   },
 
-  // ── Históricos ────────────────────────────────────────────────
-  // Límites departamentales según distintas leyes históricas.
-  // Área (polígono) y Línea para cada período.
+  // ── Históricos ────────────────────────────────────────────────────────────────
 
   limite_hist_1835_area_uy: {
     source:       'igm_uy',
@@ -153,6 +156,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', 'departamento histórico', '1835', 'ley 84', 'historia uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -168,10 +172,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1835', 'ley 84', 'historia uruguay'],
     attributes: [
-      { campo: 'def',  label: 'Definición' },
-      { campo: 'use_', label: 'Tipo', classifiable: true },
+      { campo: 'def', label: 'Definición' },
     ]
   },
 
@@ -183,6 +187,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', 'departamento histórico', '1837', 'ley 158', 'historia uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -198,10 +203,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1837', 'ley 158', 'historia uruguay'],
     attributes: [
-      { campo: 'def',  label: 'Definición' },
-      { campo: 'use_', label: 'Tipo', classifiable: true },
+      { campo: 'def', label: 'Definición' },
     ]
   },
 
@@ -213,6 +218,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1856', 'ley 493', 'historia uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -228,10 +234,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1856', 'ley 493', 'historia uruguay'],
     attributes: [
-      { campo: 'def',  label: 'Definición' },
-      { campo: 'use_', label: 'Tipo', classifiable: true },
+      { campo: 'def', label: 'Definición' },
     ]
   },
 
@@ -243,6 +249,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1880', 'ley 1474', 'historia uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -258,10 +265,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1880', 'ley 1474', 'historia uruguay'],
     attributes: [
-      { campo: 'def',  label: 'Definición' },
-      { campo: 'use_', label: 'Tipo', classifiable: true },
+      { campo: 'def', label: 'Definición' },
     ]
   },
 
@@ -273,6 +280,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1884', 'ley 1757', 'historia uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -288,10 +296,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1884', 'ley 1757', 'historia uruguay'],
     attributes: [
-      { campo: 'def',  label: 'Definición' },
-      { campo: 'use_', label: 'Tipo', classifiable: true },
+      { campo: 'def', label: 'Definición' },
     ]
   },
 
@@ -303,6 +311,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1885', 'ley 1854', 'historia uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -318,10 +327,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1885', 'ley 1854', 'historia uruguay'],
     attributes: [
-      { campo: 'def',  label: 'Definición' },
-      { campo: 'use_', label: 'Tipo', classifiable: true },
+      { campo: 'def', label: 'Definición' },
     ]
   },
 
@@ -333,6 +342,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1927', 'ley 8187', 'historia uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -348,10 +358,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1927', 'ley 8187', 'historia uruguay'],
     attributes: [
-      { campo: 'def',  label: 'Definición' },
-      { campo: 'use_', label: 'Tipo', classifiable: true },
+      { campo: 'def', label: 'Definición' },
     ]
   },
 
@@ -363,6 +373,7 @@ export const IGM_UY = {
     labelField:   'nam',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1934', 'rincón de maneco', 'historia uruguay'],
     attributes: [
       { campo: 'nam',        label: 'Nombre' },
@@ -378,10 +389,10 @@ export const IGM_UY = {
     labelField:   'def',
     clipStrategy: null,
     special:      'historico',
+    visible:      false,
     keywords:     ['límite histórico', '1934', 'rincón de maneco', 'historia uruguay'],
     attributes: [
-      { campo: 'def',  label: 'Definición' },
-      { campo: 'use_', label: 'Tipo', classifiable: true },
+      { campo: 'def', label: 'Definición' },
     ]
   },
 
