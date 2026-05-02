@@ -370,7 +370,7 @@ body.day .sd-acc-option.active { background: rgba(59,130,246,0.10); color: #1a18
 }
 
 /* Divider + logout */
-.sd-divider { height: 0.5px; background: var(--border-md); }
+.sd-divider { height: 0; border-top: 0.5px solid var(--border); }
 
 /* Dropdown flotante opciones de chat */
 
