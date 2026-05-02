@@ -9,11 +9,13 @@
  */
 
 import { AR_LAYERS, AR_GEO_MAPS } from './ar/index.js';
+import { UY_LAYERS, UY_GEO_MAPS } from './uy/index.js';
 // Futuro:
 // import { CL_LAYERS, CL_GEO_MAPS } from './cl/index.js';
 
 window.LAYERS = {
   ...AR_LAYERS,
+  ...UY_LAYERS,
   // Futuro: ...CL_LAYERS,
 };
 
@@ -21,6 +23,7 @@ window.PROVINCIAS_MAP = AR_GEO_MAPS.provincias;
 
 window.GEO_MAPS = {
   ar: AR_GEO_MAPS,
+  uy: UY_GEO_MAPS,
   // Futuro: cl: CL_GEO_MAPS,
 };
 
