@@ -30,6 +30,23 @@ body.day .map-title-input { color: #1a1814; }
 .map-title-input::placeholder { color: var(--cream2); }
 .map-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
+/* ── Barra de progreso de carga de capas ────────────────────── */
+.map-progress {
+  height: 3px; flex-shrink: 0;
+  background: transparent;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.map-progress.active { opacity: 1; }
+.map-progress.done   { opacity: 0; }
+
+.map-progress-bar {
+  height: 100%; width: 0%;
+  background: var(--accent);
+  transition: width .35s cubic-bezier(.4,0,.2,1);
+}
+
 /* Botones */
 
 .btn-icon {
