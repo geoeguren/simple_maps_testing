@@ -74,7 +74,7 @@ window.LP_STYLE = (() => {
 
     acc.innerHTML =
       `<div class="lea-mode-content" id="lea-content-${k}"></div>` +
-      `<div class="lea-sep"></div>` +
+      `<div class="lea-sep lea-sep--top"></div>` +
       `<button class="lea-advanced-btn" data-key="${k}"><span class="material-icons">biotech</span>Edición avanzada</button>` +
       `<div class="lea-sep"></div>` +
       `<button class="lea-delete-btn" data-key="${k}"><span class="material-icons">delete</span>Eliminar capa</button>`;
