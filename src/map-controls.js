@@ -32,6 +32,8 @@ window.MAP_CONTROLS = (() => {
       e.preventDefault();
     });
 
+    let _rafId = null;
+
     document.addEventListener('mousemove', e => {
       if (!dragging) return;
       const minChat = 280, minMap = 280;
@@ -41,7 +43,12 @@ window.MAP_CONTROLS = (() => {
       const clamped  = Math.min(Math.max(delta, minDelta), maxDelta);
       chat.style.width     = (startChatW + clamped) + 'px';
       mapPanel.style.width = (startMapW  - clamped) + 'px';
-      window.MAP.getInstance()?.invalidateSize();
+      // Throttle con rAF — invalidateSize es costoso, una vez por frame alcanza
+      if (_rafId) return;
+      _rafId = requestAnimationFrame(() => {
+        window.MAP.getInstance()?.invalidateSize();
+        _rafId = null;
+      });
     });
 
     document.addEventListener('mouseup', () => {
