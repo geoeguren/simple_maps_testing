@@ -615,33 +615,55 @@ body.day .popup-key { color: #6a6560; }
 body.day .popup-val { color: #1a1814; }
 
 /* "Más campos" — selector flotante igual que adv-ramp-csel */
-.pfc-csel-wrap {
-  position: relative; margin: 8px 12px 8px;
-  width: calc(100% - 24px);
+/* ── Acordeón "Más campos" en popup de consulta ─────────────── */
+.pfc-acc-wrap {
+  border-top: 0.5px solid var(--border);
 }
-.pfc-trigger {
-  display: flex; align-items: center; gap: 8px; cursor: pointer;
+.pfc-acc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px; cursor: pointer; gap: 8px;
+  transition: background var(--transition);
 }
-.pfc-trigger-label {
-  flex: 1; font-family: var(--font-sans); font-size: 12px; color: var(--cream2);
-}
-body.day .pfc-trigger-label { color: #6a6560; }
+.pfc-acc-header:hover { background: var(--cream3); }
+body.day .pfc-acc-header:hover { background: rgba(0,0,0,0.05); }
 
-.pfc-dropdown {
-  position: fixed;
-  background: var(--bg2); border: 0.5px solid var(--border-md);
-  border-radius: 4px; z-index: 9999;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-  max-height: 190px; overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch; /* scroll inercial en iOS */
-  touch-action: pan-y;               /* permitir scroll vertical, bloquear gestos del mapa */
-  scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
+.pfc-acc-label {
+  font-family: var(--font-sans); font-size: 12px; color: var(--cream2); flex: 1;
 }
-.pfc-dropdown::-webkit-scrollbar { width: 4px; }
-.pfc-dropdown::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
-body.day .pfc-dropdown { background: #f0ede8; border-color: #c8c4be; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.pfc-dropdown.hidden { display: none; }
+body.day .pfc-acc-label { color: #6a6560; }
+
+.pfc-acc-arrow {
+  font-size: 16px !important; color: var(--cream2); flex-shrink: 0;
+  transition: transform .15s;
+}
+.pfc-acc-arrow.open { transform: rotate(180deg); }
+
+.pfc-acc-body {
+  /* Mostrar máx 6 filas (~34px c/u), scroll si hay más */
+  max-height: 204px; overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
+  border-top: 0.5px solid var(--border);
+}
+.pfc-acc-body::-webkit-scrollbar { width: 3px; }
+.pfc-acc-body::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+.pfc-acc-body.hidden { display: none; }
+
+.pfc-acc-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px; gap: 8px; cursor: pointer;
+  border-bottom: 0.5px solid var(--border);
+  transition: background var(--transition);
+}
+.pfc-acc-row:last-child { border-bottom: none; }
+.pfc-acc-row:hover { background: var(--cream3); }
+body.day .pfc-acc-row:hover { background: rgba(0,0,0,0.05); }
+
+.pfc-acc-field {
+  font-family: var(--font-mono); font-size: 11px; color: var(--cream2);
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+}
+body.day .pfc-acc-field { color: #6a6560; }
 
 /* Styles panel */
 .styles-panel {
