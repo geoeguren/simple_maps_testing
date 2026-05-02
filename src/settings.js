@@ -203,6 +203,13 @@ window.SETTINGS = (() => {
           arrow.classList.add('open');
           header.classList.add('active');
         }
+
+        // Recalcular posición — el dropdown crece hacia arriba
+        const r = btnEl.getBoundingClientRect();
+        const h = dropdown.offsetHeight;
+        let newTop = r.top - h - 8;
+        if (newTop < 8) newTop = r.bottom + 8;
+        dropdown.style.top = newTop + 'px';
       });
 
       // Wire opciones
