@@ -225,7 +225,8 @@ window.CHAT = (() => {
       if (!user) return;
 
       // Usar título sugerido por el LLM, o el texto del usuario como fallback
-      const titulo = _pendingChatTitle
+      const nuevoTitulo  = _pendingChatTitle;
+      const titulo = nuevoTitulo
         || (userText.length > 50 ? userText.slice(0, 50) + '\u2026' : userText);
       _pendingChatTitle = null;
 
@@ -236,6 +237,12 @@ window.CHAT = (() => {
         SIDEBAR.refreshChats();
         // Mostrar título en la barra superior
         if (window.APP?.setChatHeader) window.APP.setChatHeader(titulo);
+      } else if (mapPlan && nuevoTitulo) {
+        // Hay un mapa nuevo con título sugerido por el LLM → actualizar header y Firestore
+        if (window.APP?.setChatHeader) window.APP.setChatHeader(nuevoTitulo);
+        await window.FB.updateChat(user.uid, currentChatId, { titulo: nuevoTitulo });
+        SIDEBAR.updateCachedChat(currentChatId, { titulo: nuevoTitulo });
+        SIDEBAR.refreshChats();
       }
 
       const data = { messages: history };
