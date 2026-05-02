@@ -819,84 +819,55 @@ window.MAP = (() => {
     const el = document.createElement('div');
     el.className = 'map-popup';
     el.dataset.layerKey = layerKey;
+
+    // Construir filas de campos del acordeón
+    const fieldRows = allFields.map(k => {
+      const active  = isActive(k);
+      return `<label class="pfc-acc-row">
+        <span class="pfc-acc-field">${k}</span>
+        <input type="checkbox" class="pfc-acc-chk" data-field="${k}" ${active ? 'checked' : ''}
+          style="flex-shrink:0;accent-color:var(--accent);cursor:pointer"/>
+      </label>`;
+    }).join('');
+
     el.innerHTML = `
       <div class="popup-header">
         ${name ? `<span class="popup-name">${name}</span>` : '<span></span>'}
         <button class="popup-close-btn"><span class="material-icons">close</span></button>
       </div>
       <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
-      <div class="pfc-csel-wrap">
-        <div class="pfc-trigger adv-ramp-trigger">
-          <span class="pfc-trigger-label">Más campos</span>
-          <span class="pfc-chevron adv-ramp-arrow">▾</span>
+      <div class="pfc-acc-wrap">
+        <div class="pfc-acc-header">
+          <span class="pfc-acc-label">Más campos</span>
+          <span class="pfc-acc-arrow material-icons">expand_more</span>
+        </div>
+        <div class="pfc-acc-body hidden">
+          ${fieldRows}
         </div>
       </div>`;
 
-    // Dropdown appended to body to escape Leaflet overflow:hidden
-    const dropdown = document.createElement('div');
-    dropdown.className = 'pfc-dropdown adv-ramp-dropdown hidden';
-    document.body.appendChild(dropdown);
+    // Wire acordeón
+    const accHeader = el.querySelector('.pfc-acc-header');
+    const accBody   = el.querySelector('.pfc-acc-body');
+    const accArrow  = el.querySelector('.pfc-acc-arrow');
 
-    // Evitar que Leaflet intercepte wheel y touch dentro del dropdown.
-    // Sin esto, el scroll del dropdown arrastra el mapa en lugar de la lista.
-    dropdown.addEventListener('wheel', e => {
+    accHeader.addEventListener('click', e => {
       e.stopPropagation();
-      e.stopImmediatePropagation();
-      const atTop    = dropdown.scrollTop === 0;
-      const atBottom = dropdown.scrollTop + dropdown.clientHeight >= dropdown.scrollHeight - 1;
-      if ((e.deltaY < 0 && !atTop) || (e.deltaY > 0 && !atBottom)) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+      const isOpen = !accBody.classList.contains('hidden');
+      accBody.classList.toggle('hidden', isOpen);
+      accArrow.classList.toggle('open', !isOpen);
+    });
 
-    // Touch: registrar posición inicial y scrollear el dropdown manualmente
-    let _touchStartY = 0;
-    dropdown.addEventListener('touchstart', e => {
-      _touchStartY = e.touches[0].clientY;
-      e.stopPropagation();
-    }, { passive: true });
-    dropdown.addEventListener('touchmove', e => {
-      e.stopPropagation();
-      const dy       = _touchStartY - e.touches[0].clientY;
-      _touchStartY   = e.touches[0].clientY;
-      const atTop    = dropdown.scrollTop === 0;
-      const atBottom = dropdown.scrollTop + dropdown.clientHeight >= dropdown.scrollHeight - 1;
-      if ((dy < 0 && !atTop) || (dy > 0 && !atBottom)) {
-        e.preventDefault();
-        dropdown.scrollTop += dy;
-      }
-    }, { passive: false });
-
-    // Build dropdown options — immediate apply on checkbox change
-    allFields.forEach(k => {
-      const active = isActive(k);
-
-      const opt = document.createElement('div');
-      opt.className = 'adv-ramp-option pfc-option';
-
-      const keySpan = document.createElement('span');
-      keySpan.className   = 'adv-ramp-option-label';
-      keySpan.textContent = k;
-      keySpan.style.cssText = 'font-family:var(--font-mono);font-size:11px';
-
-      const cb = document.createElement('input');
-      cb.type    = 'checkbox';
-      cb.checked = active;
-      cb.dataset.field = k;
-      cb.style.cssText = 'flex-shrink:0;accent-color:var(--accent);margin-left:auto;cursor:pointer';
-
+    // Wire checkboxes
+    el.querySelectorAll('.pfc-acc-chk').forEach(cb => {
       cb.addEventListener('change', () => {
-        const checked = [...dropdown.querySelectorAll('input[type=checkbox]:checked')]
+        const checked = [...el.querySelectorAll('.pfc-acc-chk:checked')]
           .map(i => i.dataset.field);
         if (checked.length === 0) { cb.checked = true; return; }
         _popupFieldPrefs[layerKey] = new Set(checked);
         _savePopupPrefs();
         _refreshOpenPopup(false);
       });
-
-      opt.appendChild(keySpan);
-      opt.appendChild(cb);
-      dropdown.appendChild(opt);
     });
 
     // Cerrar popup con X
@@ -904,57 +875,29 @@ window.MAP = (() => {
       leafletMap?.closePopup();
     });
 
-    const trigger = el.querySelector('.pfc-trigger');
-    const chevron = el.querySelector('.pfc-chevron');
-
-    trigger.addEventListener('click', () => {
-      const isOpen = !dropdown.classList.contains('hidden');
-      dropdown.classList.toggle('hidden', isOpen);
-      chevron.textContent = isOpen ? '▾' : '▲';
-      trigger.classList.toggle('pfc-open', !isOpen);
-      if (!isOpen) {
-        const rect = trigger.getBoundingClientRect();
-        dropdown.style.position = 'fixed';
-        dropdown.style.left     = rect.left + 'px';
-        dropdown.style.width    = rect.width + 'px';
-        dropdown.style.top      = (rect.bottom + 3) + 'px';
-        dropdown.style.bottom   = 'auto';
-      }
-    });
-
-    // Clean up body-appended dropdown when popup closes
-    leafletMap?.once('popupclose', () => dropdown.remove());
-
     return el;
   }
 
-  // Actualiza el contenido del popup abierto sin cerrarlo ni moverlo.
   function _refreshOpenPopup(keepAccordion = false) {
     const openPopup = _currentPopup;
     if (!openPopup || !_lastIdentifyFeature) return;
 
     const wrapper = openPopup.getElement?.();
     if (!wrapper) return;
-    const popupEl  = wrapper.querySelector('.map-popup');
-    const tableEl  = popupEl?.querySelector('.popup-table');
-    const dropdown = document.querySelector('.pfc-dropdown');
-    const trigger  = popupEl?.querySelector('.pfc-trigger');
-    const chevron  = popupEl?.querySelector('.pfc-chevron');
+    const popupEl = wrapper.querySelector('.map-popup');
+    const tableEl = popupEl?.querySelector('.popup-table');
     if (!tableEl) return;
 
-    // Actualizar tabla y mantener dropdown abierto (no cerrarlo)
-    if (tableEl) {
-      const props     = _lastIdentifyFeature.properties;
-      const layerKey  = activeLayers[_lastIdentifyMapKey]?.layerKey || _lastIdentifyMapKey;
-      const allFields = Object.keys(props).filter(k =>
-        !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type') &&
-        props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
-      );
-      const visibleFields = _getVisibleFields(layerKey, allFields);
-      tableEl.innerHTML = visibleFields.map(k =>
-        `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`
-      ).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
-    }
+    const props     = _lastIdentifyFeature.properties;
+    const layerKey  = activeLayers[_lastIdentifyMapKey]?.layerKey || _lastIdentifyMapKey;
+    const allFields = Object.keys(props).filter(k =>
+      !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type') &&
+      props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
+    );
+    const visibleFields = _getVisibleFields(layerKey, allFields);
+    tableEl.innerHTML = visibleFields.map(k =>
+      `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`
+    ).join('') || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>';
 
     // Recalcular tamaño sin mover (dropdown permanece abierto)
     const _ap = openPopup.options.autoPan;
