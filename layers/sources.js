@@ -29,6 +29,18 @@ window.SOURCES = {
     url:         'https://www.ign.gob.ar',
   },
 
+  igm_uy: {
+    label:        'Instituto Geográfico Militar',
+    country:      'uy',
+    countryLabel: 'Uruguay',
+    wfsBase:      'https://sig.igm.gub.uy/geoserver/wfs',
+    wfsVersion:   '1.1.0',
+    clipLayer:    'LimitesDepartamentalesA:LimitesDepartamentalesA',
+    clipField:    'depto',         // valores en MAYÚSCULAS — normalizar al consultar
+    attribution:  '© Instituto Geográfico Militar (Uruguay)',
+    url:          'https://www.igm.gub.uy',
+  },
+
   // ── Futuras fuentes ───────────────────────────────────────────
   // Descomentar y completar cuando se agreguen:
   //
