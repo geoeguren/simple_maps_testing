@@ -423,7 +423,7 @@ body.day .lea-advanced-btn { color: #6a6560; }
 body.day .lea-advanced-btn:hover { background: rgba(0,0,0,0.05); color: #1a1814; }
 
 .lea-sep { height: 0.5px; background: var(--border-md); margin: 0; }
-.layer-edit-accordion .lea-sep:first-of-type { margin-top: 4px; }
+.lea-sep--top { margin-top: 4px; }
 
 /* Modal de edición avanzada */
 /* Leaflet label tooltip */
