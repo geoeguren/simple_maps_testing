@@ -63,11 +63,11 @@ window.SETTINGS = (() => {
       key: 'lang',
       label: 'Idioma',
       options: [
-        { val: 'en-US',  label: 'English (United States)',  disabled: true  },
-        { val: 'es-ES',  label: 'Español (España)',         disabled: true  },
-        { val: 'es-419', label: 'Español (Latinoamérica)',  disabled: false },
-        { val: 'fr-FR',  label: 'Français (France)',        disabled: true  },
-        { val: 'pt-BR',  label: 'Português (Brasil)',       disabled: true  },
+        { val: 'en-US',  label: 'English',    disabled: true  },
+        { val: 'es-ES',  label: 'Español',    disabled: true  },
+        { val: 'es-419', label: 'Español',    disabled: false },
+        { val: 'fr-FR',  label: 'Français',   disabled: true  },
+        { val: 'pt-BR',  label: 'Português',  disabled: true  },
       ]
     },
     {
@@ -126,10 +126,7 @@ window.SETTINGS = (() => {
       <div class="sd-acc-section" data-key="${sec.key}">
         <div class="sd-acc-header">
           <span class="sd-acc-label">${esc(sec.label)}</span>
-          <div class="sd-acc-value">
-            ${currentIcon}<span>${esc(currentLabel)}</span>
-            <span class="sd-acc-arrow material-icons">expand_more</span>
-          </div>
+          <span class="sd-acc-arrow material-icons">expand_more</span>
         </div>
         <div class="sd-acc-body hidden">
           ${optionsHtml}
@@ -218,19 +215,6 @@ window.SETTINGS = (() => {
           const key = opt.dataset.key;
           const val = opt.dataset.val;
           set(key, val);
-
-          // Actualizar valor mostrado en el header
-          const secDef    = SECTIONS.find(s => s.key === key);
-          const selOpt    = secDef?.options.find(o => o.val === val);
-          const iconHtml  = selOpt?.icon
-            ? `<span class="material-icons sd-acc-icon">${selOpt.icon}</span>` : '';
-          sec.querySelector('.sd-acc-value').innerHTML =
-            `${iconHtml}<span>${esc(selOpt?.label || val)}</span>
-             <span class="sd-acc-arrow material-icons open">expand_more</span>`;
-
-          // Re-wirear la flecha
-          sec.querySelector('.sd-acc-arrow').classList.add('open');
-
           // Marcar opción activa
           body.querySelectorAll('.sd-acc-option').forEach(o => o.classList.remove('active'));
           opt.classList.add('active');
