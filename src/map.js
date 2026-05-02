@@ -846,7 +846,7 @@ window.MAP = (() => {
         </div>
       </div>`;
 
-    // Wire acordeón
+    // Wire acordeón — deshabilita autoPan al abrir para que el popup no se mueva
     const accHeader = el.querySelector('.pfc-acc-header');
     const accBody   = el.querySelector('.pfc-acc-body');
     const accArrow  = el.querySelector('.pfc-acc-arrow');
@@ -856,6 +856,11 @@ window.MAP = (() => {
       const isOpen = !accBody.classList.contains('hidden');
       accBody.classList.toggle('hidden', isOpen);
       accArrow.classList.toggle('open', !isOpen);
+      // Deshabilitar autoPan para que el popup no suba al expandirse
+      if (_currentPopup) {
+        _currentPopup.options.autoPan = false;
+        _currentPopup.update();
+      }
     });
 
     // Wire checkboxes
