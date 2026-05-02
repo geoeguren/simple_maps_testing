@@ -621,26 +621,26 @@ body.day .popup-val { color: #1a1814; }
 }
 .pfc-acc-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 12px; cursor: pointer; gap: 8px;
+  padding: 5px 10px; cursor: pointer; gap: 8px;
   transition: background var(--transition);
 }
 .pfc-acc-header:hover { background: var(--cream3); }
 body.day .pfc-acc-header:hover { background: rgba(0,0,0,0.05); }
 
 .pfc-acc-label {
-  font-family: var(--font-sans); font-size: 12px; color: var(--cream2); flex: 1;
+  font-family: var(--font-sans); font-size: 11px; color: var(--cream2); flex: 1;
 }
 body.day .pfc-acc-label { color: #6a6560; }
 
 .pfc-acc-arrow {
-  font-size: 16px !important; color: var(--cream2); flex-shrink: 0;
+  font-size: 14px !important; color: var(--cream2); flex-shrink: 0;
   transition: transform .15s;
 }
 .pfc-acc-arrow.open { transform: rotate(180deg); }
 
 .pfc-acc-body {
-  /* Mostrar máx 6 filas (~34px c/u), scroll si hay más */
-  max-height: 204px; overflow-y: auto;
+  /* ~5 filas de ~28px c/u */
+  max-height: 140px; overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin; scrollbar-color: var(--border-md) transparent;
   border-top: 0.5px solid var(--border);
@@ -651,7 +651,7 @@ body.day .pfc-acc-label { color: #6a6560; }
 
 .pfc-acc-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 12px; gap: 8px; cursor: pointer;
+  padding: 5px 10px; gap: 8px; cursor: pointer;
   border-bottom: 0.5px solid var(--border);
   transition: background var(--transition);
 }
