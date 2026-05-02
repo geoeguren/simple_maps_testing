@@ -835,7 +835,7 @@ window.MAP = (() => {
         ${name ? `<span class="popup-name">${name}</span>` : '<span></span>'}
         <button class="popup-close-btn"><span class="material-icons">close</span></button>
       </div>
-      <table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table>
+      <div class="popup-table-wrap"><table class="popup-table">${dataRows || '<tr><td class="popup-key" colspan="2" style="opacity:.5">Sin datos</td></tr>'}</table></div>
       <div class="pfc-acc-wrap">
         <div class="pfc-acc-header">
           <span class="pfc-acc-label">Más campos</span>
@@ -856,11 +856,9 @@ window.MAP = (() => {
       const isOpen = !accBody.classList.contains('hidden');
       accBody.classList.toggle('hidden', isOpen);
       accArrow.classList.toggle('open', !isOpen);
-      // Deshabilitar autoPan para que el popup no suba al expandirse
-      if (_currentPopup) {
-        _currentPopup.options.autoPan = false;
-        _currentPopup.update();
-      }
+      // No llamar update() ni tocar autoPan: el acordeón crece dentro del
+      // max-height del popup (ver .map-popup en map.css) y Leaflet no necesita
+      // reposicionar nada. Llamar update() movería el popup hacia arriba.
     });
 
     // Wire checkboxes
