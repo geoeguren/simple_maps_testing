@@ -110,14 +110,13 @@ window.CLIP = (() => {
       ? maskGeoJSON.features[0]
       : unionFeatures(maskGeoJSON.features);
 
-    // Pre-filtro por BBOX — reduce features antes del clip geométrico
-    const bbox       = calcularBbox(maskFeature);
-    const bboxFilter = `BBOX(the_geom,${bbox.minX},${bbox.minY},${bbox.maxX},${bbox.maxY})`;
-    const cqlConBbox = cql ? `${cql} AND ${bboxFilter}` : bboxFilter;
+    // Pre-filtro por BBOX como parámetro nativo WFS — más compatible que BBOX() en CQL
+    const bbox = calcularBbox(maskFeature);
 
     const layerGeoJSON = await window.WFS.fetch(layerDef.typename, {
       ...wfsOpts,
-      cqlFilter: cqlConBbox,
+      cqlFilter: cql || undefined,
+      bbox,
     });
 
     if (!layerGeoJSON.features?.length) {
