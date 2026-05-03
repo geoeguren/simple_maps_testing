@@ -225,10 +225,13 @@ window.INTENT = (() => {
   function resolver(textoUsuario, historial = []) {
     // ── Guardianes ────────────────────────────────────────────
 
-    // Si hay conversación en curso, el contexto importa → LLM
-    const mensajesAsistente = (historial || []).filter(m => m.role === 'assistant');
-    if (mensajesAsistente.length > 0) {
-      console.log('[INTENT] Conversación en curso → LLM');
+    // Si hay conversación real del LLM en curso, el contexto importa → LLM
+    // Los mensajes generados por intent (prefijo [intent]) no cuentan
+    const mensajesLLM = (historial || []).filter(
+      m => m.role === 'assistant' && !m.content?.startsWith('[intent]')
+    );
+    if (mensajesLLM.length > 0) {
+      console.log('[INTENT] Conversación LLM en curso → LLM');
       return null;
     }
 
