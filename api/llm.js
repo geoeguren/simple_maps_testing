@@ -58,7 +58,11 @@ function capasAContexto(capas) {
     const countInfo = c.featureCount !== undefined
       ? ` [${c.featureCount} features]`
       : '';
-    return `  ${c.key} — ${c.titulo} (${c.geomType})${countInfo}${attrs ? '\n' + attrs : ''}`;
+    // Mostrar geoFields si existen — son los campos correctos para filtrar por área
+    const geoFieldsInfo = c.geoFields
+      ? '\n    filtros de área: ' + Object.entries(c.geoFields).map(([tipo, campo]) => `${tipo}→${campo}`).join(', ')
+      : '';
+    return `  ${c.key} — ${c.titulo} (${c.geomType})${countInfo}${geoFieldsInfo}${attrs ? '\n' + attrs : ''}`;
   }).join('\n\n');
 }
 
