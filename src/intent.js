@@ -127,6 +127,14 @@ window.INTENT = (() => {
     if (!tokens.length) return null;
 
     const resultados = Object.entries(layers).map(([key, capa]) => {
+      // Si el área es de un país conocido, excluir capas de otros países
+      if (area?.pais) {
+        const sourceCountry = window.SOURCES?.[capa.source]?.country;
+        if (sourceCountry && sourceCountry !== area.pais) {
+          return { key, capa, score: 0 };
+        }
+      }
+
       const textoCapa = normalizar([
         capa.titulo || '',
         key,
