@@ -110,10 +110,19 @@ window.CLIP = (() => {
       ? maskGeoJSON.features[0]
       : unionFeatures(maskGeoJSON.features);
 
+    // Pre-filtro por BBOX — reduce features antes del clip geométrico
+    const bbox       = calcularBbox(maskFeature);
+    const bboxFilter = `BBOX(the_geom,${bbox.minX},${bbox.minY},${bbox.maxX},${bbox.maxY})`;
+    const cqlConBbox = cql ? `${cql} AND ${bboxFilter}` : bboxFilter;
+
     const layerGeoJSON = await window.WFS.fetch(layerDef.typename, {
       ...wfsOpts,
-      cqlFilter: cql || undefined,
+      cqlFilter: cqlConBbox,
     });
+
+    if (!layerGeoJSON.features?.length) {
+      return { type: 'FeatureCollection', features: [] };
+    }
 
     try {
       return await clipViaEdgeFunction(layerGeoJSON, { type: 'FeatureCollection', features: [maskFeature] });
@@ -177,6 +186,31 @@ window.CLIP = (() => {
   }
 
   // ── Helpers ───────────────────────────────────────────────────
+
+  /**
+   * Calcula el bounding box de un feature GeoJSON.
+   * Soporta Polygon y MultiPolygon.
+   */
+  function calcularBbox(feature) {
+    const coords = [];
+    function extraer(anillo) { anillo.forEach(c => coords.push(c)); }
+
+    const geom = feature.geometry;
+    if (geom.type === 'Polygon') {
+      geom.coordinates.forEach(extraer);
+    } else if (geom.type === 'MultiPolygon') {
+      geom.coordinates.forEach(poligono => poligono.forEach(extraer));
+    }
+
+    const lons = coords.map(c => c[0]);
+    const lats = coords.map(c => c[1]);
+    return {
+      minX: Math.min(...lons),
+      minY: Math.min(...lats),
+      maxX: Math.max(...lons),
+      maxY: Math.max(...lats),
+    };
+  }
 
   function normalizar(texto) {
     if (!texto) return '';
