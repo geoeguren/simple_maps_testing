@@ -800,8 +800,16 @@ window.MAP = (() => {
     const layerKey = activeLayers[mapKey]?.layerKey || mapKey;
     const layerDef = window.LAYERS?.[layerKey] || {};
 
+    // Conjunto de campos permitidos: excluye visible:false de attributes.
+    // Si la capa no tiene attributes, no se restringe nada.
+    const _attrs = layerDef.attributes || [];
+    const _hiddenSet = _attrs.length
+      ? new Set(_attrs.filter(a => a.visible === false).map(a => a.campo))
+      : new Set();
+
     const allFields = Object.keys(props).filter(k =>
       !POPUP_ALWAYS_EXCLUDE.has(k) &&
+      !_hiddenSet.has(k) &&
       !k.endsWith('Type') &&
       props[k] !== null && props[k] !== undefined &&
       props[k] !== 'None' && props[k] !== ''
@@ -897,8 +905,13 @@ window.MAP = (() => {
 
     const props     = _lastIdentifyFeature.properties;
     const layerKey  = activeLayers[_lastIdentifyMapKey]?.layerKey || _lastIdentifyMapKey;
+    const _layerDef2  = window.LAYERS?.[layerKey] || {};
+    const _attrs2     = _layerDef2.attributes || [];
+    const _hiddenSet2 = _attrs2.length
+      ? new Set(_attrs2.filter(a => a.visible === false).map(a => a.campo))
+      : new Set();
     const allFields = Object.keys(props).filter(k =>
-      !POPUP_ALWAYS_EXCLUDE.has(k) && !k.endsWith('Type') &&
+      !POPUP_ALWAYS_EXCLUDE.has(k) && !_hiddenSet2.has(k) && !k.endsWith('Type') &&
       props[k] !== null && props[k] !== undefined && props[k] !== 'None' && props[k] !== ''
     );
     const visibleFields = _getVisibleFields(layerKey, allFields);
