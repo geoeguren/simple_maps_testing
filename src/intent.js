@@ -25,7 +25,7 @@ window.INTENT = (() => {
   // ── Configuración ─────────────────────────────────────────────
 
   // Score mínimo para considerar que encontramos la capa correcta
-  const MIN_SCORE = 3;
+  const MIN_SCORE = 6;
 
   // Si el segundo mejor score es >= este porcentaje del mejor, hay empate → LLM
   const EMPATE_RATIO = 0.75;
@@ -149,8 +149,8 @@ window.INTENT = (() => {
       // Match por tokens individuales
       for (const token of tokens) {
         if (textoCapa.includes(token)) score += 2;
-        // Match parcial (token es prefijo de alguna palabra)
-        if (textoCapa.split(/\s+/).some(w => w.startsWith(token))) score += 1;
+        // Match parcial solo si el token tiene 5+ caracteres (evita falsos positivos con "nacional")
+        if (token.length >= 5 && textoCapa.split(/\s+/).some(w => w.startsWith(token) && w !== token)) score += 1;
       }
 
       return { key, capa, score };
