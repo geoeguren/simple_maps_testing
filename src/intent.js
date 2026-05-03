@@ -76,30 +76,23 @@ window.INTENT = (() => {
       for (let i = 0; i <= palabras.length - largo; i++) {
         const frase = palabras.slice(i, i + largo).join(' ');
 
-        // Provincias AR
-        if (geoMaps.ar?.provincias?.[frase]) {
-          const valorOriginal = geoMaps.ar.provincias[frase];
-          return {
-            tipo:          'provincia',
-            pais:          'ar',
-            valorNorm:     frase,
-            valorOriginal, // ej: 'Santa Cruz'
-            layerKey:      'provincia_ar',
-            field:         window.LAYERS?.provincia_ar?.labelField || 'nam',
-          };
-        }
-
-        // Departamentos UY
-        if (geoMaps.uy?.departamentos?.[frase]) {
-          const valorOriginal = geoMaps.uy.departamentos[frase];
-          return {
-            tipo:          'departamento',
-            pais:          'uy',
-            valorNorm:     frase,
-            valorOriginal, // ej: 'DURAZNO'
-            layerKey:      'departamento_uy',
-            field:         window.LAYERS?.departamento_uy?.labelField || 'depto',
-          };
+        // Iterar dinámicamente sobre todos los países y tipos en GEO_MAPS
+        // Al agregar un país nuevo en layers/index.js, aparece aquí automáticamente
+        for (const [pais, tipos] of Object.entries(geoMaps)) {
+          for (const [, mapaMeta] of Object.entries(tipos)) {
+            const valorOriginal = mapaMeta.valores?.[frase];
+            if (valorOriginal) {
+              const layerKey = mapaMeta.layerKey;
+              return {
+                tipo:          mapaMeta.tipo,
+                pais,
+                valorNorm:     frase,
+                valorOriginal,
+                layerKey,
+                field:         window.LAYERS?.[layerKey]?.labelField || null,
+              };
+            }
+          }
         }
       }
     }
