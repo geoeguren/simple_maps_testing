@@ -106,7 +106,7 @@ window.WFS = (() => {
 
   // ── Constructor de URL WFS ────────────────────────────────────
 
-  function buildUrl(wfsBase, typename, wfsVersion, cqlFilter, maxFeatures) {
+  function buildUrl(wfsBase, typename, wfsVersion, cqlFilter, maxFeatures, bbox) {
     const params = new URLSearchParams({
       service:      'WFS',
       version:      wfsVersion || '1.1.0',
@@ -117,6 +117,8 @@ window.WFS = (() => {
     });
     if (maxFeatures) params.set('maxFeatures', maxFeatures);
     if (cqlFilter)   params.set('CQL_FILTER', cqlFilter);
+    // bbox como parámetro nativo WFS — más compatible que BBOX() en CQL
+    if (bbox)        params.set('bbox', `${bbox.minX},${bbox.minY},${bbox.maxX},${bbox.maxY},EPSG:4326`);
     return `${wfsBase}?${params.toString()}`;
   }
 
@@ -153,12 +155,14 @@ window.WFS = (() => {
       wfsVersion   = '1.1.0',
       cqlFilter,
       maxFeatures,
+      bbox,
       forceRefresh
     } = options;
 
     if (!wfsBase) throw new Error(`[WFS] wfsBase requerido para "${typename}". Verificá que la capa tenga "source" y que esté definido en window.SOURCES.`);
 
-    const key = cacheKey(wfsBase, typename, cqlFilter);
+    const bboxStr = bbox ? `${bbox.minX},${bbox.minY},${bbox.maxX},${bbox.maxY}` : '';
+    const key = cacheKey(wfsBase, typename, (cqlFilter || '') + bboxStr);
 
     // 1. Caché fresca en IndexedDB
     if (!forceRefresh) {
@@ -176,8 +180,8 @@ window.WFS = (() => {
     }
 
     // 3. Fetch con reintentos
-    const url = buildUrl(wfsBase, typename, wfsVersion, cqlFilter, maxFeatures);
-    console.log(`[WFS] Fetching: ${typename}${cqlFilter ? ' | ' + cqlFilter : ''} (${wfsBase})`);
+    const url = buildUrl(wfsBase, typename, wfsVersion, cqlFilter, maxFeatures, bbox);
+    console.log(`[WFS] Fetching: ${typename}${cqlFilter ? ' | ' + cqlFilter : ''}${bbox ? ' | bbox' : ''} (${wfsBase})`);
 
     const fetchPromise = fetchConReintentos(url)
       .then(async geojson => {
