@@ -3,10 +3,15 @@
  * Recibe: { layer: GeoJSON, mask: GeoJSON }
  * Devuelve: GeoJSON recortado
  *
- * Usa @turf/turf instalado como dependencia npm
+ * Usa módulos individuales de Turf en lugar de @turf/turf completo
+ * para evitar la dependencia de concaveman (ESM-only, incompatible con
+ * el runtime CommonJS de Vercel).
  */
 
-const turf = require('@turf/turf');
+const { booleanPointInPolygon } = require('@turf/boolean-point-in-polygon');
+const { bboxClip }              = require('@turf/bbox-clip');
+const { bbox }                  = require('@turf/bbox');
+const { intersect }             = require('@turf/intersect');
 
 module.exports = async function handler(req, res) {
 
@@ -37,18 +42,18 @@ module.exports = async function handler(req, res) {
       if (!geomType) continue;
 
       if (geomType === 'Point' || geomType === 'MultiPoint') {
-        if (turf.booleanPointInPolygon(feat, maskFeature)) {
+        if (booleanPointInPolygon(feat, maskFeature)) {
           clipped.push(feat);
         }
 
       } else if (geomType === 'LineString' || geomType === 'MultiLineString') {
-        const inter = turf.bboxClip(feat, turf.bbox(maskFeature));
+        const inter = bboxClip(feat, bbox(maskFeature));
         if (inter?.geometry?.coordinates?.length > 0) {
           clipped.push({ ...inter, properties: feat.properties });
         }
 
       } else if (geomType === 'Polygon' || geomType === 'MultiPolygon') {
-        const inter = turf.intersect(feat, maskFeature);
+        const inter = intersect(feat, maskFeature);
         if (inter) {
           inter.properties = feat.properties;
           clipped.push(inter);
