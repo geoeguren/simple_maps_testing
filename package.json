@@ -7,7 +7,8 @@
     "@turf/boolean-point-in-polygon": "^6.5.0",
     "@turf/bbox-clip": "^6.5.0",
     "@turf/bbox": "^6.5.0",
-    "@turf/intersect": "^6.5.0"
+    "@turf/intersect": "^6.5.0",
+    "@turf/union": "^6.5.0"
   },
   "engines": {
     "node": "24.x"
