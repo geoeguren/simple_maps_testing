@@ -229,7 +229,8 @@ Formatos válidos: "pdf", "jpeg", "geojson", "html"
 
 Cuando el usuario pida exportar sin especificar el formato, respondé con texto + bloque export-choice (sin contenido):
 \`\`\`export-choice
-\`\`\``;
+\`\`\`
+NUNCA uses export-choice para preguntas de confirmación, avisos o cualquier otra cosa que no sea un pedido explícito de exportación.`;
 }
 
 // ── Streaming con OpenAI-compatible API (Cerebras/Groq) ───────────
