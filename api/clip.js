@@ -8,19 +8,20 @@
  * el runtime CommonJS de Vercel).
  *
  * Para MultiPolygon complejos (ej: Santa Cruz con 37 subpolígonos),
- * unimos los subpolígonos con @turf/union antes de intersecar —
- * igual que hace src/clip.js en el browser.
+ * unimos los subpolígonos con @turf/union antes de intersecar.
+ *
+ * Para líneas usamos lineal de intersección punto a punto en lugar de
+ * bboxClip — más robusto con MultiLineString en módulos individuales.
  */
 
 const { booleanPointInPolygon } = require('@turf/boolean-point-in-polygon');
-const { bboxClip }              = require('@turf/bbox-clip');
 const { bbox }                  = require('@turf/bbox');
 const { intersect }             = require('@turf/intersect');
 const { union }                 = require('@turf/union');
+const { booleanPointOnLine }    = require('@turf/boolean-point-on-line');
 
 /**
  * Si la máscara es MultiPolygon, une todos los subpolígonos en uno solo.
- * Esto evita bugs de @turf/intersect con MultiPolygon complejos.
  */
 function normalizarMascara(maskFeature) {
   if (maskFeature.geometry?.type !== 'MultiPolygon') return maskFeature;
@@ -32,8 +33,41 @@ function normalizarMascara(maskFeature) {
     }));
     return poligonos.reduce((acc, feat) => union(acc, feat));
   } catch {
-    return maskFeature; // fallback: usar el MultiPolygon original
+    return maskFeature;
   }
+}
+
+/**
+ * Clip de líneas usando bboxClip manual — más robusto que @turf/bbox-clip
+ * con MultiLineString en módulos separados.
+ * Filtra segmentos cuyo bbox intersecta con el bbox de la máscara.
+ */
+function clipLinea(feat, maskBbox) {
+  const [minX, minY, maxX, maxY] = maskBbox;
+
+  const clipearAnillo = (coords) => {
+    return coords.filter(([x, y]) =>
+      x >= minX && x <= maxX && y >= minY && y <= maxY
+    );
+  };
+
+  const geom = feat.geometry;
+
+  if (geom.type === 'LineString') {
+    const filtered = clipearAnillo(geom.coordinates);
+    if (filtered.length < 2) return null;
+    return { ...feat, geometry: { type: 'LineString', coordinates: filtered } };
+  }
+
+  if (geom.type === 'MultiLineString') {
+    const lines = geom.coordinates
+      .map(line => clipearAnillo(line))
+      .filter(line => line.length >= 2);
+    if (!lines.length) return null;
+    return { ...feat, geometry: { type: 'MultiLineString', coordinates: lines } };
+  }
+
+  return null;
 }
 
 module.exports = async function handler(req, res) {
@@ -42,23 +76,19 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { layer, mask } = req.body || {};
-
-  if (!layer || !mask) {
-    return res.status(400).json({ error: 'Se requieren "layer" y "mask"' });
-  }
+  if (!layer || !mask) return res.status(400).json({ error: 'Se requieren "layer" y "mask"' });
 
   const maskFeature     = mask.features?.[0] || mask;
   const maskNormalizada = normalizarMascara(maskFeature);
+  const maskBbox        = bbox(maskNormalizada);
   const clipped         = [];
+
+  console.log(`[clip] mask type: ${maskNormalizada.geometry?.type}, bbox: ${maskBbox}`);
+  console.log(`[clip] layer features: ${layer.features?.length}`);
 
   for (const feat of layer.features || []) {
     try {
@@ -71,10 +101,8 @@ module.exports = async function handler(req, res) {
         }
 
       } else if (geomType === 'LineString' || geomType === 'MultiLineString') {
-        const inter = bboxClip(feat, bbox(maskNormalizada));
-        if (inter?.geometry?.coordinates?.length > 0) {
-          clipped.push({ ...inter, properties: feat.properties });
-        }
+        const inter = clipLinea(feat, maskBbox);
+        if (inter) clipped.push({ ...inter, properties: feat.properties });
 
       } else if (geomType === 'Polygon' || geomType === 'MultiPolygon') {
         const inter = intersect(feat, maskNormalizada);
@@ -85,6 +113,8 @@ module.exports = async function handler(req, res) {
       }
     } catch { /* feature individual rota — omitir */ }
   }
+
+  console.log(`[clip] clipped features: ${clipped.length}`);
 
   return res.status(200).json({
     type:     'FeatureCollection',
