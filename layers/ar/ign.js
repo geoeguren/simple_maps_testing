@@ -31,6 +31,7 @@ export const IGN_AR = {
   provincia_ar: {
     source:       'ign_ar',
     typename:     'ign:provincia',
+    featureCount:  24,
     titulo:       'Provincias de Argentina',
     geomType:     'polygon',
     labelField:   'nam',
@@ -53,6 +54,7 @@ export const IGN_AR = {
   departamento_ar: {
     source:       'ign_ar',
     typename:     'ign:departamento',
+    featureCount:  529,
     titulo:       'Departamentos de Argentina',
     geomType:     'polygon',
     labelField:   'nam',
@@ -75,6 +77,7 @@ export const IGN_AR = {
   municipio_ar: {
     source:       'ign_ar',
     typename:     'ign:municipio',
+    featureCount:  2114,
     titulo:       'Municipios de Argentina',
     geomType:     'polygon',
     labelField:   'nam',
@@ -96,6 +99,7 @@ export const IGN_AR = {
   gobierno_local_ar: {
     source:       'ign_ar',
     typename:     'ign:gobiernoslocales_2022',
+    featureCount:  2313,
     titulo:       'Gobiernos locales de Argentina',
     geomType:     'polygon',
     labelField:   'nam',
@@ -122,6 +126,7 @@ export const IGN_AR = {
   localidad_ar: {
     source:       'ign_ar',
     typename:     'ign:localidad_bahra',
+    featureCount:  3528,
     titulo:       'Localidades de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -155,6 +160,7 @@ export const IGN_AR = {
   paraje_ar: {
     source:       'ign_ar',
     typename:     'ign:bahra_paraje',
+    featureCount:  10425,
     titulo:       'Parajes de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -188,6 +194,7 @@ export const IGN_AR = {
   sublocalidad_ar: {
     source:       'ign_ar',
     typename:     'ign:sublocalidad_entidad_bahra',
+    featureCount:  707,
     titulo:       'Sublocalidades de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -221,6 +228,7 @@ export const IGN_AR = {
   pais_ar: {
     source:       'ign_ar',
     typename:     'ign:pais',
+    featureCount:  1,
     titulo:       'País — Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -243,6 +251,7 @@ export const IGN_AR = {
   plataforma_continental_ar: {
     source:       'ign_ar',
     typename:     'ign:plataforma_continental',
+    featureCount:  1,
     titulo:       'Plataforma continental argentina',
     geomType:     'polygon',
     labelField:   null,
@@ -263,6 +272,7 @@ export const IGN_AR = {
   mar_territorial_ar: {
     source:       'ign_ar',
     typename:     'ign:mar_territorial_argentino',
+    featureCount:  1,
     titulo:       'Mar territorial argentino',
     geomType:     'polygon',
     labelField:   null,
@@ -283,6 +293,7 @@ export const IGN_AR = {
   zona_contigua_ar: {
     source:       'ign_ar',
     typename:     'ign:zona_contigua_argentina',
+    featureCount:  1,
     titulo:       'Zona contigua argentina',
     geomType:     'polygon',
     labelField:   null,
@@ -302,6 +313,7 @@ export const IGN_AR = {
   zee_ar: {
     source:       'ign_ar',
     typename:     'ign:zona_economica_exclusiva_argentina',
+    featureCount:  1,
     titulo:       'Zona económica exclusiva argentina',
     geomType:     'polygon',
     labelField:   null,
@@ -324,6 +336,7 @@ export const IGN_AR = {
   millas_antartico_ar: {
     source:       'ign_ar',
     typename:     'ign:doscientas_millas_sector_antartico',
+    featureCount:  1,
     titulo:       '200 millas sector antártico',
     geomType:     'polygon',
     labelField:   null,
@@ -345,6 +358,7 @@ export const IGN_AR = {
   limite_internacional_ar: {
     source:       'ign_ar',
     typename:     'ign:linea_de_limite_FA004',
+    featureCount:  104,
     titulo:       'Límites internacionales de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -367,6 +381,7 @@ export const IGN_AR = {
   limite_provincial_ar: {
     source:       'ign_ar',
     typename:     'ign:linea_de_limite_070111',
+    featureCount:  164,
     titulo:       'Límites provinciales de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -390,6 +405,7 @@ export const IGN_AR = {
   limite_departamental_ar: {
     source:       'ign_ar',
     typename:     'ign:linea_de_limite_070110',
+    featureCount:  2582,
     titulo:       'Límites departamentales de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -411,6 +427,7 @@ export const IGN_AR = {
   limite_area_protegida_ar: {
     source:       'ign_ar',
     typename:     'ign:linea_de_limite_070114',
+    featureCount:  3751,
     titulo:       'Límites de áreas protegidas de Argentina',
     geomType:     'line',
     labelField:   null,
@@ -430,6 +447,7 @@ export const IGN_AR = {
   limite_maritimo_ar: {
     source:       'ign_ar',
     typename:     'ign:linea_limite_maritimos',
+    featureCount:  115,
     titulo:       'Límites marítimos de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -452,6 +470,7 @@ export const IGN_AR = {
   hito_internacional_ar: {
     source:       'ign_ar',
     typename:     'ign:hitos_internacionales',
+    featureCount:  1678,
     titulo:       'Hitos internacionales de Argentina',
     geomType:     'point',
     labelField:   'nombre',
@@ -471,6 +490,7 @@ export const IGN_AR = {
   hito_interprovincial_ar: {
     source:       'ign_ar',
     typename:     'ign:hitos_interprovinciales',
+    featureCount:  143,
     titulo:       'Hitos interprovinciales de Argentina',
     geomType:     'point',
     labelField:   'nombre',
@@ -487,6 +507,7 @@ export const IGN_AR = {
   circulo_polar_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_terrestres_070401',
+    featureCount:  2,
     titulo:       'Círculos polares',
     geomType:     'line',
     labelField:   null,
@@ -507,6 +528,7 @@ export const IGN_AR = {
   tropico_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_terrestres_070402',
+    featureCount:  2,
     titulo:       'Trópicos',
     geomType:     'line',
     labelField:   null,
@@ -527,6 +549,7 @@ export const IGN_AR = {
   ecuador_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_terrestres_070403',
+    featureCount:  1,
     titulo:       'Ecuador',
     geomType:     'line',
     labelField:   null,
@@ -549,6 +572,7 @@ export const IGN_AR = {
   vial_nacional_ar: {
     source:       'ign_ar',
     typename:     'ign:vial_nacional',
+    featureCount:  2738,
     titulo:       'Red vial nacional de Argentina',
     geomType:     'line',
     labelField:   'rtn',
@@ -570,6 +594,7 @@ export const IGN_AR = {
   vial_provincial_ar: {
     source:       'ign_ar',
     typename:     'ign:vial_provincial',
+    featureCount:  12928,
     titulo:       'Red vial provincial de Argentina',
     geomType:     'line',
     labelField:   'rtn',
@@ -591,6 +616,7 @@ export const IGN_AR = {
   vial_terciario_ar: {
     source:       'ign_ar',
     typename:     'ign:vial_terciaria',
+    featureCount:  136168,
     titulo:       'Red vial terciaria de Argentina',
     geomType:     'line',
     labelField:   'fna1',
@@ -623,6 +649,7 @@ export const IGN_AR = {
   huella_ar: {
     source:       'ign_ar',
     typename:     'ign:vial_AP010',
+    featureCount:  84606,
     titulo:       'Huellas de Argentina',
     geomType:     'line',
     labelField:   null,
@@ -643,6 +670,7 @@ export const IGN_AR = {
   senda_ar: {
     source:       'ign_ar',
     typename:     'ign:vial_AP050',
+    featureCount:  20965,
     titulo:       'Sendas rurales de Argentina',
     geomType:     'line',
     labelField:   null,
@@ -663,6 +691,7 @@ export const IGN_AR = {
   puente_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_cruces_y_enlaces_AQ040',
+    featureCount:  1049,
     titulo:       'Puentes de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -690,6 +719,7 @@ export const IGN_AR = {
   puente_punto_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_cruces_y_enlaces_AQ040',
+    featureCount:  6002,
     titulo:       'Puentes (punto) de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -717,6 +747,7 @@ export const IGN_AR = {
   alcantarilla_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_cruces_y_enlaces_AQ065',
+    featureCount:  20913,
     titulo:       'Alcantarillas de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -737,6 +768,7 @@ export const IGN_AR = {
   tunel_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_cruces_y_enlaces_AQ130',
+    featureCount:  28,
     titulo:       'Túneles de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -761,6 +793,7 @@ export const IGN_AR = {
   vado_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_cruces_y_enlaces_BH070',
+    featureCount:  35290,
     titulo:       'Vados de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -784,6 +817,7 @@ export const IGN_AR = {
   aeropuerto_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_transporte_aereo_GB005',
+    featureCount:  60,
     titulo:       'Aeropuertos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -806,6 +840,7 @@ export const IGN_AR = {
   aerodromo_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_transporte_aereo_GB001',
+    featureCount:  884,
     titulo:       'Aeródromos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -829,6 +864,7 @@ export const IGN_AR = {
   helipuerto_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_transporte_aereo_GB035',
+    featureCount:  154,
     titulo:       'Helipuertos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -851,6 +887,7 @@ export const IGN_AR = {
   pista_aerea_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_transporte_aereo_GB055',
+    featureCount:  1065,
     titulo:       'Pistas aéreas de Argentina',
     geomType:     'line',
     labelField:   null,
@@ -875,6 +912,7 @@ export const IGN_AR = {
   ferrocarril_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_transporte_ferroviario_AN010',
+    featureCount:  1092,
     titulo:       'Red ferroviaria de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -901,6 +939,7 @@ export const IGN_AR = {
   estacion_ferroviaria_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_transporte_ferroviario_AN070',
+    featureCount:  2672,
     titulo:       'Estaciones ferroviarias de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -926,6 +965,7 @@ export const IGN_AR = {
   puerto_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_puertos_y_muelles_BB005',
+    featureCount:  155,
     titulo:       'Puertos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -949,6 +989,7 @@ export const IGN_AR = {
   muelle_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_puertos_y_muelles_BB190',
+    featureCount:  359,
     titulo:       'Muelles de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -971,6 +1012,7 @@ export const IGN_AR = {
   rompeolas_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_puertos_y_muelles_BB041',
+    featureCount:  18,
     titulo:       'Rompeolas de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -994,6 +1036,7 @@ export const IGN_AR = {
   rompeolas_punto_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_puertos_y_muelles_BB041',
+    featureCount:  18,
     titulo:       'Rompeolas (punto) de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1020,6 +1063,7 @@ export const IGN_AR = {
   pasos_frontera_ar: {
     source:       'ign_ar',
     typename:     'ign:pasos_de_fronteras_internacionales',
+    featureCount:  158,
     titulo:       'Pasos de frontera de Argentina',
     geomType:     'point',
     labelField:   'nom_pfi',
@@ -1059,6 +1103,7 @@ export const IGN_AR = {
   complejo_fronterizo_ar: {
     source:       'ign_ar',
     typename:     'ign:complejos_fronterizos',
+    featureCount:  144,
     titulo:       'Complejos fronterizos de Argentina',
     geomType:     'point',
     labelField:   'nom_cf',
@@ -1088,6 +1133,7 @@ export const IGN_AR = {
   aduana_ar: {
     source:       'ign_ar',
     typename:     'ign:controles_AH070',
+    featureCount:  228,
     titulo:       'Aduanas y puestos de control de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1114,6 +1160,7 @@ export const IGN_AR = {
   terminal_omnibus_ar: {
     source:       'ign_ar',
     typename:     'ign:infraestructura_de_transporte_AQ125',
+    featureCount:  639,
     titulo:       'Terminales de ómnibus de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1136,6 +1183,7 @@ export const IGN_AR = {
   estacion_servicio_ar: {
     source:       'ign_ar',
     typename:     'ign:infraestructura_de_transporte_AQ170',
+    featureCount:  5383,
     titulo:       'Estaciones de servicio de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1159,6 +1207,7 @@ export const IGN_AR = {
   peaje_ar: {
     source:       'ign_ar',
     typename:     'ign:infraestructura_de_transporte_030801',
+    featureCount:  161,
     titulo:       'Estaciones de peaje de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1182,6 +1231,7 @@ export const IGN_AR = {
   pesaje_ar: {
     source:       'ign_ar',
     typename:     'ign:infraestructura_de_transporte_AQ180',
+    featureCount:  44,
     titulo:       'Estaciones de pesaje de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1205,6 +1255,7 @@ export const IGN_AR = {
   indicador_km_ar: {
     source:       'ign_ar',
     typename:     'ign:infraestructura_de_transporte_030803',
+    featureCount:  2202,
     titulo:       'Indicadores de kilómetros de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1231,6 +1282,7 @@ export const IGN_AR = {
   rio_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_aguas_continentales_perenne',
+    featureCount:  52611,
     titulo:       'Ríos y corrientes de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1252,6 +1304,7 @@ export const IGN_AR = {
   rio_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_aguas_continentales_BH140',
+    featureCount:  854,
     titulo:       'Ríos principales (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1275,6 +1328,7 @@ export const IGN_AR = {
   rio_intermitente_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_aguas_continentales_intermitentes',
+    featureCount:  271784,
     titulo:       'Ríos intermitentes de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1296,6 +1350,7 @@ export const IGN_AR = {
   espejo_agua_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_aguas_continentales_perenne',
+    featureCount:  21524,
     titulo:       'Espejos de agua de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1317,6 +1372,7 @@ export const IGN_AR = {
   lago_embalse_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_aguas_continentales_BH130',
+    featureCount:  99,
     titulo:       'Lagos y embalses de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1340,6 +1396,7 @@ export const IGN_AR = {
   laguna_intermitente_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_aguas_continentales_intermitente',
+    featureCount:  1329,
     titulo:       'Lagunas intermitentes de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1363,6 +1420,7 @@ export const IGN_AR = {
   canal_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_aguas_continentales_BH020',
+    featureCount:  5614,
     titulo:       'Canales de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1385,6 +1443,7 @@ export const IGN_AR = {
   canal_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_aguas_continentales_BH020',
+    featureCount:  77,
     titulo:       'Canales (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1408,6 +1467,7 @@ export const IGN_AR = {
   acequia_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_aguas_continentales_BH030',
+    featureCount:  10254,
     titulo:       'Acequias y zanjas de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1430,6 +1490,7 @@ export const IGN_AR = {
   acueducto_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_aguas_continentales_BH010',
+    featureCount:  290,
     titulo:       'Acueductos de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1453,6 +1514,7 @@ export const IGN_AR = {
   muro_embalse_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_aguas_continentales_BI020',
+    featureCount:  126,
     titulo:       'Muros de embalse de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1475,6 +1537,7 @@ export const IGN_AR = {
   dique_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_aguas_continentales_BH051',
+    featureCount:  125,
     titulo:       'Diques de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1498,6 +1561,7 @@ export const IGN_AR = {
   cascada_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_aguas_continentales_BH180',
+    featureCount:  80,
     titulo:       'Cascadas y saltos de agua de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1520,6 +1584,7 @@ export const IGN_AR = {
   fuente_natural_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_aguas_continentales_BH170',
+    featureCount:  110,
     titulo:       'Fuentes naturales de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1543,6 +1608,7 @@ export const IGN_AR = {
   embalse_rural_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_aguas_continentales_041101',
+    featureCount:  918,
     titulo:       'Embalses rurales (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1565,6 +1631,7 @@ export const IGN_AR = {
   embalse_rural_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_aguas_continentales_041101',
+    featureCount:  1155,
     titulo:       'Embalses rurales de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1587,6 +1654,7 @@ export const IGN_AR = {
   marea_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_mareas_y_corrientes_040601',
+    featureCount:  0,
     titulo:       'Mareas y corrientes de Argentina',
     geomType:     'line',
     labelField:   null,
@@ -1608,6 +1676,7 @@ export const IGN_AR = {
   mareografo_ar: {
     source:       'ign_ar',
     typename:     'ign:mareas_y_corrientes_BG020',
+    featureCount:  21,
     titulo:       'Mareógrafos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1633,6 +1702,7 @@ export const IGN_AR = {
   glaciar_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_glaciologia_BJ030',
+    featureCount:  404,
     titulo:       'Glaciares de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1656,6 +1726,7 @@ export const IGN_AR = {
   barrera_hielo_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_glaciologia_050705',
+    featureCount:  390,
     titulo:       'Barreras de hielo de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1679,6 +1750,7 @@ export const IGN_AR = {
   morena_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_glaciologia_BJ020',
+    featureCount:  35,
     titulo:       'Morrenas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1705,6 +1777,7 @@ export const IGN_AR = {
   costa_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_zona_costera_BA040',
+    featureCount:  1734,
     titulo:       'Zona costera de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1728,6 +1801,7 @@ export const IGN_AR = {
   isla_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_zona_costera_BA030',
+    featureCount:  7556,
     titulo:       'Islas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1751,6 +1825,7 @@ export const IGN_AR = {
   playa_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_zona_costera_playa_areana',
+    featureCount:  408,
     titulo:       'Playas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1774,6 +1849,7 @@ export const IGN_AR = {
   playa_grava_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_zona_costera_playa_grava',
+    featureCount:  61,
     titulo:       'Playas de grava de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1797,6 +1873,7 @@ export const IGN_AR = {
   restinga_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_zona_costera_playa_restinga',
+    featureCount:  153,
     titulo:       'Restingas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -1820,6 +1897,7 @@ export const IGN_AR = {
   faro_ar: {
     source:       'ign_ar',
     typename:     'ign:ayuda_a_la_navegacion_BC050',
+    featureCount:  72,
     titulo:       'Faros de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1843,6 +1921,7 @@ export const IGN_AR = {
   boya_ar: {
     source:       'ign_ar',
     typename:     'ign:ayuda_a_la_navegacion_BC020',
+    featureCount:  22,
     titulo:       'Boyas de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -1862,6 +1941,7 @@ export const IGN_AR = {
   baliza_ar: {
     source:       'ign_ar',
     typename:     'ign:ayuda_a_la_navegacion_BC101',
+    featureCount:  157,
     titulo:       'Balizas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1884,6 +1964,7 @@ export const IGN_AR = {
   roca_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_obstrucciones_BD130',
+    featureCount:  179,
     titulo:       'Rocas en zonas costeras de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -1909,6 +1990,7 @@ export const IGN_AR = {
   cordillera_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_050205',
+    featureCount:  70,
     titulo:       'Cordilleras de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1932,6 +2014,7 @@ export const IGN_AR = {
   sierra_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_050204',
+    featureCount:  430,
     titulo:       'Sierras de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1955,6 +2038,7 @@ export const IGN_AR = {
   cordon_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_050206',
+    featureCount:  229,
     titulo:       'Cordones montañosos de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -1978,6 +2062,7 @@ export const IGN_AR = {
   cuchilla_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_050207',
+    featureCount:  299,
     titulo:       'Cuchillas y lomas de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2001,6 +2086,7 @@ export const IGN_AR = {
   cuesta_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_050208',
+    featureCount:  27,
     titulo:       'Cuestas de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2024,6 +2110,7 @@ export const IGN_AR = {
   filo_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_CA020',
+    featureCount:  121,
     titulo:       'Filos y crestas de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2047,6 +2134,7 @@ export const IGN_AR = {
   valle_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_CA025',
+    featureCount:  167,
     titulo:       'Valles de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2069,6 +2157,7 @@ export const IGN_AR = {
   lugar_geomorf_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_DB001',
+    featureCount:  217,
     titulo:       'Lugares geomorfológicos de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2092,6 +2181,7 @@ export const IGN_AR = {
   quebrada_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_DB200',
+    featureCount:  1686,
     titulo:       'Quebradas y cañadones de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2115,6 +2205,7 @@ export const IGN_AR = {
   barranca_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_barranca',
+    featureCount:  793,
     titulo:       'Barrancas de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2136,6 +2227,7 @@ export const IGN_AR = {
   curva_nivel_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_geomorfologia_CA010',
+    featureCount:  184198,
     titulo:       'Curvas de nivel de Argentina',
     geomType:     'line',
     labelField:   null,
@@ -2157,6 +2249,7 @@ export const IGN_AR = {
   meseta_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_geomorfologia_050202',
+    featureCount:  477,
     titulo:       'Mesetas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2180,6 +2273,7 @@ export const IGN_AR = {
   medano_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_geomorfologia_DB560',
+    featureCount:  621,
     titulo:       'Médanos y dunas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2202,6 +2296,7 @@ export const IGN_AR = {
   pico_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_geomorfologia_NA100',
+    featureCount:  6118,
     titulo:       'Picos y cumbres de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2224,6 +2319,7 @@ export const IGN_AR = {
   abra_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_geomorfologia_DB120',
+    featureCount:  839,
     titulo:       'Abras y pasos de montaña de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2245,6 +2341,7 @@ export const IGN_AR = {
   mogote_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_geomorfologia_050203',
+    featureCount:  66,
     titulo:       'Mogotes de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2268,6 +2365,7 @@ export const IGN_AR = {
   punto_acotado_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_geomorfologia_CA030',
+    featureCount:  77287,
     titulo:       'Puntos acotados de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -2290,6 +2388,7 @@ export const IGN_AR = {
   area_montana_ar: {
     source:       'ign_ar',
     typename:     'ign:area_de_montana',
+    featureCount:  72,
     titulo:       'Áreas de montaña de Argentina',
     geomType:     'polygon',
     labelField:   null,
@@ -2310,6 +2409,7 @@ export const IGN_AR = {
   salina_ar: {
     source:       'ign_ar',
     typename:     'ign:edafologia_salina',
+    featureCount:  429,
     titulo:       'Salinas y salares de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2331,6 +2431,7 @@ export const IGN_AR = {
   afloramiento_ar: {
     source:       'ign_ar',
     typename:     'ign:edafologia_afloramiento_rocoso',
+    featureCount:  2450,
     titulo:       'Afloramientos rocosos de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2352,6 +2453,7 @@ export const IGN_AR = {
   arenal_ar: {
     source:       'ign_ar',
     typename:     'ign:edafologia_arenal',
+    featureCount:  3323,
     titulo:       'Arenales de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2373,6 +2475,7 @@ export const IGN_AR = {
   barrial_ar: {
     source:       'ign_ar',
     typename:     'ign:edafologia_barrial_barrizal',
+    featureCount:  2959,
     titulo:       'Barriales de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2394,6 +2497,7 @@ export const IGN_AR = {
   cumbre_rocosa_ar: {
     source:       'ign_ar',
     typename:     'ign:edafologia_cumbre_rocosa',
+    featureCount:  994,
     titulo:       'Cumbres rocosas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2415,6 +2519,7 @@ export const IGN_AR = {
   pedregal_ar: {
     source:       'ign_ar',
     typename:     'ign:edafologia_pedregal',
+    featureCount:  1906,
     titulo:       'Pedregales de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2436,6 +2541,7 @@ export const IGN_AR = {
   sedimento_fluvial_ar: {
     source:       'ign_ar',
     typename:     'ign:edafologia_sedimento_fluvial',
+    featureCount:  2431,
     titulo:       'Sedimentos fluviales de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2457,6 +2563,7 @@ export const IGN_AR = {
   desmonte_ar: {
     source:       'ign_ar',
     typename:     'ign:sin_vegetacion_061001',
+    featureCount:  640,
     titulo:       'Desmontes de Argentina',
     geomType:     'polygon',
     labelField:   null,
@@ -2479,6 +2586,7 @@ export const IGN_AR = {
   bosque_ar: {
     source:       'ign_ar',
     typename:     'ign:vegetacion_arborea_EC015',
+    featureCount:  6419,
     titulo:       'Bosques y selvas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2499,6 +2607,7 @@ export const IGN_AR = {
   monte_ar: {
     source:       'ign_ar',
     typename:     'ign:vegetacion_arborea_060302',
+    featureCount:  974,
     titulo:       'Monte bajo de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2521,6 +2630,7 @@ export const IGN_AR = {
   bosque_artificial_ar: {
     source:       'ign_ar',
     typename:     'ign:vegetacion_arborea_060301',
+    featureCount:  2938,
     titulo:       'Bosques artificiales de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2543,6 +2653,7 @@ export const IGN_AR = {
   parque_artificial_ar: {
     source:       'ign_ar',
     typename:     'ign:vegetacion_arborea_AK120',
+    featureCount:  395,
     titulo:       'Parques y arboledas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2565,6 +2676,7 @@ export const IGN_AR = {
   estepa_ar: {
     source:       'ign_ar',
     typename:     'ign:vegetacion_arbustiva_EB015',
+    featureCount:  1633,
     titulo:       'Estepas arbustivas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2585,6 +2697,7 @@ export const IGN_AR = {
   pajonal_ar: {
     source:       'ign_ar',
     typename:     'ign:vegetacion_hidrofila_ED020',
+    featureCount:  7547,
     titulo:       'Pajonales y juncales de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2605,6 +2718,7 @@ export const IGN_AR = {
   plantacion_ar: {
     source:       'ign_ar',
     typename:     'ign:plantacion_permanente_KB025',
+    featureCount:  2031,
     titulo:       'Plantaciones permanentes de Argentina',
     geomType:     'polygon',
     labelField:   null,
@@ -2624,6 +2738,7 @@ export const IGN_AR = {
   cultivo_ar: {
     source:       'ign_ar',
     typename:     'ign:terreno_para_cultivo_EA010',
+    featureCount:  5045,
     titulo:       'Terrenos de cultivo de Argentina',
     geomType:     'polygon',
     labelField:   null,
@@ -2646,6 +2761,7 @@ export const IGN_AR = {
   area_protegida_ar: {
     source:       'ign_ar',
     typename:     'ign:area_protegida',
+    featureCount:  506,
     titulo:       'Áreas protegidas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -2675,6 +2791,7 @@ export const IGN_AR = {
   central_electrica_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_energia_AD010',
+    featureCount:  445,
     titulo:       'Centrales eléctricas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2699,6 +2816,7 @@ export const IGN_AR = {
   subestacion_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_energia_AD030',
+    featureCount:  493,
     titulo:       'Subestaciones eléctricas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2722,6 +2840,7 @@ export const IGN_AR = {
   linea_alta_tension_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_energia_AT030',
+    featureCount:  333208,
     titulo:       'Líneas de alta tensión de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2746,6 +2865,7 @@ export const IGN_AR = {
   ducto_ar: {
     source:       'ign_ar',
     typename:     'ign:lineas_de_estructura_asociada_ducto_subterraneo',
+    featureCount:  11541,
     titulo:       'Ductos subterráneos de Argentina',
     geomType:     'line',
     labelField:   'fna',
@@ -2773,6 +2893,7 @@ export const IGN_AR = {
   antena_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_comunicacion_AT010',
+    featureCount:  426,
     titulo:       'Antenas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2795,6 +2916,7 @@ export const IGN_AR = {
   torre_telecomunicacion_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_comunicacion_AT080',
+    featureCount:  754,
     titulo:       'Torres de telecomunicaciones de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2820,6 +2942,7 @@ export const IGN_AR = {
   salud_ar: {
     source:       'ign_ar',
     typename:     'ign:salud_020801',
+    featureCount:  8311,
     titulo:       'Establecimientos de salud de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2844,6 +2967,7 @@ export const IGN_AR = {
   educacion_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_ciencia_y_educacion_020601',
+    featureCount:  51141,
     titulo:       'Establecimientos educativos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2865,6 +2989,7 @@ export const IGN_AR = {
   universidad_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_ciencia_y_educacion_020602',
+    featureCount:  1132,
     titulo:       'Universidades de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2886,6 +3011,7 @@ export const IGN_AR = {
   observatorio_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_ciencia_y_educacion_AL295',
+    featureCount:  558,
     titulo:       'Observatorios e institutos científicos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2910,6 +3036,7 @@ export const IGN_AR = {
   cultura_ar: {
     source:       'ign_ar',
     typename:     'ign:cultura_y_religion_AL021',
+    featureCount:  3723,
     titulo:       'Edificios culturales de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2932,6 +3059,7 @@ export const IGN_AR = {
   iglesia_ar: {
     source:       'ign_ar',
     typename:     'ign:cultura_y_religion_AL330',
+    featureCount:  9804,
     titulo:       'Edificios religiosos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2955,6 +3083,7 @@ export const IGN_AR = {
   monumento_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_equipamiento_AL130',
+    featureCount:  851,
     titulo:       'Monumentos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2977,6 +3106,7 @@ export const IGN_AR = {
   ruina_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_asentamientos_y_edificios_ruina',
+    featureCount:  62,
     titulo:       'Ruinas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -2999,6 +3129,7 @@ export const IGN_AR = {
   cementerio_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_equipamiento_AL030',
+    featureCount:  1894,
     titulo:       'Cementerios de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3021,6 +3152,7 @@ export const IGN_AR = {
   cementerio_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_equipamiento_AL030',
+    featureCount:  1846,
     titulo:       'Cementerios (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3043,6 +3175,7 @@ export const IGN_AR = {
   espacio_verde_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_equipamiento_AL170',
+    featureCount:  13101,
     titulo:       'Espacios verdes de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3065,6 +3198,7 @@ export const IGN_AR = {
   deporte_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_recreacion_AK040',
+    featureCount:  3073,
     titulo:       'Instalaciones deportivas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3087,6 +3221,7 @@ export const IGN_AR = {
   ski_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_recreacion_020401',
+    featureCount:  16,
     titulo:       'Centros de esquí de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3109,6 +3244,7 @@ export const IGN_AR = {
   refugio_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_equipamiento_AH030',
+    featureCount:  136,
     titulo:       'Refugios de montaña de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3131,6 +3267,7 @@ export const IGN_AR = {
   sitio_interes_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_asentamientos_y_edificios_AL201',
+    featureCount:  1076,
     titulo:       'Sitios de interés de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3153,6 +3290,7 @@ export const IGN_AR = {
   edificio_gubernamental_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_asentamientos_y_edificios_020101',
+    featureCount:  5263,
     titulo:       'Edificios gubernamentales de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3176,6 +3314,7 @@ export const IGN_AR = {
   correo_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_asentamientos_y_edificios_020102',
+    featureCount:  1395,
     titulo:       'Correos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3199,6 +3338,7 @@ export const IGN_AR = {
   planta_urbana_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_asentamientos_y_edificios_020105',
+    featureCount:  3350,
     titulo:       'Plantas urbanas de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3221,6 +3361,7 @@ export const IGN_AR = {
   edificacion_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_asentamientos_y_edificios_AL015',
+    featureCount:  183509,
     titulo:       'Edificaciones de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3243,6 +3384,7 @@ export const IGN_AR = {
   tapera_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_asentamientos_y_edificios_020108',
+    featureCount:  121,
     titulo:       'Taperas de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -3262,6 +3404,7 @@ export const IGN_AR = {
   tanque_agua_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_almacenamiento_y_logistica_AM080',
+    featureCount:  137,
     titulo:       'Tanques de agua de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -3282,6 +3425,7 @@ export const IGN_AR = {
   tanque_combustible_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_almacenamiento_y_logistica_AM070',
+    featureCount:  1242,
     titulo:       'Tanques de combustible de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -3305,6 +3449,7 @@ export const IGN_AR = {
   instalacion_militar_ar: {
     source:       'ign_ar',
     typename:     'ign:instalacion_militar_SU001',
+    featureCount:  152,
     titulo:       'Instalaciones militares de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3327,6 +3472,7 @@ export const IGN_AR = {
   bomberos_ar: {
     source:       'ign_ar',
     typename:     'ign:estructuras_operativas_y_defensivas_090102',
+    featureCount:  1081,
     titulo:       'Cuarteles de bomberos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3349,6 +3495,7 @@ export const IGN_AR = {
   seguridad_ar: {
     source:       'ign_ar',
     typename:     'ign:estructuras_operativas_y_defensivas_FA517',
+    featureCount:  4117,
     titulo:       'Edificios de seguridad de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3372,6 +3519,7 @@ export const IGN_AR = {
   carcel_ar: {
     source:       'ign_ar',
     typename:     'ign:estructuras_operativas_y_defensivas_090101',
+    featureCount:  186,
     titulo:       'Instituciones penitenciarias de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3397,6 +3545,7 @@ export const IGN_AR = {
   cantera_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_extraccion_AA010',
+    featureCount:  1840,
     titulo:       'Canteras y minas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3420,6 +3569,7 @@ export const IGN_AR = {
   cantera_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_extraccion_AA012',
+    featureCount:  416,
     titulo:       'Canteras (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3444,6 +3594,7 @@ export const IGN_AR = {
   pozo_hidrocarburo_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_extraccion_AA050',
+    featureCount:  70551,
     titulo:       'Pozos de hidrocarburos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3468,6 +3619,7 @@ export const IGN_AR = {
   yacimiento_hidrocarburo_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_extraccion_AA052',
+    featureCount:  872,
     titulo:       'Yacimientos de hidrocarburos de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3492,6 +3644,7 @@ export const IGN_AR = {
   zona_minera_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_estructura_asociada_010601',
+    featureCount:  80,
     titulo:       'Zonas de extracción minera de Argentina',
     geomType:     'polygon',
     labelField:   null,
@@ -3515,6 +3668,7 @@ export const IGN_AR = {
   fabrica_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_fabricacion_y_procesamiento_AC000',
+    featureCount:  2226,
     titulo:       'Fábricas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3539,6 +3693,7 @@ export const IGN_AR = {
   parque_industrial_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_fabricacion_y_procesamiento_AC070',
+    featureCount:  425,
     titulo:       'Parques industriales de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3562,6 +3717,7 @@ export const IGN_AR = {
   potabilizadora_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_fabricacion_y_procesamiento_BH220',
+    featureCount:  205,
     titulo:       'Plantas potabilizadoras de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3584,6 +3740,7 @@ export const IGN_AR = {
   potabilizadora_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_fabricacion_y_procesamiento_BH220',
+    featureCount:  186,
     titulo:       'Plantas potabilizadoras (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3607,6 +3764,7 @@ export const IGN_AR = {
   depuradora_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_fabricacion_y_procesamiento_AC507',
+    featureCount:  260,
     titulo:       'Plantas depuradoras de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3629,6 +3787,7 @@ export const IGN_AR = {
   depuradora_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_fabricacion_y_procesamiento_AC507',
+    featureCount:  249,
     titulo:       'Plantas depuradoras (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3652,6 +3811,7 @@ export const IGN_AR = {
   planta_residuos_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_gestion_de_residuos_AB030',
+    featureCount:  148,
     titulo:       'Plantas de tratamiento de residuos de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3673,6 +3833,7 @@ export const IGN_AR = {
   planta_residuos_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_gestion_de_residuos_AB030',
+    featureCount:  124,
     titulo:       'Plantas de tratamiento de residuos (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3695,6 +3856,7 @@ export const IGN_AR = {
   relleno_sanitario_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_gestion_de_residuos_relleno_sanitario',
+    featureCount:  46,
     titulo:       'Rellenos sanitarios de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3716,6 +3878,7 @@ export const IGN_AR = {
   basural_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_gestion_de_residuos_AB000',
+    featureCount:  147,
     titulo:       'Basurales de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3738,6 +3901,7 @@ export const IGN_AR = {
   establecimiento_agropecuario_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_actividad_agropecuaria_AL270',
+    featureCount:  434,
     titulo:       'Establecimientos agropecuarios de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3761,6 +3925,7 @@ export const IGN_AR = {
   invernadero_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_actividad_agropecuaria_AJ110',
+    featureCount:  278,
     titulo:       'Invernaderos y viveros de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3784,6 +3949,7 @@ export const IGN_AR = {
   invernadero_area_ar: {
     source:       'ign_ar',
     typename:     'ign:areas_de_actividad_agropecuaria_AJ110',
+    featureCount:  258,
     titulo:       'Invernaderos y viveros (área) de Argentina',
     geomType:     'polygon',
     labelField:   'fna',
@@ -3807,6 +3973,7 @@ export const IGN_AR = {
   molino_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_actividad_agropecuaria_AJ050',
+    featureCount:  4050,
     titulo:       'Molinos de viento de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -3827,6 +3994,7 @@ export const IGN_AR = {
   camara_valvulas_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_estructura_asociada_AA051',
+    featureCount:  236,
     titulo:       'Cámaras de válvulas de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -3846,6 +4014,7 @@ export const IGN_AR = {
   planta_bombeo_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_estructura_asociada_AQ116',
+    featureCount:  39,
     titulo:       'Plantas de bombeo de agua de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3868,6 +4037,7 @@ export const IGN_AR = {
   galpon_ar: {
     source:       'ign_ar',
     typename:     'ign:puntos_de_estructura_asociada_AJ080',
+    featureCount:  7908,
     titulo:       'Galpones y tinglados de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -3890,6 +4060,7 @@ export const IGN_AR = {
   base_antartica_ar: {
     source:       'ign_ar',
     typename:     'ign:bahra_base_antartica',
+    featureCount:  13,
     titulo:       'Bases antárticas de Argentina',
     geomType:     'point',
     labelField:   'fna',
@@ -3924,6 +4095,7 @@ export const IGN_AR = {
   cartas_50000_ar: {
     source:       'ign_ar',
     typename:     'ign:cartas_50000',
+    featureCount:  7195,
     titulo:       'Cartas topográficas 1:50.000 de Argentina',
     geomType:     'polygon',
     labelField:   'nombre',
@@ -3949,6 +4121,7 @@ export const IGN_AR = {
   cartas_100000_ar: {
     source:       'ign_ar',
     typename:     'ign:cartas_100000',
+    featureCount:  1898,
     titulo:       'Cartas topográficas 1:100.000 de Argentina',
     geomType:     'polygon',
     labelField:   'nombre',
@@ -3974,6 +4147,7 @@ export const IGN_AR = {
   cartas_250000_ar: {
     source:       'ign_ar',
     typename:     'ign:cartas_250000',
+    featureCount:  253,
     titulo:       'Cartas topográficas 1:250.000 de Argentina',
     geomType:     'polygon',
     labelField:   'nombre',
@@ -3999,6 +4173,7 @@ export const IGN_AR = {
   cartas_500000_ar: {
     source:       'ign_ar',
     typename:     'ign:cartas_500000',
+    featureCount:  103,
     titulo:       'Cartas topográficas 1:500.000 de Argentina',
     geomType:     'polygon',
     labelField:   'nombre',
@@ -4024,6 +4199,7 @@ export const IGN_AR = {
   ramsac_ar: {
     source:       'ign_ar',
     typename:     'ign:ramsac',
+    featureCount:  151,
     titulo:       'Red RAMSAC de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4043,6 +4219,7 @@ export const IGN_AR = {
   ramsac_ntrip_ar: {
     source:       'ign_ar',
     typename:     'ign:ramsac_ntrip',
+    featureCount:  132,
     titulo:       'Red RAMSAC NTRIP de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4062,6 +4239,7 @@ export const IGN_AR = {
   nivelacion_topografica_ar: {
     source:       'ign_ar',
     typename:     'ign:nivelacion_topografica',
+    featureCount:  8576,
     titulo:       'Nivelación topográfica de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4085,6 +4263,7 @@ export const IGN_AR = {
   nivelacion_alta_precision_ar: {
     source:       'ign_ar',
     typename:     'ign:nivelacion_alta_precision',
+    featureCount:  18738,
     titulo:       'Nivelación de alta precisión de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4108,6 +4287,7 @@ export const IGN_AR = {
   nivelacion_precision_ar: {
     source:       'ign_ar',
     typename:     'ign:nivelacion_precision',
+    featureCount:  8669,
     titulo:       'Red de nivelación de precisión de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4131,6 +4311,7 @@ export const IGN_AR = {
   red_posgar_densif_ar: {
     source:       'ign_ar',
     typename:     'ign:red_densificacion_posgar',
+    featureCount:  2637,
     titulo:       'Red de densificación POSGAR de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4153,6 +4334,7 @@ export const IGN_AR = {
   red_pasma_ar: {
     source:       'ign_ar',
     typename:     'ign:red_pasma',
+    featureCount:  1676,
     titulo:       'Red PASMA de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4175,6 +4357,7 @@ export const IGN_AR = {
   red_posgar_ar: {
     source:       'ign_ar',
     typename:     'ign:red_posgar',
+    featureCount:  178,
     titulo:       'Red POSGAR de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4197,6 +4380,7 @@ export const IGN_AR = {
   red_provincial_ar: {
     source:       'ign_ar',
     typename:     'ign:red_provincial',
+    featureCount:  2471,
     titulo:       'Red geodésica provincial de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4219,6 +4403,7 @@ export const IGN_AR = {
   gravimetria_bacara_ar: {
     source:       'ign_ar',
     typename:     'ign:gravimetria_bacara',
+    featureCount:  69,
     titulo:       'Red gravimétrica BACARA de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4242,6 +4427,7 @@ export const IGN_AR = {
   gravimetria_igsn71_ar: {
     source:       'ign_ar',
     typename:     'ign:gravimetria_igsn71',
+    featureCount:  34,
     titulo:       'Red gravimétrica IGSN71 de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4265,6 +4451,7 @@ export const IGN_AR = {
   gravimetria_raga_ar: {
     source:       'ign_ar',
     typename:     'ign:gravimetria_raga',
+    featureCount:  45,
     titulo:       'Red gravimétrica RAGA de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4288,6 +4475,7 @@ export const IGN_AR = {
   gravimetria_rpo_ar: {
     source:       'ign_ar',
     typename:     'ign:gravimetria_rpo',
+    featureCount:  227,
     titulo:       'Red gravimétrica RPO de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4311,6 +4499,7 @@ export const IGN_AR = {
   gravimetria_rso_ar: {
     source:       'ign_ar',
     typename:     'ign:gravimetria_rso',
+    featureCount:  14896,
     titulo:       'Red gravimétrica RSO de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4334,6 +4523,7 @@ export const IGN_AR = {
   gravimetria_rto_ar: {
     source:       'ign_ar',
     typename:     'ign:gravimetria_rto',
+    featureCount:  1246,
     titulo:       'Red gravimétrica RTO de Argentina',
     geomType:     'point',
     labelField:   null,
@@ -4357,6 +4547,7 @@ export const IGN_AR = {
   mde_ar: {
     source:       'ign_ar',
     typename:     'ign:mde',
+    featureCount:  5106,
     titulo:       'Modelos digitales de elevación de Argentina',
     geomType:     'polygon',
     labelField:   'nombre',
@@ -4376,6 +4567,7 @@ export const IGN_AR = {
   vuelos_dsr_ar: {
     source:       'ign_ar',
     typename:     'ign:area_vuelos_dsr_sig',
+    featureCount:  99,
     titulo:       'Áreas de vuelos fotogramétricos del IGN',
     geomType:     'polygon',
     labelField:   null,
@@ -4398,6 +4590,7 @@ export const IGN_AR = {
   vuelos_vant_ar: {
     source:       'ign_ar',
     typename:     'ign:area_vuelos_vant_sig',
+    featureCount:  120,
     titulo:       'Áreas de vuelos VANT del IGN',
     geomType:     'polygon',
     labelField:   null,
