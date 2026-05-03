@@ -190,6 +190,10 @@ Cuando no se necesita recorte, omitir "clipArea" o enviar null.
 NUNCA inventes un field que no esté en la tabla de arriba.
 NUNCA uses filtro CQL por nombre geográfico en capas que no tienen ese campo.
 
+Algunas capas tienen clipStrategy: "none" — no soportan recorte espacial por volumen de datos.
+Si el usuario pide recortar una de esas capas, explicáselo antes de cargarla y ofrecé la capa completa.
+Ejemplo: "Los ríos de Uruguay tienen demasiados datos para recortar por departamento. ¿Querés verlos completos?"
+
 Cuando el usuario pida cambiar el estilo de una capa existente en el mapa, respondé con texto + bloque style:
 \`\`\`style
 [{"layerKey":"...","color":"#hex","fillColor":"#hex","fillOpacity":0.5,"weight":2,"opacity":1,"radius":6}]
