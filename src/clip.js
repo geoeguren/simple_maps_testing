@@ -1,97 +1,137 @@
 /**
  * clip.js — Ejecutor de instrucciones WFS
  *
- * Recibe una instrucción { layerKey, filtro, descripcion } ya armada por el LLM
- * y devuelve un GeoJSON listo para renderizar.
+ * Recibe una instrucción armada por el LLM y devuelve GeoJSON listo para renderizar.
  *
- * Lee la fuente de cada capa desde layerDef.source → window.SOURCES,
- * de modo que wfs.js no necesita saber a qué servidor apuntar.
+ * Estructura de la instrucción:
+ *   {
+ *     layerKey:  string,           // clave en window.LAYERS
+ *     filtro:    string|null,      // CQL adicional (atributos de la capa pedida)
+ *     clipArea:  {                 // área de recorte — opcional
+ *       layerKey: string,          // clave en window.LAYERS de la capa-máscara
+ *       field:    string,          // campo de nombre en esa capa (ej: 'nam', 'nombre')
+ *       value:    string,          // valor a buscar (ej: 'Mendoza', 'Montevideo')
+ *     }|null,
+ *     descripcion: string,
+ *   }
  *
- * Estrategias de recorte (definidas en layers/):
- *   null        → fetch directo con filtro CQL (o sin filtro)
- *   'attribute' → filtro CQL (ya viene en inst.filtro, se usa tal cual)
- *   'spatial'   → si hay una unidad administrativa en el filtro, recorte geométrico;
- *                 si no, fetch directo
+ * Estrategias de recorte (definidas por capa en layers/):
+ *   null        → fetch directo, filtro CQL si lo hay
+ *   'attribute' → filtro CQL ya construido por el LLM en inst.filtro
+ *   'spatial'   → si hay clipArea: fetch de la máscara + clip geométrico
+ *                 si no hay clipArea: fetch directo
+ *
+ * El LLM es responsable de armar clipArea correctamente.
+ * clip.js no adivina ni parsea el CQL — solo ejecuta.
  */
 
 window.CLIP = (() => {
 
   const EDGE_FN_URL = '/api/clip';
 
-  /**
-   * Resuelve la fuente de una capa desde window.SOURCES.
-   * Retorna el objeto fuente o un fallback al IGN si no está definido.
-   */
-  function resolverFuente(layerDef) {
+  // ── Resolver fuente ───────────────────────────────────────────
+
+  function resolverFuente(layerDef, layerKey) {
     const sourceKey = layerDef.source;
     const source    = sourceKey && window.SOURCES?.[sourceKey];
     if (!source) {
-      throw new Error(`[CLIP] Fuente "${sourceKey}" no encontrada en window.SOURCES. Verificá que esté definida en layers/sources.js.`);
+      throw new Error(`[CLIP] Fuente "${sourceKey}" no encontrada en window.SOURCES (capa: ${layerKey}).`);
     }
     return source;
   }
 
+  // ── Punto de entrada ──────────────────────────────────────────
+
   /**
    * ejecutar(instruccion)
-   * instruccion: { layerKey, filtro, descripcion }
-   * Devuelve GeoJSON FeatureCollection
+   * Devuelve GeoJSON FeatureCollection.
    */
   async function ejecutar(instruccion) {
-    const { layerKey, filtro } = instruccion;
+    const { layerKey, filtro, clipArea } = instruccion;
+
     const layerDef = window.LAYERS[layerKey];
-    if (!layerDef) throw new Error(`Capa desconocida: ${layerKey}`);
+    if (!layerDef) throw new Error(`[CLIP] Capa desconocida: "${layerKey}"`);
 
-    const source    = resolverFuente(layerDef);
-    const cqlFilter = (filtro || '').trim();
-
-    // Opciones base para WFS.fetch — incluyen el servidor correcto para esta capa
+    const source  = resolverFuente(layerDef, layerKey);
     const wfsOpts = {
       wfsBase:    source.wfsBase,
       wfsVersion: source.wfsVersion || '1.1.0',
     };
+    const cql = (filtro || '').trim();
 
-    // ── Capas con recorte espacial ────────────────────────────
-    if (layerDef.clipStrategy === 'spatial') {
-      const provincia = extraerProvinciaDelFiltro(cqlFilter);
-
-      if (provincia) {
-        // Buscar el polígono de recorte usando la capa y campo definidos en la fuente
-        const provFilter  = `strToLowerCase(${source.clipField})='${normalizar(provincia)}'`;
-        const provGeoJSON = await window.WFS.fetch(source.clipLayer, {
-          ...wfsOpts,
-          cqlFilter: provFilter
-        });
-
-        if (!provGeoJSON.features?.length) {
-          throw new Error(`No se encontró la unidad administrativa: "${provincia}"`);
-        }
-
-        const filtroSinProv = removerCondicionProvincia(cqlFilter);
-        const layerGeoJSON  = await window.WFS.fetch(layerDef.typename, {
-          ...wfsOpts,
-          cqlFilter: filtroSinProv || undefined
-        });
-
-        try {
-          return await clipViaEdgeFunction(layerGeoJSON, provGeoJSON);
-        } catch (edgeErr) {
-          console.warn('[CLIP] Edge Function falló, usando Turf.js:', edgeErr.message);
-          return clipWithTurf(layerGeoJSON, provGeoJSON);
-        }
-      }
-
-      // Sin provincia → fetch directo
-      return window.WFS.fetch(layerDef.typename, {
-        ...wfsOpts,
-        cqlFilter: cqlFilter || undefined
-      });
+    // ── Recorte espacial ─────────────────────────────────────
+    if (layerDef.clipStrategy === 'spatial' && clipArea) {
+      return ejecutarRecorteSpatial(layerDef, wfsOpts, cql, clipArea);
     }
 
-    // ── Capas con filtro por atributo o sin estrategia ────────
+    // ── Filtro por atributo o fetch directo ──────────────────
     return window.WFS.fetch(layerDef.typename, {
       ...wfsOpts,
-      cqlFilter: cqlFilter || undefined
+      cqlFilter: cql || undefined,
     });
+  }
+
+  // ── Recorte espacial ──────────────────────────────────────────
+
+  /**
+   * Busca el polígono de la máscara (clipArea) y recorta la capa pedida.
+   *
+   * clipArea: { layerKey, field, value }
+   *   - layerKey: cualquier capa del catálogo que sirva de máscara
+   *   - field:    campo de nombre en esa capa
+   *   - value:    valor a buscar
+   */
+  async function ejecutarRecorteSpatial(layerDef, wfsOpts, cql, clipArea) {
+    const maskDef = window.LAYERS[clipArea.layerKey];
+    if (!maskDef) {
+      throw new Error(`[CLIP] Capa de recorte desconocida: "${clipArea.layerKey}"`);
+    }
+
+    const maskSource = resolverFuente(maskDef, clipArea.layerKey);
+    const maskWfsOpts = {
+      wfsBase:    maskSource.wfsBase,
+      wfsVersion: maskSource.wfsVersion || '1.1.0',
+    };
+
+    // La capa-máscara puede venir de un servidor diferente al de la capa pedida
+    const maskFilter  = `strToLowerCase(${clipArea.field})='${normalizar(clipArea.value)}'`;
+    const maskGeoJSON = await window.WFS.fetch(maskDef.typename, {
+      ...maskWfsOpts,
+      cqlFilter: maskFilter,
+    });
+
+    if (!maskGeoJSON.features?.length) {
+      throw new Error(`[CLIP] No se encontró "${clipArea.value}" en la capa "${clipArea.layerKey}" (campo: ${clipArea.field}).`);
+    }
+
+    // Si la máscara devuelve múltiples features (ej: municipio con varios polígonos),
+    // los unimos en un solo feature para el clip
+    const maskFeature = maskGeoJSON.features.length === 1
+      ? maskGeoJSON.features[0]
+      : unionFeatures(maskGeoJSON.features);
+
+    const layerGeoJSON = await window.WFS.fetch(layerDef.typename, {
+      ...wfsOpts,
+      cqlFilter: cql || undefined,
+    });
+
+    try {
+      return await clipViaEdgeFunction(layerGeoJSON, { type: 'FeatureCollection', features: [maskFeature] });
+    } catch (edgeErr) {
+      console.warn('[CLIP] Edge Function falló, usando Turf.js:', edgeErr.message);
+      return clipWithTurf(layerGeoJSON, maskFeature);
+    }
+  }
+
+  // ── Unión de múltiples features (máscara con varios polígonos) ─
+
+  function unionFeatures(features) {
+    if (typeof turf === 'undefined') return features[0];
+    try {
+      return features.reduce((acc, feat) => turf.union(acc, feat));
+    } catch {
+      return features[0];
+    }
   }
 
   // ── Edge Function ─────────────────────────────────────────────
@@ -101,7 +141,7 @@ window.CLIP = (() => {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ layer: layerGeoJSON, mask: maskGeoJSON }),
-      signal:  AbortSignal.timeout(25000)
+      signal:  AbortSignal.timeout(25000),
     });
     if (!resp.ok) throw new Error(`Edge Function HTTP ${resp.status}`);
     return resp.json();
@@ -109,59 +149,34 @@ window.CLIP = (() => {
 
   // ── Fallback Turf.js ──────────────────────────────────────────
 
-  function clipWithTurf(layerGeoJSON, maskGeoJSON) {
+  function clipWithTurf(layerGeoJSON, maskFeature) {
     if (typeof turf === 'undefined') throw new Error('Turf.js no disponible');
-    const mask    = maskGeoJSON.features[0];
     const clipped = [];
 
     layerGeoJSON.features.forEach(feat => {
       try {
-        const geom = feat.geometry.type;
+        const geom = feat.geometry?.type;
+        if (!geom) return;
+
         if (geom === 'Point' || geom === 'MultiPoint') {
-          if (turf.booleanPointInPolygon(feat, mask)) clipped.push(feat);
+          if (turf.booleanPointInPolygon(feat, maskFeature)) clipped.push(feat);
+
         } else if (geom === 'LineString' || geom === 'MultiLineString') {
-          const inter = turf.bboxClip(feat, turf.bbox(mask));
+          const inter = turf.bboxClip(feat, turf.bbox(maskFeature));
           if (inter?.geometry?.coordinates?.length > 0)
             clipped.push({ ...inter, properties: feat.properties });
+
         } else if (geom === 'Polygon' || geom === 'MultiPolygon') {
-          const inter = turf.intersect(feat, mask);
+          const inter = turf.intersect(feat, maskFeature);
           if (inter) { inter.properties = feat.properties; clipped.push(inter); }
         }
-      } catch {}
+      } catch { /* feature individual rota — ignorar */ }
     });
 
     return { type: 'FeatureCollection', features: clipped };
   }
 
-  // ── Helpers para analizar el filtro CQL ──────────────────────
-
-  function extraerProvinciaDelFiltro(cql) {
-    if (!cql) return null;
-    const camposProv = ['nam', 'nom_pcia', 'prov', 'provincia'];
-    for (const campo of camposProv) {
-      const re = new RegExp(
-        `(?:strToLowerCase\\(${campo}\\)|${campo})\\s*(?:LIKE\\s*'%([^%']+)%'|=\\s*'([^']+)')`,
-        'i'
-      );
-      const m = cql.match(re);
-      if (m) return m[1] || m[2];
-    }
-    return null;
-  }
-
-  function removerCondicionProvincia(cql) {
-    if (!cql) return '';
-    const camposProv = ['nam', 'nom_pcia', 'prov', 'provincia'];
-    let result = cql;
-    for (const campo of camposProv) {
-      const re = new RegExp(
-        `\\s*(?:AND\\s*)?(?:strToLowerCase\\(${campo}\\)|${campo})\\s*(?:LIKE\\s*'[^']*'|=\\s*'[^']*')\\s*(?:AND\\s*)?`,
-        'gi'
-      );
-      result = result.replace(re, ' ');
-    }
-    return result.replace(/^\s*(AND|OR)\s*/i, '').replace(/\s*(AND|OR)\s*$/i, '').trim();
-  }
+  // ── Helpers ───────────────────────────────────────────────────
 
   function normalizar(texto) {
     if (!texto) return '';
