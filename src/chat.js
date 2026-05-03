@@ -186,10 +186,9 @@ window.CHAT = (() => {
                   }
 
                   UI.showMapReady(plan);
-                  const mapPanel = document.getElementById('map-panel');
-                  if (mapPanel && mapPanel.style.display !== 'none') {
-                    await window.APP.renderMap(plan);
-                  }
+                  // Abrir el mapa automáticamente al generar un plan
+                  window.MAP_CONTROLS?.setMapVisible(true);
+                  await window.APP.renderMap(plan);
                   await saveToFirestore(userText, plan);
                   return;
                 }
