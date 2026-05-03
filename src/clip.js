@@ -59,6 +59,17 @@ window.CLIP = (() => {
     };
     const cql = (filtro || '').trim();
 
+    // ── Capa sin soporte de recorte ─────────────────────────
+    if (layerDef.clipStrategy === 'none') {
+      if (clipArea) {
+        window.TOAST?.warning(`"${layerDef.titulo}" no soporta recorte espacial por volumen de datos. Se muestra completa.`);
+      }
+      return window.WFS.fetch(layerDef.typename, {
+        ...wfsOpts,
+        cqlFilter: cql || undefined,
+      });
+    }
+
     // ── Recorte espacial ─────────────────────────────────────
     if (layerDef.clipStrategy === 'spatial' && clipArea) {
       return ejecutarRecorteSpatial(layerDef, wfsOpts, cql, clipArea);
