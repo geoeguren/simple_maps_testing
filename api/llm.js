@@ -129,7 +129,16 @@ Si el usuario pidió un color específico, usá ese. Si el usuario no especific�
 
 Cuando tengas suficiente información para generar el mapa, respondé con tu mensaje + estos bloques al final:
 \`\`\`map
-[{"layerKey":"...","filtro":"CQL o vacío","clipArea":"nombre del área en minúsculas sin tildes, o vacío","descripcion":"texto breve"}]
+[{
+  "layerKey": "...",
+  "filtro": "CQL o vacío",
+  "clipArea": {
+    "layerKey": "clave_de_la_capa_mascara",
+    "field": "campo_de_nombre",
+    "value": "Valor Exacto"
+  },
+  "descripcion": "texto breve"
+}]
 \`\`\`
 \`\`\`style
 [{"layerKey":"...","color":"#hex","fillColor":"#hex","fillOpacity":0.5,"weight":2,"opacity":1,"radius":6}]
@@ -148,13 +157,27 @@ REGLAS DE FILTROS CQL:
 - Si el usuario pide limpiar o vaciar el mapa: []
 
 REGLA DE RECORTE GEOGRÁFICO:
-Algunas capas tienen campos propios para filtrar por área (provincia, departamento, etc.) — usá filtro CQL.
-  localidad_ar:      usar nom_pcia para provincia, nom_depto para departamento
-  pasos_frontera_ar: usar prov para provincia, pvecino para país vecino
-Otras capas NO tienen esos campos — usá "clipArea" con el área en minúsculas sin tildes y dejá "filtro" vacío:
-  vial_nacional_ar, area_protegida_ar, puertos_ar, puentes_ar → recorte espacial automático
-  Ejemplo: {"layerKey":"puertos_ar","filtro":"","clipArea":"santa cruz","descripcion":"Puertos de Santa Cruz"}
-NUNCA inventes un filtro CQL por nombre de feature para intentar filtrar geográficamente.
+Algunas capas tienen campos propios para filtrar por área — usá filtro CQL directamente:
+  localidad_ar:      nom_pcia para provincia, nom_depto para departamento
+  pasos_frontera_ar: prov para provincia, pvecino para país vecino
+
+Otras capas NO tienen esos campos — usá "clipArea" para recorte espacial:
+  vial_nacional_ar, area_protegida_ar, puertos_ar, puentes_ar, y la mayoría de capas Uruguay.
+
+"clipArea" es un objeto con tres campos:
+  layerKey: clave de una capa del catálogo que sirva como máscara (provincia, departamento, municipio, área protegida, etc.)
+  field:    campo de nombre en esa capa (consultá los atributos del catálogo)
+  value:    valor exacto tal como está en los datos (con tildes y mayúsculas correctas)
+
+Ejemplos de clipArea:
+  Rutas de Mendoza:            {"layerKey":"provincia_ar","field":"nam","value":"Mendoza"}
+  Puertos de Santa Cruz:       {"layerKey":"provincia_ar","field":"nam","value":"Santa Cruz"}
+  Rutas en Montevideo (UY):    {"layerKey":"departamento_uy","field":"nombre","value":"Montevideo"}
+  Ríos dentro del Parque Lanín:{"layerKey":"area_protegida_ar","field":"nam","value":"Lanín"}
+  Capas de un municipio:       {"layerKey":"municipio_ar","field":"nam","value":"General Pueyrredón"}
+
+Cuando no se necesita recorte, omitir "clipArea" o enviar null.
+NUNCA inventes un filtro CQL por nombre geográfico en capas que no tienen ese campo.
 
 Cuando el usuario pida cambiar el estilo de una capa existente en el mapa, respondé con texto + bloque style:
 \`\`\`style
