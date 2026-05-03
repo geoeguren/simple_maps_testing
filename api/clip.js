@@ -14,11 +14,16 @@
  * bboxClip — más robusto con MultiLineString en módulos individuales.
  */
 
-const { booleanPointInPolygon } = require('@turf/boolean-point-in-polygon');
-const _bboxMod = require('@turf/bbox');
-const bbox = _bboxMod.default || _bboxMod.bbox || _bboxMod;
-const { intersect }             = require('@turf/intersect');
-const { union }                 = require('@turf/union');
+const _boolMod     = require('@turf/boolean-point-in-polygon');
+const _bboxMod     = require('@turf/bbox');
+const _intersectMod = require('@turf/intersect');
+const _unionMod    = require('@turf/union');
+
+// Cada módulo de Turf puede exportar de forma distinta en CommonJS
+const booleanPointInPolygon = _boolMod.default     || _boolMod.booleanPointInPolygon || _boolMod;
+const bbox                  = _bboxMod.default     || _bboxMod.bbox                  || _bboxMod;
+const intersect             = _intersectMod.default || _intersectMod.intersect        || _intersectMod;
+const union                 = _unionMod.default    || _unionMod.union                || _unionMod;
 const { booleanPointOnLine }    = require('@turf/boolean-point-on-line');
 
 /**
