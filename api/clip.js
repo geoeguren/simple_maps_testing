@@ -15,7 +15,8 @@
  */
 
 const { booleanPointInPolygon } = require('@turf/boolean-point-in-polygon');
-const { bbox }                  = require('@turf/bbox');
+const _bboxMod = require('@turf/bbox');
+const bbox = _bboxMod.default || _bboxMod.bbox || _bboxMod;
 const { intersect }             = require('@turf/intersect');
 const { union }                 = require('@turf/union');
 const { booleanPointOnLine }    = require('@turf/boolean-point-on-line');
