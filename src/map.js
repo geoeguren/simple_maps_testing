@@ -18,8 +18,8 @@ window.MAP = (() => {
     if (leafletMap) return;
 
     leafletMap = L.map('leaflet-map', {
-      center:    [-38.5, -63.5],
-      zoom:      5,
+      center:    [-20, -60],
+      zoom:      4,
       zoomControl: false,
       attributionControl: true
     });
