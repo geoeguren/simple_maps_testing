@@ -39,10 +39,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['provincia', 'provincias', 'división política', 'límite provincial', 'argentina', 'ciudad autónoma'],
     attributes: [
-      { campo: 'fna', label: 'Nombre completo' },
-      { campo: 'nam', label: 'Nombre corto' },
-      { campo: 'in1', label: 'Código', numeric: true },
-      { campo: 'gna', label: 'Tipo' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre completo', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'in1', label: 'Código', visible: true, numeric: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -57,10 +61,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['departamento', 'partido', 'municipio', 'departamentos', 'argentina', 'comuna'],
     attributes: [
-      { campo: 'fna', label: 'Nombre completo' },
-      { campo: 'nam', label: 'Nombre corto' },
-      { campo: 'in1', label: 'Código', numeric: true },
-      { campo: 'gna', label: 'Tipo' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna', label: 'Nombre completo', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'in1', label: 'Código', visible: true, numeric: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -75,10 +83,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['municipio', 'municipios', 'ejido', 'argentina', 'comisión', 'comuna', 'junta'],
     attributes: [
-      { campo: 'fna', label: 'Nombre completo' },
-      { campo: 'nam', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo' },
-      { campo: 'in1', label: 'Código', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'fna', label: 'Nombre completo', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true },
+      { campo: 'nam', label: 'Nombre', visible: true },
+      { campo: 'in1', label: 'Código', visible: true, numeric: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -93,12 +104,18 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['gobierno local', 'comuna', 'comisión municipal', 'junta de gobierno', 'argentina', 'comisión', 'junta', 'municipio'],
     attributes: [
-      { campo: 'fna', label: 'Nombre completo' },
-      { campo: 'nam', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo' },
-      { campo: 'tgl', label: 'Tipo gobierno local', classifiable: true },
-      { campo: 'nam_prov', label: 'Provincia' },
-      { campo: 'in1', label: 'Código', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna', label: 'Nombre completo', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true },
+      { campo: 'nam', label: 'Nombre', visible: true },
+      { campo: 'in1', label: 'Código', visible: true, numeric: true },
+      { campo: 'tgl', label: 'Tipo gobierno local', visible: true, classifiable: true },
+      { campo: 'cod_tgl', label: 'Cod tgl', visible: false },
+      { campo: 'nam_prov', label: 'Provincia', visible: true },
+      { campo: 'cod_prov', label: 'Cod prov', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -115,10 +132,23 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['localidad', 'localidades', 'ciudad', 'pueblo', 'poblado', 'asentamiento', 'argentina', 'componente de localidad compuesta', 'localidad simple'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'tipo_asent', label: 'Tipo de asentamiento', classifiable: true },
-      { campo: 'nom_pcia', label: 'Provincia' },
-      { campo: 'nom_depto', label: 'Departamento' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'cod_pcia', label: 'Cod pcia', visible: false },
+      { campo: 'nom_pcia', label: 'Provincia', visible: true },
+      { campo: 'cod_depto', label: 'Cod depto', visible: false },
+      { campo: 'nom_depto', label: 'Departamento', visible: true },
+      { campo: 'cod_ase', label: 'Cod ase', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'tipo_asent', label: 'Tipo de asentamiento', visible: true, classifiable: true },
+      { campo: 'cod_aglo', label: 'Cod aglo', visible: false },
+      { campo: 'nom_aglo', label: 'Nom aglo', visible: true },
+      { campo: 'cod_agl', label: 'Cod agl', visible: false },
+      { campo: 'nom_agl', label: 'Nom agl', visible: true },
+      { campo: 'lat_gd', label: 'Lat gd', visible: false },
+      { campo: 'long_gd', label: 'Long gd', visible: false },
+      { campo: 'lat_gs', label: 'Lat gs', visible: false },
+      { campo: 'long_gs', label: 'Long gs', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -135,10 +165,23 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['paraje', 'parajes', 'lugar rural', 'topónimo rural', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'tipo_asent', label: 'Tipo', classifiable: true },
-      { campo: 'nom_pcia', label: 'Provincia' },
-      { campo: 'nom_depto', label: 'Departamento' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'cod_pcia', label: 'Cod pcia', visible: false },
+      { campo: 'nom_pcia', label: 'Provincia', visible: true },
+      { campo: 'cod_depto', label: 'Cod depto', visible: false },
+      { campo: 'nom_depto', label: 'Departamento', visible: true },
+      { campo: 'cod_ase', label: 'Cod ase', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'tipo_asent', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'cod_aglo', label: 'Cod aglo', visible: false },
+      { campo: 'nom_aglo', label: 'Nom aglo', visible: true },
+      { campo: 'cod_agl', label: 'Cod agl', visible: false },
+      { campo: 'nom_agl', label: 'Nom agl', visible: true },
+      { campo: 'lat_gd', label: 'Lat gd', visible: false },
+      { campo: 'long_gd', label: 'Long gd', visible: false },
+      { campo: 'lat_gs', label: 'Lat gs', visible: false },
+      { campo: 'long_gs', label: 'Long gs', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -155,10 +198,23 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['sublocalidad', 'entidad rural', 'paraje', 'argentina', 'entidad'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'tipo_asent', label: 'Tipo', classifiable: true },
-      { campo: 'nom_pcia', label: 'Provincia' },
-      { campo: 'nom_depto', label: 'Departamento' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'cod_pcia', label: 'Cod pcia', visible: false },
+      { campo: 'nom_pcia', label: 'Provincia', visible: true },
+      { campo: 'cod_depto', label: 'Cod depto', visible: false },
+      { campo: 'nom_depto', label: 'Departamento', visible: true },
+      { campo: 'cod_ase', label: 'Cod ase', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'tipo_asent', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'cod_aglo', label: 'Cod aglo', visible: false },
+      { campo: 'nom_aglo', label: 'Nom aglo', visible: true },
+      { campo: 'cod_agl', label: 'Cod agl', visible: false },
+      { campo: 'nom_agl', label: 'Nom agl', visible: true },
+      { campo: 'lat_gd', label: 'Lat gd', visible: false },
+      { campo: 'long_gd', label: 'Long gd', visible: false },
+      { campo: 'lat_gs', label: 'Lat gs', visible: false },
+      { campo: 'long_gs', label: 'Long gs', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -173,8 +229,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['argentina', 'país', 'límite nacional', 'república'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -188,7 +250,14 @@ export const IGN_AR = {
     special:      false,
     visible:      true,
     keywords:     ['plataforma continental', 'argentina', 'mar', 'límite marítimo'],
-    attributes: []
+    attributes: [
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'vlp', label: 'Vlp', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+    ]
   },
 
   mar_territorial_ar: {
@@ -201,7 +270,14 @@ export const IGN_AR = {
     special:      false,
     visible:      true,
     keywords:     ['mar territorial', 'argentina', 'mar', 'límite marítimo', 'mar territorial argentino'],
-    attributes: []
+    attributes: [
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'vlp', label: 'Vlp', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+    ]
   },
 
   zona_contigua_ar: {
@@ -214,7 +290,13 @@ export const IGN_AR = {
     special:      false,
     visible:      false,
     keywords:     ['zona contigua', 'argentina', 'mar', 'límite marítimo'],
-    attributes: []
+    attributes: [
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+    ]
   },
 
   zee_ar: {
@@ -227,7 +309,16 @@ export const IGN_AR = {
     special:      false,
     visible:      true,
     keywords:     ['zona económica exclusiva', 'ZEE', 'argentina', 'mar', 'límite marítimo'],
-    attributes: []
+    attributes: [
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna', label: 'Fna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+    ]
   },
 
   millas_antartico_ar: {
@@ -241,7 +332,10 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['200 millas', 'sector antártico', 'antártida', 'argentina', '200 millas sector antártico'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -259,8 +353,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['límite internacional', 'frontera', 'límite', 'argentina', 'argentina - bolivia', 'argentina - brasil', 'argentina - chile', 'argentina - paraguay', 'argentina - uruguay', 'límite del lecho y subsuelo del río de la plata', 'límite exterior del río de la plata', 'límite lateral marítimo argentino-uruguayo'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -275,8 +375,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['límite provincial', 'límite interprovincial', 'argentina', 'buenos aires - córdoba', 'buenos aires - entre ríos', 'buenos aires - la pampa', 'buenos aires - santa fe', 'catamarca - córdoba', 'catamarca - santiago del estero', 'chaco - corrientes', 'chaco - salta', 'chaco - santa fe', 'chubut - río negro', 'ciudad de buenos aires - buenos aires', 'corrientes - misiones', 'corrientes - santa fe', 'córdoba - la pampa', 'córdoba - san luis', 'córdoba - santa fe', 'entre ríos - corrientes', 'entre ríos - santa fe', 'formosa - chaco', 'jujuy - salta', 'la pampa - río negro', 'la pampa - san luis', 'la rioja - catamarca', 'la rioja - córdoba', 'la rioja - san juan', 'la rioja - san luis', 'mendoza - la pampa', 'mendoza - san luis', 'neuquén - mendoza', 'neuquén - río negro', 'río negro - buenos aires', 'salta - catamarca', 'salta - formosa', 'salta - tucumán', 'san juan - mendoza', 'san juan - san luis', 'santa cruz - chubut', 'santiago del estero - chaco', 'santiago del estero - córdoba', 'santiago del estero - salta', 'santiago del estero - santa fe', 'santiago del estero - tucumán', 'tucumán - catamarca'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'vlj', label: 'Vlj', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -291,8 +398,13 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['límite departamental', 'límite interdepartamental', 'partido', 'argentina', 'límite interdepartamental o de partido'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'vlp', label: 'Vlp', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
     ]
   },
 
@@ -307,7 +419,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['límite área protegida', 'argentina', 'límite de área protegida'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -322,8 +438,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['límite marítimo', 'mar territorial', 'zona económica', 'argentina', 'límite de la plataforma continental', 'límite de la zona contigua', 'límite de la zona económica exclusiva', 'límite del mar territorial argentino', 'línea de base'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -338,10 +460,11 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['hito', 'hito fronterizo', 'frontera', 'límite internacional', 'argentina'],
     attributes: [
-      { campo: 'nombre', label: 'Nombre' },
-      { campo: 'pais', label: 'País limítrofe', classifiable: true },
-      { campo: 'seccion', label: 'Sección' },
-      { campo: 'codigo', label: 'Código' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'pais', label: 'País limítrofe', visible: true, classifiable: true },
+      { campo: 'codigo', label: 'Código', visible: true },
+      { campo: 'nombre', label: 'Nombre', visible: true },
+      { campo: 'seccion', label: 'Sección', visible: true },
     ]
   },
 
@@ -356,7 +479,8 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['hito interprovincial', 'límite provincial', 'argentina'],
     attributes: [
-      { campo: 'nombre', label: 'Nombre' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nombre', label: 'Nombre', visible: true },
     ]
   },
 
@@ -371,7 +495,12 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['círculo polar', 'paralelo', 'cartografía'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'tcp', label: 'Tcp', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -386,7 +515,12 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['trópico', 'paralelo', 'cartografía'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'ttr', label: 'Ttr', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -401,7 +535,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['ecuador', 'paralelo', 'cartografía'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -419,9 +557,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['ruta', 'rutas', 'red vial', 'vial', 'carretera', 'camino nacional', 'argentina'],
     attributes: [
-      { campo: 'rtn', label: 'Número de ruta', numeric: true },
-      { campo: 'typ', label: 'Tipo de vía', classifiable: true },
-      { campo: 'rst', label: 'Estado', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'rtn', label: 'Número de ruta', visible: true, numeric: true },
+      { campo: 'typ', label: 'Tipo de vía', visible: true, classifiable: true },
+      { campo: 'rst', label: 'Estado', visible: true, classifiable: true },
+      { campo: 'hct', label: 'Hct', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -436,9 +578,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['ruta provincial', 'rutas provinciales', 'vial provincial', 'camino provincial', 'argentina'],
     attributes: [
-      { campo: 'rtn', label: 'Número de ruta', numeric: true },
-      { campo: 'typ', label: 'Tipo de vía', classifiable: true },
-      { campo: 'rst', label: 'Estado', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'rtn', label: 'Número de ruta', visible: true, numeric: true },
+      { campo: 'typ', label: 'Tipo de vía', visible: true, classifiable: true },
+      { campo: 'rst', label: 'Estado', visible: true, classifiable: true },
+      { campo: 'hct', label: 'Hct', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -453,9 +599,24 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['camino', 'caminos', 'camino rural', 'vial terciario', 'acceso rural', 'argentina', 'red vial'],
     attributes: [
-      { campo: 'fna1', label: 'Nombre' },
-      { campo: 'gna1', label: 'Tipo', classifiable: true },
-      { campo: 'rst', label: 'Estado', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna1', label: 'Nombre', visible: true },
+      { campo: 'gna1', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam1', label: 'Nam1', visible: false },
+      { campo: 'fna2', label: 'Fna2', visible: false },
+      { campo: 'gna2', label: 'Gna2', visible: false },
+      { campo: 'nam2', label: 'Nam2', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'rst', label: 'Estado', visible: true, classifiable: true },
+      { campo: 'typ', label: 'Typ', visible: false },
+      { campo: 'mes', label: 'Mes', visible: false },
+      { campo: 'hct', label: 'Hct', visible: false },
+      { campo: 'loc', label: 'Loc', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'nr', label: 'Nr', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -470,8 +631,12 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['huella', 'huellas', 'camino de tierra', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
-      { campo: 'caa', label: 'Ancho', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'caa', label: 'Ancho', visible: false, numeric: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -486,8 +651,12 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['senda', 'sendas', 'senda rural', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
-      { campo: 'caa', label: 'Ancho', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'caa', label: 'Ancho', visible: false, numeric: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -502,9 +671,19 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['puente', 'puentes', 'viaducto', 'cruce', 'enlace', 'argentina', 'puente ferroviario carretero'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
-      { campo: 'tup', label: 'Uso', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'tup', label: 'Uso', visible: false, classifiable: true },
+      { campo: 'mcc', label: 'Mcc', visible: false },
+      { campo: 'bsc', label: 'Bsc', visible: false },
+      { campo: 'feo', label: 'Feo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -519,8 +698,19 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['puente', 'puentes', 'argentina', 'puente carretero', 'puente internacional', 'viaducto'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'tup', label: 'Tup', visible: false },
+      { campo: 'mcc', label: 'Mcc', visible: false },
+      { campo: 'bsc', label: 'Bsc', visible: false },
+      { campo: 'feo', label: 'Feo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -535,7 +725,12 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['alcantarilla', 'alcantarillas', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'feo', label: 'Feo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -550,8 +745,16 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['túnel', 'túneles', 'argentina', 'túnel internacional', 'túnel subfluvial'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'feo', label: 'Feo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -566,7 +769,12 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['vado', 'vados', 'cruce de agua', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'feo', label: 'Feo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -584,9 +792,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['aeropuerto', 'aeropuertos', 'aeródromo', 'terminal aérea', 'argentina', 'aeropuerto internacional', 'aeropuerto regional'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -601,9 +814,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['aeródromo', 'aeródromos', 'pista de aterrizaje', 'aviación', 'argentina', 'aeroclub', 'club de planeadores', 'gendarmería nacional'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'atv', label: 'Atv', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -618,8 +837,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['helipuerto', 'helipuertos', 'helicóptero', 'argentina', 'heliplataforma'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -634,7 +859,13 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['pista', 'pista aérea', 'aeropuerto', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'rst', label: 'Rst', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -652,10 +883,18 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['ferrocarril', 'tren', 'red ferroviaria', 'vía férrea', 'ramal', 'argentina', 'ferrocarril nacional'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'fun', label: 'Función', classifiable: true },
-      { campo: 'rgc', label: 'Trocha', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Función', visible: true, classifiable: true },
+      { campo: 'rgc', label: 'Trocha', visible: true, classifiable: true },
+      { campo: 'ltn', label: 'Ltn', visible: false },
+      { campo: 'loc', label: 'Loc', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -670,9 +909,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['estación de tren', 'estación ferroviaria', 'ferrocarril', 'tren', 'argentina', 'apeadero', 'desvío', 'embarcadero', 'empalme', 'estación', 'parada', 'parador'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -690,9 +934,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['puerto', 'puertos', 'muelle', 'muelles', 'terminal portuaria', 'argentina', 'base naval', 'club naútico', 'club náutico', 'terminal'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fuc', label: 'Fuc', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -707,8 +957,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['muelle', 'muelles', 'embarcadero', 'argentina', 'club náutico', 'puerto'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -723,8 +979,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['rompeolas', 'escollera', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'tro', label: 'Tro', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -739,8 +1002,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['rompeolas', 'escollera', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'tro', label: 'Tro', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -760,11 +1030,29 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['paso', 'pasos', 'frontera', 'paso fronterizo', 'paso internacional', 'argentina'],
     attributes: [
-      { campo: 'nom_pfi', label: 'Nombre' },
-      { campo: 'cruce_pfi', label: 'Tipo de cruce', classifiable: true },
-      { campo: 'pvecino', label: 'País vecino', classifiable: true },
-      { campo: 'prov', label: 'Provincia' },
-      { campo: 'hab_migr', label: 'Habilitación migratoria' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'cod_pfi', label: 'Cod pfi', visible: false },
+      { campo: 'nom_pfi', label: 'Nombre', visible: true },
+      { campo: 'cat_pfi', label: 'Cat pfi', visible: false },
+      { campo: 'pres_aci', label: 'Pres aci', visible: false },
+      { campo: 'pres_cf', label: 'Pres cf', visible: false },
+      { campo: 'cant_cf', label: 'Cant cf', visible: false },
+      { campo: 'region', label: 'Region', visible: false },
+      { campo: 'nom_adf', label: 'Nom adf', visible: true },
+      { campo: 'num_adf', label: 'Num adf', visible: false },
+      { campo: 'tipo_aci', label: 'Tipo aci', visible: false },
+      { campo: 'prov', label: 'Provincia', visible: true },
+      { campo: 'depto', label: 'Depto', visible: false },
+      { campo: 'muni', label: 'Muni', visible: false },
+      { campo: 'lat_pfi', label: 'Lat pfi', visible: false },
+      { campo: 'lon_pfi', label: 'Lon pfi', visible: false },
+      { campo: 'cruce_pfi', label: 'Tipo de cruce', visible: true, classifiable: true },
+      { campo: 'hab_migr', label: 'Habilitación migratoria', visible: true },
+      { campo: 'mod_migr', label: 'Mod migr', visible: false },
+      { campo: 'espec', label: 'Espec', visible: false },
+      { campo: 'autoridad', label: 'Autoridad', visible: false },
+      { campo: 'ffss_arg', label: 'Ffss arg', visible: false },
+      { campo: 'pvecino', label: 'País vecino', visible: true, classifiable: true },
     ]
   },
 
@@ -779,9 +1067,21 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['complejo fronterizo', 'frontera', 'paso fronterizo', 'aduana', 'argentina'],
     attributes: [
-      { campo: 'nom_cf', label: 'Nombre' },
-      { campo: 'nom_pfi', label: 'Paso internacional' },
-      { campo: 'cod_cf', label: 'Código' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'cod_cf', label: 'Código', visible: true },
+      { campo: 'nom_cf', label: 'Nombre', visible: true },
+      { campo: 'cod_pfi', label: 'Cod pfi', visible: false },
+      { campo: 'nom_pfi', label: 'Paso internacional', visible: true },
+      { campo: 'region', label: 'Region', visible: false },
+      { campo: 'nom_adf', label: 'Nom adf', visible: true },
+      { campo: 'num_adf', label: 'Num adf', visible: false },
+      { campo: 'prov', label: 'Prov', visible: false },
+      { campo: 'depto', label: 'Depto', visible: false },
+      { campo: 'muni', label: 'Muni', visible: false },
+      { campo: 'lat_cf', label: 'Lat cf', visible: false },
+      { campo: 'lon_cf', label: 'Lon cf', visible: false },
+      { campo: 'cruce_pfi', label: 'Cruce pfi', visible: false },
+      { campo: 'pvecino', label: 'Pvecino', visible: false },
     ]
   },
 
@@ -796,9 +1096,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['aduana', 'control fronterizo', 'puesto de control', 'argentina', 'aeroparque', 'aeropuerto', 'aeropuerto internacional', 'barrera sanitaria', 'complejo de cargas', 'complejo fronterizo', 'control', 'control de ingreso provincial de productos aliment', 'control fiscal', 'control fitosanitario', 'control sanitario', 'dirección nacional de migraciones', 'gendarmería nacioanl', 'gendarmería nacional', 'paso', 'paso fronterizo', 'paso internacional', 'policía caminera', 'puesto', 'puesto fitosanitario', 'puesto limítrofe', 'resguardo', 'sección seguridad vial', 'zona aduanera primaria', 'zona franca'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'bcp', label: 'Bcp', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -816,9 +1122,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['terminal de buses', 'terminal de ómnibus', 'colectivo', 'transporte', 'argentina', 'estación', 'estación central', 'estación de colectivos', 'estación de ómnibus', 'estación ferroautomotora', 'estación municipal de ómnibus', 'estación terminal', 'estación terminal de ómnibus', 'nueva estación terminal de ómnibus', 'nueva terminal de ómnibus', 'parador de ómnibus', 'parador municipal de ómnibus', 'terminal', 'terminal de transferencia'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -833,8 +1144,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['estación de servicio', 'nafta', 'combustible', 'argentina', 'combustibles', 'estación', 'estación de servicios', 'gnc', 'parador'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -849,8 +1167,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['peaje', 'autopista', 'argentina', 'estación de peaje'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'feo', label: 'Feo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -865,8 +1190,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['pesaje', 'control de camiones', 'argentina', 'balanza', 'balanza fija', 'balanza pública', 'báscula pública', 'control de peso y dimensiones', 'estación de peaje', 'estación de pesaje', 'privada', 'puesto'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'feo', label: 'Feo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -881,7 +1213,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['kilómetro', 'indicador vial', 'argentina', 'indicador de kilómetros'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'feo', label: 'Feo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -899,10 +1239,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['río', 'ríos', 'arroyo', 'arroyos', 'corriente', 'hidrografía', 'curso de agua', 'argentina', 'corriente de agua', 'riacho'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -917,9 +1260,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['río', 'ríos', 'corriente de agua', 'hidrografía', 'cauce', 'argentina', 'arroyo', 'boca', 'cañada', 'riacho'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'hyp', label: 'Hyp', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -934,9 +1283,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['río intermitente', 'arroyo intermitente', 'corriente temporal', 'argentina', 'arroyo', 'cañada', 'corriente de agua', 'riacho'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -951,9 +1304,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['laguna', 'lagunas', 'espejo de agua', 'cuerpo de agua', 'argentina', 'embalse', 'espejo de agua perenne', 'guadal', 'lago'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -968,9 +1325,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['lago', 'lagos', 'embalse', 'embalses', 'represa', 'dique', 'laguna grande', 'argentina', 'laguna', 'piedra'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'hyp', label: 'Hyp', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -985,9 +1348,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['laguna intermitente', 'espejo de agua temporal', 'argentina', 'espejo de agua intermitente', 'laguna'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'hyp', label: 'Hyp', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1002,9 +1371,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['canal', 'canales', 'irrigación', 'riego', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1019,9 +1393,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['canal', 'canales', 'irrigación', 'riego', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1036,8 +1416,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['acequia', 'zanja', 'riego', 'argentina', 'acequia o zanja', 'canal', 'cañada', 'zanjón'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1052,8 +1438,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['acueducto', 'conducto de agua', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'loc', label: 'Loc', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1068,8 +1461,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['muro de embalse', 'represa', 'argentina', 'arco de protección c. h.', 'central hidroeléctrica', 'dique', 'dique nivelador', 'embalse', 'presa'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1084,9 +1483,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['dique', 'presa', 'represa', 'embalse', 'diques', 'argentina', 'bañado', 'presa de embalse', 'presa embalse', 'salto', 'terraplén de defensa'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1101,9 +1506,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cascada', 'salto de agua', 'catarata', 'argentina', 'garganta', 'saltillo', 'salto'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1118,8 +1528,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['fuente natural', 'manantial', 'vertiente', 'argentina', 'agua', 'aguada', 'baños', 'baños termales', 'fuente termal', 'laguna', 'pozo', 'termas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'swt', label: 'Swt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1134,8 +1551,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['embalse rural', 'jagüel', 'argentina', 'dique de cola', 'represa'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1150,8 +1573,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['embalse rural', 'jagüel', 'argentina', 'embalse'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1166,7 +1595,13 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['marea', 'corriente marina', 'batimetría', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Fna', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1181,8 +1616,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['mareógrafo', 'medición mareas', 'argentina', 'estación'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1200,9 +1641,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['glaciar', 'glaciares', 'hielo', 'patagonia', 'argentina', 'nunatak', 'nunataks', 'ventisquero', 'ventisqueros'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdd', label: 'Fdd', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1217,8 +1664,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['barrera de hielo', 'glaciar', 'antártida', 'hielo', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdd', label: 'Fdd', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1233,8 +1687,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['morrena', 'glaciar', 'geomorfología', 'argentina', 'morena'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdd', label: 'Fdd', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1252,9 +1713,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['costa', 'litoral', 'accidente costero', 'punta', 'bahía', 'argentina', 'archipiélago', 'cabo', 'caleta', 'canal', 'ensenada', 'estrecho', 'fiordo', 'golfo', 'islas', 'islotes', 'mar', 'pasaje', 'paso', 'península', 'puerto', 'río', 'seno'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'ta1', label: 'Ta1', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1269,9 +1736,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['isla', 'islas', 'archipiélago', 'argentina', 'islote', 'islotes', 'roca', 'rocas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'tis', label: 'Tis', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1286,8 +1759,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['playa', 'playas', 'costa', 'litoral', 'arena', 'argentina', 'playa de arena'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'smc', label: 'Smc', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1302,8 +1782,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['playa', 'playa de grava', 'costa', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'smc', label: 'Smc', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1318,8 +1805,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['restinga', 'playa', 'costa', 'argentina', 'playa restinga'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'smc', label: 'Smc', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1334,9 +1828,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['faro', 'faros', 'navegación', 'costa', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1351,7 +1851,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['boya', 'boyas', 'navegación', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1366,8 +1870,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['baliza', 'señalización', 'navegación', 'argentina', 'balizas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1382,8 +1892,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['roca', 'obstáculo navegación', 'costa', 'argentina', 'arrecife', 'arrecifes', 'rocas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1401,9 +1917,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cordillera', 'sierra', 'montaña', 'geomorfología', 'argentina', 'cadena'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1418,9 +1940,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['sierra', 'sierras', 'cordón serrano', 'geomorfología', 'argentina', 'alturas', 'cadena', 'macizo', 'montañas', 'montes', 'morro', 'nevado', 'nevados', 'paramillo', 'picos', 'serranía', 'serranías', 'sierrita'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1435,9 +1963,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cordón', 'serranía', 'montaña', 'geomorfología', 'argentina', 'cerrillada', 'cerrillo', 'cerrillos', 'cerritos', 'cerro', 'cerros', 'cordón treneta', 'cumbre', 'escorial', 'montes', 'nevado', 'nevados'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1452,9 +1986,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cuchilla', 'loma', 'geomorfología', 'argentina', 'altura', 'bordo', 'bordos', 'cabeceras', 'cuchillo', 'lomada', 'lomadas', 'lomas', 'lomita', 'lomitas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1469,9 +2009,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cuesta', 'relieve', 'geomorfología', 'argentina', 'subida'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1486,9 +2032,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['filo', 'cresta', 'divisoria de aguas', 'geomorfología', 'argentina', 'cumbre', 'cumbrecita', 'cumbres', 'filos'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1503,9 +2055,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['valle', 'valles', 'geomorfología', 'argentina', 'alto valle', 'bolsón', 'río'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1520,9 +2077,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['pampa', 'llanura', 'lugar geomorfológico', 'geomorfología', 'argentina', 'altiplanicie', 'alto', 'altos', 'bajada', 'bajo', 'bajos', 'campo', 'campos', 'complejo', 'gran', 'gran altiplanicie', 'gran bajo', 'guadal', 'llanos', 'meseta', 'planicie', 'punta', 'puntilla', 'río'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'tlg', label: 'Tlg', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1537,9 +2100,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['quebrada', 'cañadón', 'garganta', 'geomorfología', 'argentina', 'cajón', 'huaico', 'quebradas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1554,8 +2123,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['barranca', 'zanjón', 'geomorfología', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1570,7 +2144,13 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['curva de nivel', 'isohipsa', 'topografía', 'altitud', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'crv', label: 'Crv', visible: false },
+      { campo: 'mo2', label: 'Mo2', visible: false },
     ]
   },
 
@@ -1585,9 +2165,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['meseta', 'mesetas', 'altiplano', 'puna', 'geomorfología', 'argentina', 'altiplanicie', 'alto', 'altos', 'altura', 'bajo', 'campo', 'cerro', 'la mesilla', 'llano', 'llanos', 'loma', 'lomas', 'lomitas', 'macizo', 'mesada', 'mesadas', 'mesillas', 'mesón', 'mogote', 'mogotes', 'pamapa', 'pampa', 'pampita', 'placeta', 'planicie', 'potrero', 'prado', 'riscos'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1602,8 +2188,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['médano', 'duna', 'arenal', 'médanos', 'geomorfología', 'argentina', 'bajo', 'campo', 'loma', 'medano', 'medanos', 'meseta'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1618,10 +2210,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['pico', 'cumbre', 'cerro', 'montaña', 'cima', 'argentina', 'alto', 'cerrito', 'colina', 'contrafuerte', 'cordón', 'loma', 'lomas', 'monte', 'morro', 'morros', 'nevado', 'peña', 'peñas', 'picacho', 'picos', 'volcán'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
-      { campo: 'alt', label: 'Altitud', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'alt', label: 'Altitud', visible: true, numeric: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1636,9 +2232,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['abra', 'paso de montaña', 'collado', 'portezuelo', 'argentina', 'aba', 'paso', 'portillo'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1653,8 +2253,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['mogote', 'cerro', 'geomorfología', 'argentina', 'mogotes'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'alt', label: 'Alt', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1669,7 +2276,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['punto acotado', 'cota', 'altitud', 'topografía', 'argentina'],
     attributes: [
-      { campo: 'alt', label: 'Altitud', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'alt', label: 'Altitud', visible: true, numeric: true },
+      { campo: 'pdt', label: 'Pdt', visible: false },
+      { campo: 'mo1', label: 'Mo1', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1684,8 +2298,9 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['montaña', 'alta montaña', 'cordillera', 'argentina', 'altiplano', 'colina', 'sierra'],
     attributes: [
-      { campo: 'cam', label: 'Categoría', classifiable: true },
-      { campo: 'provincia', label: 'Provincia' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'cam', label: 'Categoría', visible: true, classifiable: true },
+      { campo: 'provincia', label: 'Provincia', visible: true },
     ]
   },
 
@@ -1703,8 +2318,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['salina', 'salar', 'sal', 'salitral', 'argentina', 'bajo', 'boratera', 'pampa', 'salinas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1719,8 +2339,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['afloramiento rocoso', 'roca', 'geología', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1735,8 +2360,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['arenal', 'arena', 'desierto', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1751,8 +2381,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['barrial', 'bañado', 'terreno anegado', 'argentina', 'barrizal'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1767,8 +2402,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cumbre rocosa', 'roca', 'montaña', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1783,8 +2423,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['pedregal', 'roca', 'terreno pedregoso', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1799,8 +2444,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['sedimento fluvial', 'aluvión', 'planicie aluvial', 'argentina', 'embalse', 'laguna', 'río'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1815,7 +2465,11 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['desmonte', 'deforestación', 'sin vegetación', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1833,8 +2487,12 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['bosque', 'selva', 'monte', 'vegetación', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
     ]
   },
 
@@ -1849,8 +2507,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['monte', 'monte bajo', 'vegetación', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1865,8 +2529,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['bosque artificial', 'forestación', 'eucaliptos', 'pinos', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1881,8 +2551,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['parque', 'arboleda', 'vegetación urbana', 'argentina', 'parque artificial'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1897,8 +2573,12 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['estepa', 'arbustal', 'matorral', 'vegetación', 'patagonia', 'argentina', 'estepa arbustiva', 'etapa arbustiva'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
     ]
   },
 
@@ -1913,8 +2593,12 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['pajonal', 'juncal', 'totoral', 'bañado', 'vegetación hidrófila', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
     ]
   },
 
@@ -1929,7 +2613,11 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['plantación', 'viñedo', 'frutales', 'cultivo permanente', 'argentina', 'plantación permanente'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1944,7 +2632,11 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cultivo', 'chacra', 'campo sembrado', 'argentina', 'terreno para cultivo'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -1962,10 +2654,18 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['área protegida', 'áreas protegidas', 'reserva', 'parque nacional', 'parque', 'reserva natural', 'argentina', 'area natural protegida', 'area protegida', 'centro biológico de fauna silvestre', 'itinerario cultural', 'monumento natural', 'monumento natural provincial', 'paisaje protegido', 'paisaje terrestre y marino protegido', 'paleontológica y arqueológic', 'parque arqueológico', 'parque botánico municipal', 'parque escolar rural', 'parque interjurisdiccional marino', 'parque interjurisdiccional marino costero', 'parque marino provincial', 'parque municipal', 'parque nacional y reserva provincial', 'parque natural', 'parque natural municipal', 'parque natural provincial', 'parque natural provincial y reserva forestal', 'parque natural y paisaje protegido', 'parque provincial', 'parque provincial y reserva forestal', 'parque universitario', 'parque y reserva nacional', 'parque y reserva natural provincial', 'parque y reserva provincial', 'patrimonio mundial cultural de la humanidad', 'refugio de vida silvestre', 'refugio privado', 'refugio privado de vida silvestre', 'reserva costera', 'reserva costera area marina', 'reserva costera marina', 'reserva cultural y natural', 'reserva de biósfera', 'reserva de biósfera y reserva natural', 'reserva de caza', 'reserva de fauna y flora silvestre', 'reserva de pesca', 'reserva de recursos y reserva hídrica natural', 'reserva de uso múltiple', 'reserva de usos multiples marina', 'reserva de vida silvestre', 'reserva ecológica', 'reserva ecológica municipal', 'reserva ecológica municipal de uso múltiple', 'reserva faunística provincial', 'reserva forestal', 'reserva forestal de uso múltiple', 'reserva forestal natural', 'reserva geológica', 'reserva hidrogeológica', 'reserva hídrica natural', 'reserva hídrica provincial', 'reserva municipal', 'reserva municipal natural y cultural', 'reserva municipal urbana', 'reserva nacional', 'reserva natural de fauna', 'reserva natural de interés provincial', 'reserva natural de la defensa', 'reserva natural de uso múltiple', 'reserva natural educativa', 'reserva natural estricta', 'reserva natural integral', 'reserva natural manejada', 'reserva natural mejorada', 'reserva natural municipal', 'reserva natural municipal provincial', 'reserva natural objetivo definido educativo', 'reserva natural privada', 'reserva natural provincial', 'reserva natural provincial de objetivo definido', 'reserva natural provincial de objetivos definidos', 'reserva natural provincial de uso múltiple', 'reserva natural provincial integral', 'reserva natural provincial integral y de objetivo', 'reserva natural provincial y refugio', 'reserva natural silvestre', 'reserva natural turística', 'reserva natural turística de objetivo específico', 'reserva natural turística de objetivo integral', 'reserva natural turística y de investigación', 'reserva natural urbana', 'reserva natural y cultural', 'reserva natural íctica', 'reserva paisaje protegida', 'reserva paisajística natural y cultural protegida', 'reserva permanente', 'reserva privada', 'reserva privada de uso múltiple', 'reserva provincial', 'reserva provincial de fauna', 'reserva provincial de fauna y flora', 'reserva provincial de flora y fauna', 'reserva provincial de paisaje protegido', 'reserva provincial de uso múltiple', 'reserva provincial de uso múltiple y recreativa', 'reserva provincial faunística y florística', 'reserva provincial forestal y de biósfera', 'reserva provincial fáunica', 'reserva provincial geológica', 'reserva provincial hídrica y de paisaje protegido', 'reserva provincial municipal', 'reserva provincial natural', 'reserva provincial y parque interjurisdiccional', 'reserva pública', 'reserva universitaria de recursos', 'sitio ramsar', 'sitio ramsar y monumento natural', 'sitio ramsar y parque nacional', 'sitio ramsar y parque provincial', 'sitio ramsar y refugio provincial', 'sitio ramsar y reserva ecológica', 'sitio ramsar y reserva hemisférica', 'sitio ramsar y reserva natural privada', 'sitio ramsar y reserva provincial de uso múltipl', 'zaep', 'área de uso científico', 'área de uso científico bajo protección especial', 'área de uso limitado bajo protección especial', 'área marina protegida', 'área natural protegida', 'área natural protegida provincial', 'área protegida con recursos manejados', 'área provincial natural protegida'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'tap', label: 'Tipo área protegida' },
-      { campo: 'jap', label: 'Jurisdicción' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'tap', label: 'Tipo área protegida', visible: true },
+      { campo: 'jap', label: 'Jurisdicción', visible: true },
+      { campo: 'caa', label: 'Caa', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'area', label: 'Area', visible: false },
     ]
   },
 
@@ -1983,9 +2683,16 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['central eléctrica', 'central térmica', 'central hidroeléctrica', 'energía', 'argentina', 'central', 'central eólica', 'central hidráulica', 'central nuclear', 'central solar', 'central termoeléctrica', 'central térmica de ciclo combinado', 'complejo hidroeléctrica', 'complejo hidroeléctrico', 'complejo hidroléctrico', 'micro central hidroeléctrica', 'parque eólico', 'parque solar', 'parque solar fotovoltaico', 'pequeño aprovechamiento hidroeléctrico', 'usina', 'usina hidroeléctrica', 'usina nuclear'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'ppc', label: 'Ppc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2000,8 +2707,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['subestación', 'transformador', 'energía eléctrica', 'argentina', 'estación de rebaje', 'estación transformadora', 'estación transformadora provincial', 'estación trasnformadora', 'estacióntransformadora', 'planta experimental de hidrógeno', 'planta transformadora', 'subestación transformadora'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2016,8 +2730,16 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['línea eléctrica', 'alta tensión', 'tendido eléctrico', 'energía', 'argentina', 'línea de transmisión eléctrica'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'ten', label: 'Ten', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2032,8 +2754,16 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['ducto', 'gasoducto', 'oleoducto', 'infraestructura', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'tdu', label: 'Tdu', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2051,8 +2781,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['antena', 'telecomunicaciones', 'torre de comunicación', 'argentina', 'antena transmisora', 'canal', 'central telefónica', 'instituto argentino', 'radio'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2067,8 +2803,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['torre de telecomunicaciones', 'antena', 'radio', 'argentina', 'canal', 'planta compresora', 'radio club', 'repetidora tv', 'torre'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2086,9 +2828,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['hospital', 'clínica', 'centro de salud', 'sanatorio', 'salud', 'argentina', 'centro de atención primaria de la salud', 'centro de atención primaria de la salud municipal', 'centro de rehabilitación', 'centro de salud integral de la adolescencia', 'centro de salud mental', 'centro de salud municipal', 'centro de salud y acción comunitaria', 'centro médico barrial', 'centro sanitario', 'centro sanitario interzonal de odontología', 'dispensario', 'dispensario municipal', 'establecimiento asistencial', 'establecimiento sanitario', 'establecimiento sanitario periférico', 'establecimiento sanitario periférico enfermería', 'establecimiento sanitario zonal', 'hospital comunitario', 'hospital de tránsito', 'hospital distrital', 'hospital general de agudos', 'hospital geriátrico', 'hospital interzonal de agudos y crónicos', 'hospital odontológico', 'hospital provincial', 'hospital regional', 'hospital rural', 'hospital sanitario zonal', 'hospital subzonal especializado', 'hospital zonal', 'hospital zonal de agudos especializado', 'hospital zonal especializado', 'hospital zonal especializado de odontología infan', 'mini hospital', 'móvil sanitario de la mujer', 'posta', 'posta sanitaria', 'posta sanitario', 'puesto de salud', 'puesto fijo', 'puesto sanitario', 'sala', 'sala central', 'sala de primero auxilios', 'sala de primeros auxilios', 'sanidad municipal', 'unidad asistencial', 'unidad sanitaria'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2106,9 +2852,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['escuela', 'colegio', 'jardín de infantes', 'educación', 'argentina', 'aula satélite', 'centro de educación secundaria para adultos', 'centro de formación profesional', 'centro educativo', 'centro educativo de nivel primario', 'centro educativo de nivel secundario', 'ciclo básico de formación ocupacional', 'ciclo básico orientado secundario rural epep', 'ciclo básico secundario rural epep', 'colegio episcopal', 'escuela de comercio', 'escuela de educacion media', 'escuela de educación media', 'escuela de educación primaria', 'escuela de educación secundaria', 'escuela de jardín de infantes', 'escuela domiciliaria', 'escuela especial', 'escuela infantil', 'escuela integral interdisciplinaria', 'escuela normal superior', 'escuela para niños', 'escuela primaria común', 'escuela provincial de educación primaria', 'escuela provincial de educación secundaria', 'escuela provincial de educación técnica', 'escuela técnica', 'escuelas técnicas', 'instituto', 'instituto de formación técnica superior', 'instituto superior de educación física', 'instituto superior de formación docente y técnic', 'instituto superior del profesorado', 'jardín', 'jardín de infantes común', 'jardín de infantes integral', 'jardín de infantes nucleado', 'jardín de infantes nucleado a', 'jardín de infantes nucleado b', 'jardín de infantes nucleado c', 'jardín de infantes nucleado d', 'jardín de infantes nucleado e', 'jardín de infantes rural', 'jóvenes y adultos', 'liceo', 'niñas', 'niñas y jóvenes', 'núcleo de educación permanente y formación prof'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2123,9 +2873,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['universidad', 'facultad', 'instituto', 'educación superior', 'argentina', 'instituto universitario', 'universidad católica', 'universidad nacional', 'universidad provincial', 'universidad tecnológica nacional'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2140,9 +2894,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['observatorio', 'instituto científico', 'ciencia', 'investigación', 'argentina', 'administración', 'administración nacional', 'agencia de extensión rural', 'asociación argentina', 'centro', 'centro austral', 'centro científico tecnológico', 'centro de estudios', 'centro de estudios e investigaciones', 'centro de innovación', 'centro de interpretación', 'centro de interpretación ambiental', 'centro de investigaciones', 'centro de investigaciones y desarrollo', 'centro de investigaciones y transferencia', 'centro de investigación', 'centro de investigación veterinaria', 'centro de química inorgánica', 'centro de referencia', 'centro de tecnología', 'centro espacial', 'centro experimental', 'centro internacional', 'centro regional', 'comisión nacional', 'consejo nacional', 'estación astrofísica', 'estación experimental agropecuaria', 'estación terrena', 'fundación', 'instituto', 'instituto de investigaciones', 'instituto de investigación', 'instituto de investigación animal', 'instituto de investigación y desarrollo', 'instituto de investigación y desarrollo tecnológ', 'instituto superior', 'laboratorio de investigaciones', 'observatorio astronómico', 'planetario', 'polo científico tecnológico', 'servicio', 'unidad ejecutora'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2160,9 +2918,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['biblioteca', 'museo', 'teatro', 'centro cultural', 'cultura', 'argentina', 'asociación civil', 'asociación civil cultural', 'ateneo', 'biblioteca escolar popular', 'biblioteca popular', 'biblioteca popular infantil', 'biblioteca popular pública', 'casa', 'casa de la cultura', 'casa de la historia y la cultura del bicentenario', 'casa del artista plástico', 'centro', 'centro artístico', 'centro audiovisual', 'centro cultura y museo', 'centro cultural municipal', 'centro de apertura multicultural', 'centro de arte y expresión', 'centro de estudios latinoamericanos', 'centro de expresiones contemporáneas (cec)', 'centro de jubilados', 'centro de la tradición', 'centro social y cultural', 'cine', 'cine teatro', 'cine teatro municipal', 'cine y teatro', 'cinema', 'club cultural', 'complejo cultural', 'edificio de cultura', 'espacio', 'espacio cultural', 'espacio de arte', 'estación', 'fundación', 'galpón', 'museo antártico', 'museo arqueológico', 'museo arqueológico regional', 'museo arquidiocesano', 'museo comunal', 'museo de antropología', 'museo de antropología y ciencias naturales', 'museo de arqueología', 'museo de arte', 'museo de arte contemporáneo', 'museo de arte decorativo', 'museo de arte religioso', 'museo de arte sacro', 'museo de artes visuales', 'museo de bellas artes', 'museo de ciencias naturales', 'museo de historia', 'museo de sitio', 'museo etnográfico', 'museo etnográfico y colonial', 'museo histórico', 'museo histórico arquelógico', 'museo histórico comunal y de la colonización', 'museo histórico militar', 'museo histórico natural', 'museo histórico policial', 'museo histórico provincial', 'museo histórico regional', 'museo histórico y arqueológico', 'museo histórico y arqueológico jesuítico', 'museo histórico y biblioteca', 'museo internacional', 'museo municipal', 'museo municipal de bellas artes', 'museo nacional', 'museo provincial', 'museo provincial de ciencias naturales', 'museo regional', 'museo regional y archivo histórico', 'museo regional y arqueológico', 'museo regional y provincial', 'museo rural', 'museo tecnológico', 'museo universitario', 'museo y archivo histórico municipal', 'museo y archivo histórico regional', 'museo y biblioteca', 'museo y centro cultural', 'museo y centro de estudios históricos', 'museo y observatorio', 'planetario', 'plataforma', 'plaza', 'sala', 'sala cultural', 'sala histórica', 'sala municipal', 'sala teatral', 'solar', 'teatro municipal'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2177,9 +2940,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['iglesia', 'templo', 'catedral', 'capilla', 'religión', 'argentina', 'agrupación social', 'asamblea cristiana', 'asamblea cristiana apostólica profética', 'asamblea de dios misión evangélica', 'asamblea de iglesias cristianas', 'asociación cristiana', 'asociación cristiana agape', 'asociación de iglesia evangélica pentecostal', 'asociación de la iglesia', 'asociación de la iglesia de dios en la argentina', 'asociación de la iglesia evangélica', 'asociación de las iglesias', 'asociación de los testigos de jehová', 'asociación evangelística', 'asociación evangélica', 'asociación evangélica asamblea de dios', 'asociación evangélica centro de acción cristian', 'asociación evangélica pentecostal', 'asociación iglesia evangélica', 'asociación iglesia evangélica cristiana', 'asociación iglesia evangélica del nazareno', 'asociación israelita', 'asociación ortodoxa rusa en la argentina', 'asociación pentecostal', 'asociación religiosa argentino-africana', 'asociación religiosa soka gakkai internacional', 'centro espirita', 'centro evangélico misionero', 'centro fraternidad rosacruz', 'centro sri sathya sai baba de buenos aires', 'comunidad cristiana evangélica', 'congregación africanista', 'congregación cristiana', 'congregación cristiana de goya', 'congregación cristiana en la argentina', 'congregación cristiana evangélica', 'convención evangélica bautista argentina', 'cultural y religiosa', 'delegación argentina central', 'delegación argentina del norte', 'delegación argentina del sur', 'edificio religioso', 'escuela espiritual', 'federación argentina pastores unidos', 'federación asamblea cristiana', 'fundación argentina para cristo', 'iglesia adventista de la promesa', 'iglesia asamblea de dios pentecostal de mercedes', 'iglesia bautista bíblica de san antonio de padua', 'iglesia biblia abierta misión sudamericana', 'iglesia congregación familiar', 'iglesia cristiana', 'iglesia cristiana casa de misericordia', 'iglesia cristiana evangélica', 'iglesia cristiana evangélica de quilmes', 'iglesia cristiana evangélica en gez 25', 'iglesia cristiana evangélica en las heras 665', 'iglesia cristiana evangélica en tapiales', 'iglesia cristiana mensaje de esperanza', 'iglesia cristiana pentecostal', 'iglesia cristiana pentecostal de argentina', 'iglesia cristiana vida eterna', 'iglesia de dios', 'iglesia de dios (7º dia)', 'iglesia de dios en cristo jesús', 'iglesia de dios pentecostal', 'iglesia evangélica', 'iglesia evangélica antorcha pentecostal', 'iglesia evangélica apostólica', 'iglesia evangélica asamblea de dios', 'iglesia evangélica bethel', 'iglesia evangélica congregacional', 'iglesia evangélica cristiana', 'iglesia evangélica de cristo', 'iglesia evangélica de cristo jesús', 'iglesia evangélica el lirio de los valles', 'iglesia evangélica estrella de oriente', 'iglesia evangélica luterana argentina', 'iglesia evangélica luterana unida', 'iglesia evangélica menonita argentina', 'iglesia evangélica mensajeros de cristo', 'iglesia evangélica misionera', 'iglesia evangélica pentecostal', 'iglesia evangélica rayos de luz', 'iglesia evangélica unión pentecostal', 'iglesia internacional', 'iglesia israelita del nuevo pacto', 'iglesia nazarena apostólica cristiana', 'iglesia nueva apostólica (sud américa)', 'iglesia pentecostal de santidad', 'iglesia pentecostal mahanaim', 'iglesia pentecostal naciente', 'iglesia pentecostal unida de la argentina', 'la alianza cristiana y misionera argentina', 'la iglesia de dios de la profecía', 'la iglesia universal del reino de dios', 'ministerio', 'ministerio evangelístico cristo vive', 'misión apostólica pentecostal', 'misión cristiana evangélica', 'misión cristiana evangélica argentina', 'misión cristiana evangélica escrituraria', 'misión de la iglesia de dios', 'misión evangelística argentina', 'misión evangélica apóstoles de jesucristo', 'misión unida metodista pentecostal argentina', 'movimiento cristiano y misionero', 'movimiento misionero mundial argentino', 'parroquia', 'religión cristiana argentina', 'templo de umbanda divino espíritu santo', 'unión de iglesias', 'unión de las asambleas de dios', 'unión de las iglesias de dios pentecostal', 'unión evangélica de la argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'rfa', label: 'Rfa', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2194,9 +2963,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['monumento', 'monumentos', 'estatua', 'memorial', 'patrimonio', 'argentina', 'arco', 'busto', 'columna conmunerativa', 'conjunto de obras escultóricas', 'conjunto escultórico', 'escultura', 'fuente', 'fuente monumental', 'grupo escultórico', 'hito', 'homenaje', 'mausoleo', 'monolito', 'monolito conmemorativo', 'monumento histórico', 'monumento histórico nacional', 'monumento nacional', 'obelisco', 'paseo', 'piedra fundacional', 'pirámide', 'portal', 'posta', 'primer carrousel', 'primer monumento', 'puente', 'reloj solar', 'santuario', 'torre'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2211,7 +2985,11 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['ruina', 'ruinas', 'patrimonio', 'historia', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2229,9 +3007,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cementerio', 'cementerios', 'panteón', 'argentina', 'cementerio antiguo', 'cementerio israelita', 'cementerio municipal', 'cementerio parque', 'cementerio parque municipal', 'cementerio privado', 'nuevo cementerio'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2246,8 +3029,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['cementerio', 'cementerios', 'argentina', 'cementerio antiguo', 'cementerio comunal', 'cementerio israelita', 'cementerio municipal', 'cementerio parque', 'cementerio parque municipal', 'cementerio privado', 'nuevo cementerio'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2262,9 +3051,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['parque', 'plaza', 'espacio verde', 'jardín', 'paseo', 'argentina', 'bosque', 'jardines', 'jardín botánico', 'parque deportivo', 'parque municipal', 'plazoleta', 'plazoletas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2279,9 +3073,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['estadio', 'instalación deportiva', 'deporte', 'cancha', 'argentina', 'agrupación gaucha', 'asociación civil', 'atlético', 'atlético y cultural', 'autódromo', 'autódromo municipal', 'balneario', 'balneario municipal', 'camping', 'camping municipal', 'campo de deportes', 'campo recreativo', 'centro cultural', 'centro cultural y deportivo', 'centro de alto rendimiento', 'centro deportivo', 'circuito de motocross', 'circuito motocross', 'club', 'club atlético', 'club de aeromodelismo', 'club de campo', 'club de cazadores', 'club de golf', 'club de pesca', 'club de pescadores', 'club de polo', 'club deportivo', 'club ecuestre', 'club hípico', 'club municipal', 'club náutico', 'club regatas', 'club social', 'club social y cultural', 'club social y deportivo', 'club sportivo', 'club universitario', 'complejo', 'complejo deportivo', 'complejo deportivo municipal', 'complejo municipal', 'complejo polideportivo', 'complejo polideportivo municipal', 'complejo recreativo', 'complejo turístico', 'cuadreras', 'círculo', 'círculo deportivo', 'deportivo', 'estadio municipal', 'estadio municipal de fútbol', 'estadio olímpico municipal', 'federación', 'gimnasio municipal', 'golf club', 'hipódromo', 'hípico', 'instalación deportiva y de esparcimiento', 'instituto de obra social', 'motoclub', 'náutico', 'parque acuático', 'parque recreativo', 'patinódromo', 'patinódromo municipal', 'peña de ciclismo', 'picódromo', 'pista', 'polideportivo', 'polideportivo municipal', 'recreo', 'social y deportivo', 'tiro federal', 'tiro federal argentino'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2296,8 +3095,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['esquí', 'centro de ski', 'nieve', 'deportes de invierno', 'argentina', 'base centro invernal', 'centro de esquí', 'centro de sky', 'parque de nieve'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2312,9 +3117,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['refugio', 'refugio de montaña', 'trekking', 'montaña', 'argentina', 'campamento', 'camping organizado', 'puesto', 'refugio militar', 'vivac'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2329,9 +3139,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['sitio de interés', 'atracción turística', 'turismo', 'punto de interés', 'argentina', 'aeronave', 'aguada', 'almacén', 'anfiteatro natural', 'antigua aduana', 'antigua sinagoga y salón comunitario de la coloni', 'antigua vivienda', 'antiguo faro', 'antiguo fuerte', 'antiguo gasómetro', 'antiguo penal naval militar', 'antiguo puente colgante', 'archivos', 'arte rupestre', 'avenida', 'avión', 'balcón', 'barranca', 'barrio', 'basílica', 'batalla', 'batallas', 'batería', 'biblioteca', 'biblioteca popular', 'bóvedas', 'cabaña refugio', 'cabildo', 'cabildo histórico', 'caleta', 'calle', 'camarín', 'campamento', 'campo', 'campo de deportes', 'campo de la batalla', 'capilla', 'casa', 'casa de la memoria y la resistencia', 'casa histórica', 'casa natal', 'casa particular', 'casco de la estancia', 'casco histórico', 'casco histórico arquitectónico', 'casco urbano', 'casona', 'catedral', 'catedral basílica', 'cementerio', 'centro cultural por la memoria', 'cerro', 'chacra', 'chalet', 'choza', 'cima', 'cine teatro', 'club', 'club de regatas', 'club social', 'colegio', 'colegio nacional', 'columna', 'comandancia', 'combate', 'complejo ferrovial', 'complejo unidad turística', 'conjunto edilicio', 'conjunto urbano', 'convento', 'correo central', 'cruz del cementerio', 'cuarteles', 'cueva', 'cárcel', 'delegación municipal', 'desembarco', 'desembocadura', 'edificio', 'edificio de correos y telégrafos', 'edificios', 'el palomar', 'elementos circundantes a las bóvedas', 'elevadores de granos', 'emplazamiento', 'entrada', 'escuela', 'escuela de agronomía y veterinaria', 'escuela de educación primaria', 'escuela hogar', 'escuela nacional', 'escuela nacional normal mixta', 'escuela nacional primaria', 'escuela normal superior', 'escuela primaria provincial', 'establecimiento', 'estación', 'estación experimental agropecuaria', 'estación ferroviaria', 'estancia', 'estancia jesuítica', 'ex barraca', 'ex casa de gobierno', 'ex centro clandestino de detención', 'ex cine teatro', 'ex estación de ferrocarril', 'ex hotel de inmigrantes', 'ex mercado', 'ex mercado municipal', 'ex sede del banco', 'ex usina del puerto', 'ex usina ferroviaria y talleres anexos', 'faro', 'ferrocarril', 'finca', 'fortaleza protectora', 'fortaleza protectora argentina', 'fortín', 'fortín y molino', 'fuerte', 'graneros', 'hangares', 'hogar escuela', 'hotel', 'iglesia', 'iglesia anglicana', 'iglesia evangélica metodista', 'iglesia ortodoxa', 'iglesia parroquial', 'iglesia presbiteriana', 'ingenio', 'inmuebles de la antigua chacra experimental', 'instalaciones', 'instituto', 'isla', 'liceo militar', 'manantiales', 'manzana', 'matadero municipal', 'menhires', 'molino de viento', 'molino de viento y tahona', 'muelle y área contigua', 'mural escultórico', 'museo', 'museo del cine', 'museo folklórico', 'museo nacional', 'médano', 'ombú', 'oratorio', 'palacio', 'palacio de gobierno', 'palacio municipal', 'paleontológica y arqueológic', 'paraje inicial', 'parque', 'parque criollo', 'parroquia', 'pasaje', 'paseo', 'paso', 'plataforma', 'plaza', 'poblado', 'poblado prehispánico', 'portal de acceso', 'portal del cementerio', 'portal del cementerio municipal', 'posta', 'potrero', 'predio', 'predio del monumento conmemorativo', 'primera conscripción argentina', 'primera vivienda', 'primitivo templo', 'pueblo', 'pueblo histórico', 'puente', 'puente colgante', 'puente ferroviario', 'puerto', 'punta', 'quebrada', 'quinta', 'rectorado', 'reducción jesuítica', 'reserva geológica', 'reserva natural y cultural', 'residencia presidencial', 'restos', 'saladero', 'sauce', 'sector', 'sector del casco urbano y estación del ferrocarri', 'sector del trazado urbano', 'segunda batalla', 'senado', 'sepulcro', 'sinagoga', 'sinagoga y centro unión', 'sitio', 'sociedad de educación y biblioteca popular', 'solar', 'solar de la catedral', 'solar y casa', 'tambería', 'teatro', 'teatro municipal', 'templo', 'torre', 'torre de la capilla del fuerte', 'traza urbana', 'trofeos', 'usina', 'viaducto', 'vivac', 'vivienda familiar', 'yacimiento arqueológico', 'yacimiento de arte rupestre', 'yacimientos arqueológicos', 'zona de preservación', 'área', 'área adyacente al acceso', 'áreas del pueblo'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2346,9 +3161,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['municipalidad', 'edificio gubernamental', 'gobierno', 'intendencia', 'argentina', 'administración provincial', 'campamento', 'campamento de la dirección de vialidad', 'campamento de vialidad nacional', 'casa de gobierno', 'centro comunal', 'centro cívico municipal', 'centro de participación vecinal', 'centro integrador comunitario', 'centro vecinal', 'comisión municipal', 'comuna', 'concejo deliberante', 'congreso', 'consejo comunitario', 'consejo provincial de vialidad', 'cuerpo médico forense y morgue judicial', 'cámara de diputados', 'cámara de representantes', 'cámara federal de apelaciones y juzgado federal', 'delegación', 'delegación comunal', 'delegación municipal', 'delegación vecinal', 'dirección', 'dirección de vialidad', 'dirección general del registro civil', 'dirección nacional de vialidad', 'dirección provincial', 'dirección provincial de hidráulica', 'dirección provincial de recursos hídricos', 'dirección provincial de vialidad', 'ente provincial', 'honorable concejo deliberante', 'honorable cámara de diputados', 'honorable cámara de senadores', 'instituto nacional', 'juzgado de faltas', 'juzgado de paz', 'juzgado federal', 'juzgado federal de primera instancia', 'legislatura', 'ministerio', 'oficina comunal', 'palacio de gobierno', 'palacio legislativo', 'registro civil', 'sede comunal', 'subsede comunal', 'superior tribunal de justicia', 'superior unidad bromatológica provincial', 'suprema corte de justicia', 'supremo tribunal de justicia', 'tribunal superior de justicia', 'tribunales penales'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'gfc', label: 'Gfc', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2363,8 +3184,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['correo', 'correo argentino', 'oficina postal', 'argentina', 'edificio de comunicaciones', 'unidad postal'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'tc1', label: 'Tc1', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2379,8 +3207,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['área urbana', 'ciudad', 'planta urbana', 'ejido urbano', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2395,9 +3229,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['edificación', 'construcción', 'puesto', 'argentina', 'cabaña', 'estancia'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2412,7 +3251,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['tapera', 'ruinas', 'construcción abandonada', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2427,7 +3270,12 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['tanque de agua', 'depósito de agua', 'argentina', 'tanque de agua elevado'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2442,7 +3290,12 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['tanque de combustible', 'depósito de combustible', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2460,9 +3313,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['instalación militar', 'cuartel', 'base militar', 'ejército', 'argentina', 'agrupación de comunicaciones', 'apostadero naval', 'armada argentina', 'base aeronaval', 'base aérea militar', 'base de apoyo logístico', 'base naval', 'batallón de comunicaciones', 'batallón de ingenieros anfibio', 'batallón de ingenieros blindado', 'batallón de ingenieros de montaña', 'batallón de ingenieros mecanizado', 'brigada aerotransportada', 'brigada aérea', 'brigada blindada', 'brigada de montaña', 'brigada de monte', 'brigada mecanizada', 'comando', 'compañía de cazadores de alta montaña', 'compañía de cazadores de montaña', 'compañía de cazadores de monte', 'compañía de comandos', 'compañía de comunicaciones de montaña', 'compañía de comunicaciones de monte', 'compañía de comunicaciones mecanizada', 'compañía de ingenieros de monte', 'compañía de inteligencia', 'compañía de munición', 'destacamento de vigilancia', 'dirección de vigilancia y control del aeroespacio', 'ejército argentino', 'escuadrón de comunicaciones blindado', 'escuadrón de exploración de caballería blindado', 'escuadrón de ingenieros blindado', 'escuela militar de montaña', 'estación aeronaval', 'estación de radar', 'grupo de artillería', 'grupo de artillería antiaéreo', 'grupo de artillería blindado', 'grupo de artillería de montaña', 'grupo de artillería de monte', 'grupo de artillería paracaidista', 'regimiento de caballería de exploración', 'regimiento de caballería de exploración de montaña', 'regimiento de caballería de tanques', 'regimiento de infantería', 'regimiento de infantería de montaña', 'regimiento de infantería de monte', 'regimiento de infantería mecanizado', 'regimiento de infantería paracaidista', 'sección de arsenales', 'sección de aviación de ejército', 'sección de aviación de ejército de montaña', 'sección de inteligencia', 'sección de inteligencia de montaña'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2477,9 +3335,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['bomberos', 'cuartel de bomberos', 'emergencias', 'argentina', 'agrupación bomberos', 'asociación bomberos voluntarios', 'asociación civil de bomberos voluntarios', 'bomberos voluntarios', 'bomberos zapadores', 'brigada provincial de incendios forestales', 'cuartel de bomberos voluntarios', 'cuerpo de bomberos', 'cuerpo de bomberos voluntarios', 'cuerpo de bomberos zapadores', 'departamento de bomberos', 'dirección bomberos de la policía', 'dirección de bomberos', 'división', 'división bomberos de la policía', 'división bomberos zapadores', 'división bomberos zapadores de la policía de entre ríos', 'primer destacamento', 'sociedad de bomberos voluntarios', 'subdelegación bomberos', 'unidad de bomberos', 'unidad especial de bomberos'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2494,9 +3357,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['policía', 'seguridad', 'comisaría', 'argentina', 'administración de parques nacionales', 'centro de atención y orientación en violencia familiar', 'comando de prevención rural', 'comisaría comunal', 'comisaría vecinal', 'departamental de seguridad vial', 'destacamento', 'destacamento cuerpo de infantería', 'destacamento de seguridad', 'destacamento policial', 'dirección general de gendarmería nacional', 'división comando radioeléctrico', 'edificio de seguridad', 'escuadrón de seguridad vial', 'escuadrón especial', 'escuadrón táctico motorizado', 'gendarmería nacional', 'guardaparque', 'jefatura de policía', 'patrulla motorizada', 'policía de seguridad vial', 'policía federal argentina', 'prefectura naval argentina', 'puesto caminero', 'puesto de vigilancia', 'seccional', 'subcomisaría', 'subjefatura de policía', 'unidad regional'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'tes', label: 'Tes', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2511,9 +3380,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cárcel', 'penitenciaría', 'centro de detención', 'argentina', 'alcaidía departamental', 'alcaldía', 'alcaldía deparamental', 'alcaldía departamental', 'alcaldía general', 'alcaldía penitenciaria', 'alcaldía policial', 'complejo carcelario', 'complejo federal', 'complejo penitenciario', 'complejo penitenciario federal', 'complejo penitenciario provincial', 'establecimiento de ejecución penal', 'establecimiento penitenciario', 'institución penitenciaria', 'instituto de menores', 'instituto penitenciario provincial', 'servicio penitenciario provincial', 'unidad', 'unidad carcelaria', 'unidad de alojamiento de internos en tránsito', 'unidad de detención', 'unidad penal', 'unidad penitenciaria', 'unidad penitenciaria provincial'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2531,9 +3405,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['cantera', 'mina', 'minería', 'extracción mineral', 'argentina', 'azufrera', 'calera', 'campamento', 'compañía minera', 'complejo minero', 'minera', 'ripiera', 'salar', 'salinas', 'salinera'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'nam', label: 'Nombre corto' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nombre corto', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'ppo', label: 'Ppo', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2548,8 +3428,16 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['cantera', 'mina', 'minería', 'argentina', 'arenera', 'cementera', 'ripio', 'rpiera', 'yacimiento'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'ppo', label: 'Ppo', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2564,9 +3452,16 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['pozo petrolífero', 'pozo de gas', 'hidrocarburos', 'petróleo', 'gas', 'argentina', 'pozo de hidrocarburos'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'ppo', label: 'Ppo', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2581,8 +3476,16 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['yacimiento', 'yacimiento petrolífero', 'hidrocarburos', 'argentina', 'yacimiento de hidrocarburos'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'ppo', label: 'Ppo', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2597,7 +3500,12 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['zona minera', 'minería', 'extracción', 'argentina', 'zona de extracción minera'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2615,8 +3523,16 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['fábrica', 'industria', 'planta industrial', 'argentina', 'alimentos', 'aserradero', 'avícola', 'bodega', 'celulosa', 'cerámica', 'compañía', 'compañía papelera', 'construcciones metálicas', 'cooperativa agrícola limitada', 'cooperativa agrícola mixta', 'cooperativa de tabacaleros', 'cooperativa tabacalera', 'cristalería', 'destilería', 'elaboradora de té', 'electroquímica', 'embotelladora', 'establecimiento yerbatero', 'estación de bombeo', 'frigorífico', 'fundición', 'fábrica de baterías', 'fábrica de helados', 'fábrica de muebles', 'fábrica de sillas', 'fábrica militar', 'ganadera', 'hierros', 'hormigonera', 'industrias', 'ingenio', 'laboratorios', 'lácteos', 'matadero municipal', 'metalúrgica', 'molino', 'molinos', 'papelera', 'pesquera', 'petroquímica', 'planta', 'planta compresora', 'planta de acopio', 'planta de almacenaje y bombeo', 'planta de fundición', 'planta de gas', 'planta de silos', 'planta de tratamiento de minerales', 'planta elaboradora de té', 'planta impresora', 'planta procesadora de alimentos', 'procesadora', 'quesería', 'química', 'radiadores', 'refinería', 'revestimientos', 'ripiera', 'secadero de té', 'secadero de yerba mate', 'secadero de yerba mate y molino', 'talleres gráficos'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'isic', label: 'Isic', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2631,8 +3547,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['parque industrial', 'zona industrial', 'argentina', 'batería', 'bodega', 'cabecera de bombeo', 'centro industrial', 'centro industrial mixto', 'centro logístico', 'colector de petróleo', 'comercial y de servicios', 'complejo agroindustrial', 'complejo industrial', 'establecimiento minero', 'ingenio', 'instalación de medición de gas', 'instalación de medición de petróleo', 'parque agroindustrial', 'parque biotecnológico y de energías renovables', 'parque de actividades económicas', 'parque de negocios industriales', 'parque de servicios e industrias', 'parque empresarial', 'parque empresarial industrial', 'parque industrial con actividades de comercio y servicios vinculados a la producción industrial', 'parque industrial municipal', 'parque industrial oficial de desarrollo', 'parque industrial oficial de desarrollo y descongestión', 'parque industrial oficial de promoción', 'parque industrial pesquero', 'parque industrial provincial', 'parque industrial sustentable', 'parque industrial tecnológico', 'parque industrial y de servicios', 'parque industrial y logístico', 'parque industrial y minero', 'parque industrial y tecnológico', 'parque logístico', 'parque petroquímico industrial', 'parque pymes', 'parque tecno-industrial', 'parque tecnológico', 'parque tecnológico industrial y playa de transferencia de cargas', 'planta', 'planta colectora de gas', 'planta compresora', 'planta compresora de gas', 'planta de almacenaje', 'planta de almacenaje y bombeo', 'planta de bombeo', 'planta de captación de agua', 'planta de gas', 'planta de inyección', 'planta de inyección de agua', 'planta de producción primaria', 'planta de producción temprana', 'planta de separación de gas licuado', 'planta de tratamiento de crudo', 'planta de tratamiento de gas', 'planta glp', 'planta inyección de agua dulce', 'planta reductora de gas', 'planta reguladora de gas', 'planta tratamiento de crudo', 'planta tratamiento de gas anticlinal', 'polo industrial privado', 'polo logístico', 'puente de medición de gas', 'sector industrial planificado', 'sector industrial planificado mixto', 'sector industrial planificado municipal', 'sector industrial planificado oficial', 'unidad de separadora primaria', 'unidad deshidratadora', 'unidad separadora primaria', 'zona agroindustrial', 'zona agroindustrial y de servicios', 'zona comercial e industrial', 'zona de actividades complementarias', 'zona de actividades económicas', 'zona de industrias conexas al aluminio', 'zona franca', 'zona industrial planificada', 'área de fabricación y procesamiento', 'área empresarial municipal', 'área industrial', 'área industrial mixta', 'área industrial mixta de desarrollo', 'área industrial oficial', 'área industrial oficial de desarrollo', 'área industrial oficial de desarrollo y descongestión', 'área industrial oficial de promoción'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2647,8 +3570,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['planta potabilizadora', 'agua potable', 'argentina', 'cooperativa de agua potable', 'establecimiento potabilizador', 'estación de bombeo', 'planta de tratamiento de agua', 'planta de tratamiento de agua subterránea', 'planta de ósmosis', 'planta desalinizadora', 'planta desarenadora', 'planta potabilizadora de agua'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2663,8 +3592,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['planta potabilizadora', 'agua potable', 'argentina', 'establecimiento potabilizador', 'estación de bombeo', 'planta de potabilizadora', 'planta de tratamiento de agua subterránea', 'planta de ósmosis', 'planta desalinizadora', 'planta desarenadora', 'planta potabilizadora de agua'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2679,8 +3615,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['planta depuradora', 'tratamiento de efluentes', 'cloacas', 'argentina', 'planta de tratamiento', 'planta de tratamiento cloacal', 'planta de tratamiento de aguas residuales', 'planta de tratamiento de efluentes cloacales', 'planta de tratamiento de efluentes cloacales cloacales', 'planta de tratamiento de liquidos cloacales', 'planta de tratamiento de líquidos cloacales', 'planta depuradora de efluentes cloacales', 'planta depuradora de líquidos cloacales', 'planta depuradora de líquidos industriale', 'planta depuradora de líquidos industriales', 'puente de medición de gas'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2695,8 +3637,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['planta depuradora', 'tratamiento de efluentes', 'cloacas', 'argentina', 'establecimiento depurador', 'planta de líquidos cloacales', 'planta de tratamiento', 'planta de tratamiento cloacal', 'planta de tratamiento de efluentes cloacales', 'planta de tratamiento de líquidos cloacales', 'planta de tratamientos de líquidos cloacales', 'planta depuradora de efluentes cloacales', 'planta depuradora de líquidos cloacales', 'planta depuradora de líquidos industriales'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2711,8 +3660,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['planta de residuos', 'basura', 'reciclaje', 'argentina', 'basural', 'basurero municipal', 'celda sanitaria', 'centro ambiental', 'centro de acopio y redistribución de residuos', 'centro de reciclado', 'centro de reciclaje', 'centro de transferencia de residuos sólidos', 'centro de tratamiento de resduos reciclables', 'centro de tratamiento y disposición final', 'centro de tratamiento y disposición final de rsu', 'centro verde', 'complejo ambiental', 'ecoparque', 'ecoplanta', 'estación de transferencia', 'parque ambiental', 'parque de tecnologías ambientales', 'planta', 'planta de compostaje', 'planta de gestión integral de hidrocarburos usado', 'planta de gestión integral de rsu', 'planta de reciclado', 'planta de reciclado municipal', 'planta de reciclaje de neumáticos', 'planta de reciclaje municipal', 'planta de recuperación y reparación de residuos', 'planta de recupero de residuos plásticos', 'planta de residuos sólidos urbanos', 'planta de separación de residuos', 'planta de separación de residuos sólidos', 'planta de separación y gestión de residuos', 'planta de separación y recuperación de materiale', 'planta de separación y transferencia de residuos', 'planta de transferencia de residuos', 'planta de transferencia de rsu', 'planta de tratamiento', 'planta de tratamiento de reciclaje', 'planta de tratamiento de residuos', 'planta de tratamiento de residuos de construcción', 'planta de tratamiento de residuos sólidos', 'planta de tratamiento de residuos sólidos urbanos', 'planta de tratamiento mecánico biológico', 'planta de tratamientos de residuos', 'planta operadora de residuos peligrosos', 'planta procesadora de residuos sólidos urbanos', 'planta provincial de tratamiento de residuos', 'planta recicladora', 'planta regional noroeste', 'vertedero municipal'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2727,8 +3681,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['planta de residuos', 'basura', 'reciclaje', 'argentina', 'centro ambiental', 'centro de acopio y redistribución de residuos ino', 'centro de reciclado', 'centro de reciclaje', 'centro de transferencia de residuos sólidos', 'centro de tratamiento de resduos reciclables', 'centro de tratamiento y disposición final', 'centro de tratamiento y disposición final de rsu', 'centro verde', 'complejo ambiental', 'ecoparque', 'ecoplanta', 'estación de transferencia', 'parque ambiental', 'planta', 'planta de compostaje', 'planta de gestión integral de rsu', 'planta de reciclado', 'planta de reciclado municipal', 'planta de reciclaje de neumáticos', 'planta de reciclaje municipal', 'planta de recuperación y reparación de residuos', 'planta de recupero de residuos plásticos', 'planta de residuos sólidos urbanos', 'planta de separación de residuos', 'planta de separación de residuos sólidos rec', 'planta de separación y gestión de residuos', 'planta de separación y recuperación de materiale', 'planta de separación y transferencia de residuos', 'planta de transferencia de residuos', 'planta de transferencia de residuos sólidos urban', 'planta de tratamiento', 'planta de tratamiento de reciclaje', 'planta de tratamiento de residuos', 'planta de tratamiento de residuos sólidos', 'planta de tratamiento de residuos sólidos urbanos', 'planta de tratamiento mecánico biológico', 'planta de tratamiento y transferencia de residuos', 'planta de tratamientos de residuos', 'planta operadora de residuos peligrosos', 'planta procesadora de residuos sólidos urbanos', 'planta provincial  de tratamiento de residuos'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2743,8 +3703,13 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['relleno sanitario', 'basural', 'residuos', 'argentina', 'complejo ambiental', 'relleno sanitariorelleno sanitario'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2759,8 +3724,14 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['basural', 'vertedero', 'residuos', 'argentina', 'basural municipal', 'basurero', 'basurero municipal', 'vertedero municipal', 'vertedero provincial', 'vertedero regional'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'fdc', label: 'Fdc', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -2775,8 +3746,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['establecimiento agropecuario', 'campo', 'estancia', 'chacra', 'argentina', 'ingenio'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2791,9 +3769,15 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['invernadero', 'vivero', 'huerta', 'argentina', 'quinta', 'vivero forestal', 'vivero municipal', 'vivero orgánico', 'vivero provincial', 'viveros'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'gna', label: 'Tipo', classifiable: true },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2808,8 +3792,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['invernadero', 'vivero', 'huerta', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2824,7 +3815,12 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['molino de viento', 'molino', 'bomba de agua', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fun', label: 'Fun', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2839,7 +3835,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['cámara de válvulas', 'infraestructura hidráulica', 'argentina', 'camara de valvulas'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2854,8 +3854,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['planta de bombeo', 'infraestructura hidráulica', 'argentina', 'cabecera de bombeo', 'estación de bombeo', 'planta de bombeo de agua'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'gna', label: 'Gna', visible: true },
+      { campo: 'nam', label: 'Nam', visible: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2870,7 +3876,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['galpón', 'tinglado', 'depósito', 'argentina'],
     attributes: [
-      { campo: 'objeto', label: 'Objeto', classifiable: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'entidad', label: 'Entidad', visible: false },
+      { campo: 'objeto', label: 'Objeto', visible: true, classifiable: true },
+      { campo: 'sag', label: 'Sag', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2888,9 +3898,23 @@ export const IGN_AR = {
     visible:      true,
     keywords:     ['base antártica', 'antártida', 'base', 'antártico', 'argentina'],
     attributes: [
-      { campo: 'fna', label: 'Nombre' },
-      { campo: 'tipo_asent', label: 'Tipo', classifiable: true },
-      { campo: 'nom_depto', label: 'Departamento' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'cod_pcia', label: 'Cod pcia', visible: false },
+      { campo: 'nom_pcia', label: 'Nom pcia', visible: true },
+      { campo: 'cod_depto', label: 'Cod depto', visible: false },
+      { campo: 'nom_depto', label: 'Departamento', visible: true },
+      { campo: 'cod_ase', label: 'Cod ase', visible: false },
+      { campo: 'fna', label: 'Nombre', visible: true },
+      { campo: 'tipo_asent', label: 'Tipo', visible: true, classifiable: true },
+      { campo: 'cod_aglo', label: 'Cod aglo', visible: false },
+      { campo: 'nom_aglo', label: 'Nom aglo', visible: true },
+      { campo: 'cod_agl', label: 'Cod agl', visible: false },
+      { campo: 'nom_agl', label: 'Nom agl', visible: true },
+      { campo: 'lat_gd', label: 'Lat gd', visible: false },
+      { campo: 'long_gd', label: 'Long gd', visible: false },
+      { campo: 'lat_gs', label: 'Lat gs', visible: false },
+      { campo: 'long_gs', label: 'Long gs', visible: false },
+      { campo: 'fdc', label: 'Fdc', visible: false },
     ]
   },
 
@@ -2908,10 +3932,17 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['carta topográfica', 'hoja topográfica', '1:50000', 'cartografía', 'argentina'],
     attributes: [
-      { campo: 'nombre', label: 'Nombre' },
-      { campo: 'carac', label: 'Nomenclatura' },
-      { campo: 'num_faja', label: 'Faja', numeric: true },
-      { campo: 'fecha_edic', label: 'Fecha edición' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'carac', label: 'Nomenclatura', visible: true },
+      { campo: 'nombre', label: 'Nombre', visible: true },
+      { campo: 'num_faja', label: 'Faja', visible: true, numeric: true },
+      { campo: 'fecha_edic', label: 'Fecha edición', visible: true },
+      { campo: 'meridiano_', label: 'Meridiano ', visible: false },
+      { campo: 'elipsoide', label: 'Elipsoide', visible: false },
+      { campo: 'fecha_lev_', label: 'Fecha lev ', visible: false },
+      { campo: 'tipo_lev_c', label: 'Tipo lev c', visible: false },
+      { campo: 'marco_de_r', label: 'Marco de r', visible: false },
+      { campo: 'sist_de_pr', label: 'Sist de pr', visible: false },
     ]
   },
 
@@ -2926,10 +3957,17 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['carta topográfica', 'hoja topográfica', '1:100000', 'cartografía', 'argentina'],
     attributes: [
-      { campo: 'nombre', label: 'Nombre' },
-      { campo: 'carac', label: 'Nomenclatura' },
-      { campo: 'num_faja', label: 'Faja', numeric: true },
-      { campo: 'fecha_edic', label: 'Fecha edición' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'carac', label: 'Nomenclatura', visible: true },
+      { campo: 'nombre', label: 'Nombre', visible: true },
+      { campo: 'num_faja', label: 'Faja', visible: true, numeric: true },
+      { campo: 'fecha_edic', label: 'Fecha edición', visible: true },
+      { campo: 'meridiano_', label: 'Meridiano ', visible: false },
+      { campo: 'elipsoide', label: 'Elipsoide', visible: false },
+      { campo: 'fecha_lev_', label: 'Fecha lev ', visible: false },
+      { campo: 'tipo_lev_c', label: 'Tipo lev c', visible: false },
+      { campo: 'marco_de_r', label: 'Marco de r', visible: false },
+      { campo: 'sist_de_pr', label: 'Sist de pr', visible: false },
     ]
   },
 
@@ -2944,10 +3982,17 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['carta topográfica', 'hoja topográfica', '1:250000', 'cartografía', 'argentina'],
     attributes: [
-      { campo: 'nombre', label: 'Nombre' },
-      { campo: 'carac', label: 'Nomenclatura' },
-      { campo: 'num_faja', label: 'Faja', numeric: true },
-      { campo: 'fecha_edic', label: 'Fecha edición' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'carac', label: 'Nomenclatura', visible: true },
+      { campo: 'nombre', label: 'Nombre', visible: true },
+      { campo: 'num_faja', label: 'Faja', visible: true, numeric: true },
+      { campo: 'fecha_edic', label: 'Fecha edición', visible: true },
+      { campo: 'meridiano_', label: 'Meridiano ', visible: false },
+      { campo: 'elipsoide', label: 'Elipsoide', visible: false },
+      { campo: 'fecha_lev_', label: 'Fecha lev ', visible: false },
+      { campo: 'tipo_lev_c', label: 'Tipo lev c', visible: false },
+      { campo: 'marco_de_r', label: 'Marco de r', visible: false },
+      { campo: 'sist_de_pr', label: 'Sist de pr', visible: false },
     ]
   },
 
@@ -2962,10 +4007,17 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['carta topográfica', 'hoja topográfica', '1:500000', 'cartografía', 'argentina'],
     attributes: [
-      { campo: 'nombre', label: 'Nombre' },
-      { campo: 'carac', label: 'Nomenclatura' },
-      { campo: 'num_faja', label: 'Faja', numeric: true },
-      { campo: 'fecha_edic', label: 'Fecha edición' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'carac', label: 'Nomenclatura', visible: true },
+      { campo: 'nombre', label: 'Nombre', visible: true },
+      { campo: 'num_faja', label: 'Faja', visible: true, numeric: true },
+      { campo: 'fecha_edic', label: 'Fecha edición', visible: true },
+      { campo: 'meridiano_', label: 'Meridiano ', visible: false },
+      { campo: 'elipsoide', label: 'Elipsoide', visible: false },
+      { campo: 'fecha_lev_', label: 'Fecha lev ', visible: false },
+      { campo: 'tipo_lev_c', label: 'Tipo lev c', visible: false },
+      { campo: 'marco_de_r', label: 'Marco de r', visible: false },
+      { campo: 'sist_de_pr', label: 'Sist de pr', visible: false },
     ]
   },
 
@@ -2980,9 +4032,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['RAMSAC', 'red geodésica', 'GPS', 'georreferenciación', 'argentina'],
     attributes: [
-      { campo: 'codigo_estacion', label: 'Código' },
-      { campo: 'tipo_estacion', label: 'Tipo' },
-      { campo: 'estado', label: 'Estado' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'codigo_estacion', label: 'Código', visible: true },
+      { campo: 'tipo_estacion', label: 'Tipo', visible: true },
+      { campo: 'estado', label: 'Estado', visible: true },
+      { campo: 'link', label: 'Link', visible: false },
     ]
   },
 
@@ -2997,8 +4051,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['RAMSAC', 'NTRIP', 'red geodésica', 'GPS', 'argentina'],
     attributes: [
-      { campo: 'fun', label: 'Función' },
-      { campo: 'cer', label: 'Código' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'fun', label: 'Función', visible: true },
+      { campo: 'cer', label: 'Código', visible: true },
+      { campo: 'ai1', label: 'Ai1', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -3013,9 +4070,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['nivelación', 'topografía', 'red de nivelación', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
-      { campo: 'cota', label: 'Cota', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: true, numeric: true },
+      { campo: 'marca', label: 'Marca', visible: false },
+      { campo: 'estado', label: 'Estado', visible: false },
+      { campo: 'ultima_visita', label: 'Ultima visita', visible: false },
     ]
   },
 
@@ -3030,9 +4093,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['nivelación', 'alta precisión', 'geodesia', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
-      { campo: 'cota', label: 'Cota', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: true, numeric: true },
+      { campo: 'marca', label: 'Marca', visible: false },
+      { campo: 'estado', label: 'Estado', visible: false },
+      { campo: 'ultima_visita', label: 'Ultima visita', visible: false },
     ]
   },
 
@@ -3047,9 +4116,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['nivelación', 'precisión', 'geodesia', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
-      { campo: 'cota', label: 'Cota', numeric: true },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: true, numeric: true },
+      { campo: 'marca', label: 'Marca', visible: false },
+      { campo: 'estado', label: 'Estado', visible: false },
+      { campo: 'ultima_visita', label: 'Ultima visita', visible: false },
     ]
   },
 
@@ -3064,8 +4139,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['POSGAR', 'red geodésica', 'datum', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'altura_elip', label: 'Altura elip', visible: false },
+      { campo: 'estado', label: 'Estado', visible: false },
+      { campo: 'ultima_visita', label: 'Ultima visita', visible: false },
     ]
   },
 
@@ -3080,8 +4161,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['PASMA', 'red geodésica', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'altura_elip', label: 'Altura elip', visible: false },
+      { campo: 'estado', label: 'Estado', visible: false },
+      { campo: 'ultima_visita', label: 'Ultima visita', visible: false },
     ]
   },
 
@@ -3096,8 +4183,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['POSGAR', 'red geodésica', 'datum', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'altura_elip', label: 'Altura elip', visible: false },
+      { campo: 'estado', label: 'Estado', visible: false },
+      { campo: 'ultima_visita', label: 'Ultima visita', visible: false },
     ]
   },
 
@@ -3112,8 +4205,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['red provincial', 'geodesia', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'altura_elip', label: 'Altura elip', visible: false },
+      { campo: 'estado', label: 'Estado', visible: false },
+      { campo: 'ultima_visita', label: 'Ultima visita', visible: false },
     ]
   },
 
@@ -3128,8 +4227,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['gravimetría', 'BACARA', 'red gravimétrica', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: false },
+      { campo: 'gravedad_oficial', label: 'Gravedad oficial', visible: false },
+      { campo: 'tipo_gravedad_oficial', label: 'Tipo gravedad oficial', visible: false },
+      { campo: 'gravedad_nueva', label: 'Gravedad nueva', visible: false },
     ]
   },
 
@@ -3144,8 +4250,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['gravimetría', 'IGSN71', 'red gravimétrica', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: false },
+      { campo: 'gravedad_oficial', label: 'Gravedad oficial', visible: false },
+      { campo: 'tipo_gravedad_oficial', label: 'Tipo gravedad oficial', visible: false },
+      { campo: 'gravedad_nueva', label: 'Gravedad nueva', visible: false },
     ]
   },
 
@@ -3160,8 +4273,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['gravimetría', 'RAGA', 'red gravimétrica', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: false },
+      { campo: 'gravedad_oficial', label: 'Gravedad oficial', visible: false },
+      { campo: 'tipo_gravedad_oficial', label: 'Tipo gravedad oficial', visible: false },
+      { campo: 'gravedad_nueva', label: 'Gravedad nueva', visible: false },
     ]
   },
 
@@ -3176,8 +4296,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['gravimetría', 'RPO', 'red gravimétrica', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: false },
+      { campo: 'gravedad_oficial', label: 'Gravedad oficial', visible: false },
+      { campo: 'tipo_gravedad_oficial', label: 'Tipo gravedad oficial', visible: false },
+      { campo: 'gravedad_nueva', label: 'Gravedad nueva', visible: false },
     ]
   },
 
@@ -3192,8 +4319,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['gravimetría', 'RSO', 'red gravimétrica', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: false },
+      { campo: 'gravedad_oficial', label: 'Gravedad oficial', visible: false },
+      { campo: 'tipo_gravedad_oficial', label: 'Tipo gravedad oficial', visible: false },
+      { campo: 'gravedad_nueva', label: 'Gravedad nueva', visible: false },
     ]
   },
 
@@ -3208,8 +4342,15 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['gravimetría', 'RTO', 'red gravimétrica', 'argentina'],
     attributes: [
-      { campo: 'nomenclatura', label: 'Nomenclatura' },
-      { campo: 'red', label: 'Red' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nomenclatura', label: 'Nomenclatura', visible: true },
+      { campo: 'red', label: 'Red', visible: true },
+      { campo: 'latitud', label: 'Latitud', visible: false },
+      { campo: 'longitud', label: 'Longitud', visible: false },
+      { campo: 'cota', label: 'Cota', visible: false },
+      { campo: 'gravedad_oficial', label: 'Gravedad oficial', visible: false },
+      { campo: 'tipo_gravedad_oficial', label: 'Tipo gravedad oficial', visible: false },
+      { campo: 'gravedad_nueva', label: 'Gravedad nueva', visible: false },
     ]
   },
 
@@ -3224,9 +4365,11 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['modelo de elevación', 'MDT', 'MDE', 'topografía', 'argentina'],
     attributes: [
-      { campo: 'nombre', label: 'Nombre' },
-      { campo: 'proyecto', label: 'Proyecto' },
-      { campo: 'archivo', label: 'Archivo' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'nombre', label: 'Nombre', visible: true },
+      { campo: 'proyecto', label: 'Proyecto', visible: true },
+      { campo: 'archivo', label: 'Archivo', visible: true },
+      { campo: 'link', label: 'Link', visible: false },
     ]
   },
 
@@ -3241,10 +4384,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['vuelo fotogramétrico', 'ortofoto', 'fotografía aérea', 'argentina'],
     attributes: [
-      { campo: 'num_proyec', label: 'N° Proyecto' },
-      { campo: 'nombre_ign', label: 'Nombre' },
-      { campo: 'sector', label: 'Sector' },
-      { campo: 'fecha_vuel', label: 'Fecha vuelo' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'num_proyec', label: 'N° Proyecto', visible: true },
+      { campo: 'nombre_ign', label: 'Nombre', visible: true },
+      { campo: 'sector', label: 'Sector', visible: true },
+      { campo: 'fecha_vuel', label: 'Fecha vuelo', visible: true },
+      { campo: 'cant_fotos', label: 'Cant fotos', visible: false },
+      { campo: 'pixel_cm', label: 'Pixel cm', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
@@ -3259,10 +4406,14 @@ export const IGN_AR = {
     visible:      false,
     keywords:     ['vuelo dron', 'VANT', 'UAV', 'fotogrametría', 'argentina'],
     attributes: [
-      { campo: 'num_proyec', label: 'N° Proyecto' },
-      { campo: 'nombre_ign', label: 'Nombre' },
-      { campo: 'sector', label: 'Sector' },
-      { campo: 'fecha_vuel', label: 'Fecha vuelo' },
+      { campo: 'gid', label: 'Gid', visible: false },
+      { campo: 'num_proyec', label: 'N° Proyecto', visible: true },
+      { campo: 'nombre_ign', label: 'Nombre', visible: true },
+      { campo: 'sector', label: 'Sector', visible: true },
+      { campo: 'fecha_vuel', label: 'Fecha vuelo', visible: true },
+      { campo: 'cant_fotos', label: 'Cant fotos', visible: false },
+      { campo: 'pixel_cm', label: 'Pixel cm', visible: false },
+      { campo: 'sag', label: 'Sag', visible: false },
     ]
   },
 
