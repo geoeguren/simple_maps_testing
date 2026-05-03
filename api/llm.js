@@ -55,7 +55,10 @@ function capasAContexto(capas) {
       .filter(a => !excluir.includes(a.campo))
       .map(a => `    ${a.campo}: ${a.label}`)
       .join('\n');
-    return `  ${c.key} — ${c.titulo} (${c.geomType})${attrs ? '\n' + attrs : ''}`;
+    const countInfo = c.featureCount !== undefined
+      ? ` [${c.featureCount} features]`
+      : '';
+    return `  ${c.key} — ${c.titulo} (${c.geomType})${countInfo}${attrs ? '\n' + attrs : ''}`;
   }).join('\n\n');
 }
 
@@ -193,6 +196,10 @@ NUNCA uses filtro CQL por nombre geográfico en capas que no tienen ese campo.
 Algunas capas tienen clipStrategy: "none" — no soportan recorte espacial por volumen de datos.
 Si el usuario pide recortar una de esas capas, explicáselo antes de cargarla y ofrecé la capa completa.
 Ejemplo: "Los ríos de Uruguay tienen demasiados datos para recortar por departamento. ¿Querés verlos completos?"
+
+Las capas relevantes muestran [N features] junto a su nombre. Si el usuario pide recortar una capa
+con muchos features (más de 2000), avisale antes de cargarla que puede ser lenta o no recortarse.
+Ejemplo: "Esta capa tiene 6035 features — puedo mostrarla completa pero no recortarla por zona."
 
 Cuando el usuario pida cambiar el estilo de una capa existente en el mapa, respondé con texto + bloque style:
 \`\`\`style
