@@ -72,6 +72,15 @@ window.CLIP = (() => {
 
     // ── Recorte espacial ─────────────────────────────────────
     if (layerDef.clipStrategy === 'spatial' && clipArea) {
+      // Verificar umbral de features antes de intentar el recorte
+      const threshold = window.CLIP_THRESHOLDS?.spatial ?? 2000;
+      if (layerDef.featureCount !== undefined && layerDef.featureCount > threshold) {
+        window.TOAST?.warning(`"${layerDef.titulo}" tiene demasiados datos para recortar (${layerDef.featureCount} features). Se muestra completa.`);
+        return window.WFS.fetch(layerDef.typename, {
+          ...wfsOpts,
+          cqlFilter: cql || undefined,
+        });
+      }
       return ejecutarRecorteSpatial(layerDef, wfsOpts, cql, clipArea);
     }
 
