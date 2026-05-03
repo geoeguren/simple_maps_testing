@@ -28,7 +28,7 @@ window.INTENT = (() => {
   const MIN_SCORE = 6;
 
   // Si el segundo mejor score es >= este porcentaje del mejor, hay empate → LLM
-  const EMPATE_RATIO = 0.75;
+  const EMPATE_RATIO = 0.85;
 
   // Stopwords que no aportan al matching
   const STOPWORDS = new Set([
