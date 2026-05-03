@@ -35,10 +35,42 @@ window.CLIP_THRESHOLDS = {
 
 window.PROVINCIAS_MAP = AR_GEO_MAPS.provincias;
 
+/**
+ * GEO_MAPS — mapas de normalización de unidades administrativas por país.
+ *
+ * Estructura de cada entrada:
+ *   [tipo]: {
+ *     valores:  { 'nombre normalizado': 'Valor Exacto', ... },
+ *     layerKey: clave en window.LAYERS de la capa que representa esta unidad,
+ *     tipo:     nombre del tipo geográfico ('provincia', 'departamento', etc.)
+ *   }
+ *
+ * intent.js itera dinámicamente sobre todos los países y tipos —
+ * al agregar un país nuevo acá, aparece automáticamente en intent.js.
+ */
 window.GEO_MAPS = {
-  ar: AR_GEO_MAPS,
-  uy: UY_GEO_MAPS,
-  // Futuro: cl: CL_GEO_MAPS,
+  ar: {
+    provincias: {
+      valores:  AR_GEO_MAPS.provincias,
+      layerKey: 'provincia_ar',
+      tipo:     'provincia',
+    },
+  },
+  uy: {
+    departamentos: {
+      valores:  UY_GEO_MAPS.departamentos,
+      layerKey: 'departamento_uy',
+      tipo:     'departamento',
+    },
+  },
+  // Futuro — al agregar Ecuador:
+  // ec: {
+  //   provincias: {
+  //     valores:  EC_GEO_MAPS.provincias,
+  //     layerKey: 'provincia_ec',
+  //     tipo:     'provincia',
+  //   },
+  // },
 };
 
 console.log(
