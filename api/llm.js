@@ -85,6 +85,18 @@ function buildCatalogo(todasLasCapas, sources) {
   }).join('\n\n');
 }
 
+/**
+ * Tabla dinámica de capas-máscara para clipArea.
+ * Se genera en runtime desde labelField de cada capa polygon.
+ * Al agregar países o capas nuevas, aparece automáticamente — sin tocar el prompt.
+ */
+function buildMascarasDisponibles(todasLasCapas) {
+  return Object.entries(todasLasCapas)
+    .filter(([, c]) => c.geomType === 'polygon' && c.labelField)
+    .map(([key, c]) => `  ${key}: field="${c.labelField}" — ${c.titulo}`)
+    .join('\n') || '  (ninguna disponible)';
+}
+
 function buildSystemPrompt(capasRelevantes, todasLasCapas, tone, activeMap, sources, userLang) {
   const toneInstructions = {
     default:    'Dialogá con el usuario, hacé preguntas cuando haya ambigüedad, tono cálido y natural.',
@@ -96,6 +108,7 @@ function buildSystemPrompt(capasRelevantes, todasLasCapas, tone, activeMap, sour
   const toneGuide = toneInstructions[tone] || toneInstructions.default;
 
   const catalogo = buildCatalogo(todasLasCapas, sources);
+  const mascaras  = buildMascarasDisponibles(todasLasCapas);
 
   const activeMapContext = activeMap
     ? `\nMAPA ACTIVO EN ESTE MOMENTO:\nTítulo: ${activeMap.titulo}\nCapas: ${activeMap.capas}\nCualquier pedido de cambio de estilo, nombre o eliminación de capa se refiere a ESTE mapa.\n`
@@ -151,6 +164,7 @@ REGLAS DE FILTROS CQL:
 - Sin filtro: ""
 - Texto: strToLowerCase(campo)='valor_sin_tildes_minusculas'
 - LIKE: strToLowerCase(campo) LIKE '%valor%'
+- Múltiples valores: strToLowerCase(campo) IN ('valor1','valor2','valor3')  ← usar IN, nunca OR
 - Combinado: strToLowerCase(pvecino)='chile' AND strToLowerCase(prov)='santa cruz'
 - Numéricos sin strToLowerCase
 - Si no corresponde a ninguna capa: [{"error":"No tengo datos para esa consulta"}]
@@ -164,20 +178,17 @@ Algunas capas tienen campos propios para filtrar por área — usá filtro CQL d
 Otras capas NO tienen esos campos — usá "clipArea" para recorte espacial:
   vial_nacional_ar, area_protegida_ar, puertos_ar, puentes_ar, y la mayoría de capas Uruguay.
 
-"clipArea" es un objeto con tres campos:
-  layerKey: clave de una capa del catálogo que sirva como máscara (provincia, departamento, municipio, área protegida, etc.)
-  field:    campo de nombre en esa capa (consultá los atributos del catálogo)
+"clipArea" tiene tres campos:
+  layerKey: clave de la capa-máscara (de la tabla de abajo)
+  field:    exactamente el field que figura en la tabla — NO inventes ni traduzcas
   value:    valor exacto tal como está en los datos (con tildes y mayúsculas correctas)
 
-Ejemplos de clipArea:
-  Rutas de Mendoza:            {"layerKey":"provincia_ar","field":"nam","value":"Mendoza"}
-  Puertos de Santa Cruz:       {"layerKey":"provincia_ar","field":"nam","value":"Santa Cruz"}
-  Rutas en Montevideo (UY):    {"layerKey":"departamento_uy","field":"nombre","value":"Montevideo"}
-  Ríos dentro del Parque Lanín:{"layerKey":"area_protegida_ar","field":"nam","value":"Lanín"}
-  Capas de un municipio:       {"layerKey":"municipio_ar","field":"nam","value":"General Pueyrredón"}
+CAPAS DISPONIBLES COMO MÁSCARA — usá siempre el field indicado acá:
+${mascaras}
 
 Cuando no se necesita recorte, omitir "clipArea" o enviar null.
-NUNCA inventes un filtro CQL por nombre geográfico en capas que no tienen ese campo.
+NUNCA inventes un field que no esté en la tabla de arriba.
+NUNCA uses filtro CQL por nombre geográfico en capas que no tienen ese campo.
 
 Cuando el usuario pida cambiar el estilo de una capa existente en el mapa, respondé con texto + bloque style:
 \`\`\`style
