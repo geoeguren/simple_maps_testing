@@ -55,6 +55,23 @@ window.CHAT = (() => {
     UI.setSendEnabled(false);
 
     try {
+      // ── Intent: resolver pedidos simples sin llamar al LLM ───
+      const instruccionDirecta = window.INTENT?.resolver(userText, history);
+      if (instruccionDirecta) {
+        UI.hideThinking();
+        const titulo = generarTitulo(userText);
+        const plan = {
+          titulo,
+          instrucciones: [instruccionDirecta],
+        };
+        UI.showMapReady(plan);
+        window.MAP_CONTROLS?.setMapVisible(true);
+        await window.APP.renderMap(plan);
+        history.push({ role: 'assistant', content: `[intent] ${titulo}`, time: new Date().toISOString() });
+        await saveToFirestore(userText, plan);
+        return;
+      }
+
       const activeLayers = window.MAP?.getActiveLayers?.() || {};
       const activeLayersSummary = Object.entries(activeLayers).map(([, v]) => 
         `${v.layerKey}: ${v.titulo} (${v.geomType})`
