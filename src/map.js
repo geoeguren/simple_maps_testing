@@ -739,15 +739,9 @@ window.MAP = (() => {
 
   // ── Campos ocultos por defecto en el popup ────────────────────
   // Campos siempre excluidos (técnicos/internos):
-  const POPUP_ALWAYS_EXCLUDE = new Set(['gid', 'fdc', 'sag', 'entidad', 'objeto', 'gna']);
-
-  // Campos prioritarios que siempre se muestran (nombre, entidad política, clasificables):
-  const POPUP_PRIORITY_FIELDS = new Set([
-    'fna', 'nam', 'nom_pfi',                            // nombre
-    'nom_pcia', 'nom_depto', 'prov', 'pvecino',         // entidad política / país
-    'tipo_asent', 'cruce_pfi', 'gna', 'tap', 'jap',     // clasificación
-    'typ', 'rst', 'rtn', 'tup'                          // tipo/estado (rutas, puentes)
-  ]);
+  // Campos que nunca se muestran en el popup (geometría, IDs internos, tipos WFS).
+  // Nota: 'objeto' y 'gna' se eliminan de esta lista — ahora los controla visible: en attributes.
+  const POPUP_ALWAYS_EXCLUDE = new Set(['gid', 'fdc', 'sag', 'entidad']);
 
   // Preferencias de campos visibles: layerKey → Set de campos habilitados
   const _popupFieldPrefs = {};
@@ -783,9 +777,18 @@ window.MAP = (() => {
     if (_popupFieldPrefs[layerKey]) {
       return allFields.filter(k => _popupFieldPrefs[layerKey].has(k));
     }
-    // Por defecto: mostrar solo campos prioritarios que estén presentes
-    const priority = allFields.filter(k => POPUP_PRIORITY_FIELDS.has(k));
-    return priority.length ? priority : allFields.slice(0, 8);
+    // Fuente de verdad: attributes con visible: true en la definición de la capa
+    const layerDef = window.LAYERS?.[layerKey] || {};
+    const attrs    = layerDef.attributes || [];
+    if (attrs.length) {
+      const visibleSet = new Set(
+        attrs.filter(a => a.visible !== false).map(a => a.campo)
+      );
+      const fromAttrs = allFields.filter(k => visibleSet.has(k));
+      if (fromAttrs.length) return fromAttrs;
+    }
+    // Fallback si la capa no tiene attributes definidos: todos los campos presentes
+    return allFields;
   }
 
   // buildPopupEl: devuelve un elemento DOM con eventos ya wired.
@@ -813,8 +816,10 @@ window.MAP = (() => {
       .map(k => `<tr><td class="popup-key">${k}</td><td class="popup-val">${props[k]}</td></tr>`)
       .join('');
 
-    const currentPref = _popupFieldPrefs[layerKey];
-    const isActive    = k => currentPref ? currentPref.has(k) : POPUP_PRIORITY_FIELDS.has(k);
+    const currentPref  = _popupFieldPrefs[layerKey];
+    // isActive: refleja qué campos están activos en el popup (user pref o visible:true de attributes)
+    const _defaultVisibleSet = new Set(_getVisibleFields(layerKey, allFields));
+    const isActive = k => currentPref ? currentPref.has(k) : _defaultVisibleSet.has(k);
 
     const el = document.createElement('div');
     el.className = 'map-popup';
