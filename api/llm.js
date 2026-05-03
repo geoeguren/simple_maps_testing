@@ -201,7 +201,7 @@ Si el usuario pide una de esas capas con recorte geográfico:
   3. NO incluyas esa capa en el bloque map hasta que el usuario confirme.
   4. Si confirmó, incluila en el bloque map SIN clipArea.
 
-Lo mismo aplica para capas con muchos features (más de 2000 según [N features]):
+Lo mismo aplica para capas con muchos features (más de 3000 según [N features]):
   NO intentes recortarlas — avisá primero y esperá confirmación.
 
 CAPAS ADICIONALES NO SOLICITADAS:
