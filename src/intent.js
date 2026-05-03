@@ -146,16 +146,21 @@ window.INTENT = (() => {
       // Match exacto del texto completo
       if (textoCapa.includes(textoSinArea)) score += 10;
 
-      // Match por tokens individuales — con normalización de plural
+      // Match por tokens individuales — palabras completas + normalización de plural
+      const matchPalabraCompleta = (texto, palabra) => {
+        const re = new RegExp('(?:^|\\s)' + palabra + '(?:\\s|$)');
+        return re.test(texto);
+      };
+
       for (const token of tokens) {
-        if (textoCapa.includes(token)) {
+        if (matchPalabraCompleta(textoCapa, token)) {
           score += 2;
         } else {
           // Intentar singular si el token termina en 's' (parques → parque, nacionales → nacional)
           const singular = token.endsWith('es') ? token.slice(0, -2)
                          : token.endsWith('s')  ? token.slice(0, -1)
                          : null;
-          if (singular && singular.length >= 4 && textoCapa.includes(singular)) score += 2;
+          if (singular && singular.length >= 4 && matchPalabraCompleta(textoCapa, singular)) score += 2;
         }
       }
 
@@ -164,17 +169,34 @@ window.INTENT = (() => {
 
     if (!resultados.length) return null;
 
+    // Boost por visibilidad y tipo: capas públicas (visible:true, special:false)
+    // ganan sobre auxiliares/ocultas en caso de empate
+    const prioridad = (r) => {
+      let p = 0;
+      if (r.capa.visible !== false) p += 2;
+      if (r.capa.special === false) p += 1;
+      return p;
+    };
+
+    // Re-ordenar: primero por score, luego por prioridad como desempate
+    resultados.sort((a, b) => b.score !== a.score ? b.score - a.score : prioridad(b) - prioridad(a));
+
     const mejor = resultados[0];
 
     // Score mínimo
     if (mejor.score < MIN_SCORE) return null;
 
-    // Detectar empate — si el segundo tiene score muy cercano, ambigüedad → LLM
+    // Detectar empate — si el segundo tiene score muy cercano Y misma prioridad → LLM
     if (resultados.length > 1) {
       const segundo = resultados[1];
       if (segundo.score >= mejor.score * EMPATE_RATIO) {
-        console.log(`[INTENT] Empate: ${mejor.key}(${mejor.score}) vs ${segundo.key}(${segundo.score}) → LLM`);
-        return null;
+        // Si el mejor tiene más prioridad que el segundo, puede ganar igual
+        if (prioridad(mejor) > prioridad(segundo)) {
+          console.log(`[INTENT] Desempate por prioridad: ${mejor.key}(${mejor.score}) sobre ${segundo.key}(${segundo.score})`);
+        } else {
+          console.log(`[INTENT] Empate: ${mejor.key}(${mejor.score}) vs ${segundo.key}(${segundo.score}) → LLM`);
+          return null;
+        }
       }
     }
 
