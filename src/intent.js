@@ -146,11 +146,17 @@ window.INTENT = (() => {
       // Match exacto del texto completo
       if (textoCapa.includes(textoSinArea)) score += 10;
 
-      // Match por tokens individuales
+      // Match por tokens individuales — con normalización de plural
       for (const token of tokens) {
-        if (textoCapa.includes(token)) score += 2;
-        // Match parcial solo si el token tiene 5+ caracteres (evita falsos positivos con "nacional")
-        if (token.length >= 5 && textoCapa.split(/\s+/).some(w => w.startsWith(token) && w !== token)) score += 1;
+        if (textoCapa.includes(token)) {
+          score += 2;
+        } else {
+          // Intentar singular si el token termina en 's' (parques → parque, nacionales → nacional)
+          const singular = token.endsWith('es') ? token.slice(0, -2)
+                         : token.endsWith('s')  ? token.slice(0, -1)
+                         : null;
+          if (singular && singular.length >= 4 && textoCapa.includes(singular)) score += 2;
+        }
       }
 
       return { key, capa, score };
