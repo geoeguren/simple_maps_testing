@@ -19,6 +19,20 @@ window.LAYERS = {
   // Futuro: ...CL_LAYERS,
 };
 
+/**
+ * Umbrales de features por estrategia de clip.
+ * Centralizado acá — no hardcodeado en cada capa.
+ *
+ * clip.js los lee para decidir si un recorte es viable:
+ *   featureCount <= CLIP_THRESHOLD_SPATIAL  → clipStrategy: 'spatial' permitido
+ *   featureCount >  CLIP_THRESHOLD_SPATIAL  → tratar como 'none' (sin recorte)
+ *
+ * Ajustar cuando haya más presupuesto/infraestructura.
+ */
+window.CLIP_THRESHOLDS = {
+  spatial: 2000,   // máximo features para recorte geométrico
+};
+
 window.PROVINCIAS_MAP = AR_GEO_MAPS.provincias;
 
 window.GEO_MAPS = {
