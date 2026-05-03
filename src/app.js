@@ -525,9 +525,9 @@ window.APP = (() => {
         // Estilo: usa el que mandó el LLM, o un fallback neutro por geometría.
         // El LLM siempre debería mandar estilo — el fallback es red de seguridad.
         const STYLE_FALLBACK = {
-          polygon: { fillColor: '#888888', fillOpacity: 0.2,  color: '#555555', weight: 1,   opacity: 0.8 },
-          line:    { color: '#555555', weight: 2, opacity: 0.8 },
-          point:   { fillColor: '#888888', fillOpacity: 0.85, color: '#555555', radius: 5, weight: 1.5, opacity: 1 },
+          polygon: { fillColor: '#c8622a', fillOpacity: 0.2,  color: '#c8622a', weight: 1.5, opacity: 1 },
+          line:    { color: '#d4720f',     weight: 2,          opacity: 1 },
+          point:   { fillColor: '#6a0572', fillOpacity: 0.85,  color: '#fff',   radius: 5,   weight: 1.5, opacity: 1 },
         };
         const geomType = layerDef.geomType || 'polygon';
         const style    = inst.style ? { ...inst.style } : { ...STYLE_FALLBACK[geomType] };
