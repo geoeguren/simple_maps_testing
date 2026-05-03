@@ -30,7 +30,7 @@ window.LAYERS = {
  * Ajustar cuando haya más presupuesto/infraestructura.
  */
 window.CLIP_THRESHOLDS = {
-  spatial: 2000,   // máximo features para recorte geométrico
+  spatial: 3000,   // máximo features para recorte geométrico
 };
 
 window.PROVINCIAS_MAP = AR_GEO_MAPS.provincias;
