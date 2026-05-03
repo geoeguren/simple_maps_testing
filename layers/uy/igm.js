@@ -21,6 +21,7 @@ export const IGM_UY = {
   departamento_uy: {
     source:       'igm_uy',
     typename:     'LimitesDepartamentalesA:LimitesDepartamentalesA',
+    featureCount:  21,
     titulo:       'Departamentos de Uruguay',
     geomType:     'polygon',
     labelField:   'depto',
@@ -48,6 +49,7 @@ export const IGM_UY = {
   municipio_uy: {
     source:       'igm_uy',
     typename:     'LimitesMunicipales250:LimitesMunicipales',
+    featureCount:  129,
     titulo:       'Municipios de Uruguay',
     geomType:     'polygon',
     labelField:   'nombre',
@@ -86,6 +88,7 @@ export const IGM_UY = {
   seccion_judicial_uy: {
     source:       'igm_uy',
     typename:     'SeccionalesJudiciales250:SeccionesJudiciales',
+    featureCount:  189,
     titulo:       'Secciones judiciales de Uruguay',
     geomType:     'polygon',
     labelField:   'numero',
@@ -123,6 +126,7 @@ export const IGM_UY = {
   limite_terrestre_uy: {
     source:       'igm_uy',
     typename:     'LimitesNacionalesTerrestres:LimitesNacionalesTerrestres',
+    featureCount:  9,
     titulo:       'Límites nacionales terrestres de Uruguay',
     geomType:     'line',
     labelField:   'def',
@@ -151,6 +155,7 @@ export const IGM_UY = {
   limite_marino_uy: {
     source:       'igm_uy',
     typename:     'LimitesNacionalesMarinos250:LimitesNacionalesMarinos',
+    featureCount:  26,
     titulo:       'Límites nacionales marinos de Uruguay',
     geomType:     'line',
     labelField:   'def',
@@ -181,10 +186,11 @@ export const IGM_UY = {
   rio_area_uy: {
     source:       'igm_uy',
     typename:     'Hidrografia250:RioArroyoA_250K',
+    featureCount:  184,
     titulo:       'Ríos y arroyos de Uruguay (área)',
     geomType:     'polygon',
     labelField:   'nam',
-    clipStrategy: 'spatial',
+    clipStrategy: 'none',
     special:      false,
     visible:      true,
     keywords:     ['río', 'ríos', 'arroyo', 'arroyos', 'cañada', 'hidrografía', 'agua', 'cuenca', 'uruguay', 'ao . veras', 'ao. bequeló', 'ao. del ceibo', 'ao. del tala', 'ao. maldonado', 'ao. salsipuedes', 'ao. sarandí de la horqueta', 'ao. solís grande', 'ao. tacuarembó chico', 'ao. tropa vieja', 'ao. yaguarí', 'brazo arapey grande', 'brazo de la fea', 'brazo de la la enramada', 'brazo de las cañas', 'brazo de las conchas', 'brazo de los laureles', 'brazo de los negros', 'brazo de los perros', 'brazo del  achar', 'brazo del  arroyo grande', 'brazo del boycuá', 'brazo del carpintería', 'brazo del espinillar', 'brazo del guayabos', 'brazo del itapebí chico', 'brazo del itapebí grande', 'brazo del laureles', 'brazo del medio', 'brazo del palomas grande', 'brazo del rolón', 'brazo del río yí', 'brazo del salsipuedes grande', 'brazo del san josé', 'brazo del sarandí', 'brazo del sauce', 'brazo del sauce grande', 'brazo del sauzal', 'brazo del tala', 'brazo del tigre', 'brazo del tres árboles', 'cda. marrero', 'océano atlántico', 'río arapey grande', 'río cebollatí', 'río daymán', 'río de la plata', 'río negro', 'río queguay grande', 'río san luis', 'río san salvador', 'río santa lucía', 'río uruguay', 'río uruguay (entero)', 'río yaguarón', 'río yí'],
@@ -213,10 +219,11 @@ export const IGM_UY = {
   rio_linea_uy: {
     source:       'igm_uy',
     typename:     'Hidrografia250:RioArroyoL_250K',
+    featureCount:  6035,
     titulo:       'Ríos y arroyos de Uruguay (línea)',
     geomType:     'line',
     labelField:   'nam',
-    clipStrategy: 'spatial',
+    clipStrategy: 'none',
     special:      false,
     visible:      true,
     keywords:     ['río', 'ríos', 'arroyo', 'arroyos', 'cañada', 'hidrografía', 'agua', 'cuenca', 'uruguay', 'ao. agua dulce', 'ao. algarrobos', 'ao. aparicio', 'ao. arazá', 'ao. averías', 'ao. bolas grande', 'ao. bopicua', 'ao. canelón grande', 'ao. carpintería', 'ao. catalán chico', 'ao. catalán grande', 'ao. catalán seco', 'ao. ceballitos', 'ao. ceballos grande', 'ao. ceibal', 'ao. chiflero', 'ao. cochengo', 'ao. colorado chico', 'ao. corral de piedra', 'ao. cuaró chico', 'ao. cuaró grande', 'ao. cueva del tigre', 'ao. curupí', 'ao. de chamangá', 'ao. de florencio', 'ao. de gaspar', 'ao. de la azotea', 'ao. de la casa de piedra', 'ao. de la charqueada', 'ao. de la invernada', 'ao. de la isleta', 'ao. de la perdíz', 'ao. de la piedra sola', 'ao. de la raposa', 'ao. de la tuna', 'ao. de las cañas', 'ao. de las pajas blancas', 'ao. de las palmas', 'ao. de las pavas', 'ao. de lemos', 'ao. de los caraguatás', 'ao. de los ceibos', 'ao. de los juncos', 'ao. de los molles', 'ao. de los molles del sauce', 'ao. de los padres', 'ao. de los perros', 'ao. de melilla', 'ao. de pintos', 'ao. del  arenal chico', 'ao. del  sauce', 'ao. del arbolito', 'ao. del avestruz', 'ao. del bagre', 'ao. del catalancito', 'ao. del colorado', 'ao. del corral de piedra', 'ao. del cortado', 'ao. del descarnado', 'ao. del gato', 'ao. del gigante', 'ao. del horno', 'ao. del medio', 'ao. del miguelete', 'ao. del pedernal chico', 'ao. del pescador', 'ao. del renegado', 'ao. del sarandí', 'ao. del sauce', 'ao. del tala', 'ao. del tigre', 'ao. del totoral', 'ao. don esteban chico', 'ao. duraznito', 'ao. durazno', 'ao. durán', 'ao. falso mandiyú', 'ao. frasquito', 'ao. guaviyú', 'ao. hernández', 'ao. juan fernández', 'ao. juncal', 'ao. la pedrera', 'ao. la rambla', 'ao. lenguazo', 'ao. maletas chico', 'ao. manantiales', 'ao. mandiyú', 'ao. maneco', 'ao. manga', 'ao. molles', 'ao. navarro', 'ao. palma sola grande', 'ao. pantanoso', 'ao. patitas', 'ao. pauni', 'ao. pedregal', 'ao. pelado', 'ao. pichinango', 'ao. piedras de espinosa', 'ao. pilatos', 'ao. pintadito', 'ao. polancos', 'ao. polonia', 'ao. porongos', 'ao. quebracho', 'ao. quintón', 'ao. ramiréz grande', 'ao. retobadas', 'ao. san carlos', 'ao. san gregorio', 'ao. san luis', 'ao. sarandí', 'ao. sarandí chico', 'ao. sauce', 'ao. sauce chico', 'ao. sauce de macedo', 'ao. sauce de pintos', 'ao. sauce grande', 'ao. sepulturas', 'ao. sequeira', 'ao. solís grande', 'ao. talita', 'ao. toribio de la llana', 'ao. tres cruces chico', 'ao. tres cruces grande', 'ao. tres árboles', 'ao. trillo', 'ao. tropa vieja', 'ao. vejigas', 'ao. viraró', 'ao. yacaré chico', 'ao. yacaré grande', 'ao. yacot', 'ao. yucutujá', 'cda. arazá', 'cda. arbolito', 'cda. atolladero', 'cda. atolladora', 'cda. bellaca', 'cda. blanquillo', 'cda. bonilla', 'cda. capivara', 'cda. cardozo', 'cda. clarín', 'cda. colorada', 'cda. cortinas', 'cda. cueva del tigre', 'cda. curupí', 'cda. de anselmo', 'cda. de baldoino', 'cda. de bolivar', 'cda. de eleuterio', 'cda. de hackembruck', 'cda. de la barrera', 'cda. de la canelera', 'cda. de la concha', 'cda. de la divisa', 'cda. de la enramada', 'cda. de la horqueta', 'cda. de la isla', 'cda. de la laguna', 'cda. de la lana', 'cda. de la manga de terrón', 'cda. de la pedrera', 'cda. de la piedra redonda', 'cda. de la pierna de palo', 'cda. de la pulpería', 'cda. de la quinta', 'cda. de la quisilla', 'cda. de la rata', 'cda. de la tapera', 'cda. de la totora', 'cda. de la zanja', 'cda. de la zanja honda', 'cda. de las barrancas negras', 'cda. de las canteras', 'cda. de las chacras', 'cda. de las conchas', 'cda. de las conchillas', 'cda. de las nutrias', 'cda. de las pajas', 'cda. de las piedras', 'cda. de las piedritas', 'cda. de las rosas', 'cda. de los burros', 'cda. de los chachos', 'cda. de los corrales', 'cda. de los fuentes', 'cda. de los manantiales', 'cda. de los negros', 'cda. de los padres', 'cda. de los perros', 'cda. de mendoza', 'cda. de modesto', 'cda. de paraso', 'cda. de pascual', 'cda. de rocha', 'cda. de valdez', 'cda. del balta', 'cda. del bolocuá', 'cda. del capitan', 'cda. del catalán', 'cda. del ceibal', 'cda. del cementerio', 'cda. del cerro', 'cda. del chaná', 'cda. del convoy', 'cda. del guaviyú', 'cda. del horno', 'cda. del indio muerto', 'cda. del juncal', 'cda. del junco', 'cda. del medio', 'cda. del negro', 'cda. del negro paciencia', 'cda. del pedregal', 'cda. del perro muerto', 'cda. del pesquero', 'cda. del portero', 'cda. del rodeo', 'cda. del sarandí', 'cda. del sauce', 'cda. del sauce solo', 'cda. del sauzal', 'cda. del tajamar', 'cda. del tala', 'cda. del tigre', 'cda. del totoral', 'cda. del turumán', 'cda. del viejo sebastián', 'cda. del yacaré', 'cda. del ñandubay seco', 'cda. divisa', 'cda. divisoria pando san jacinto', 'cda. don fidel', 'cda. espinillos', 'cda. feliciano', 'cda. gadea', 'cda. garcía', 'cda. grande', 'cda. honda', 'cda. la barra', 'cda. la lorenza', 'cda. lisboa', 'cda. luzardo', 'cda. machín', 'cda. manantial', 'cda. marrero', 'cda. martínez', 'cda. mataojo', 'cda. medina', 'cda. moreira', 'cda. ojos de agua', 'cda. pajas blancas', 'cda. pantanosa', 'cda. pantanoso', 'cda. pereira', 'cda. piedra del toro', 'cda. piedras blancas', 'cda. prudencia', 'cda. sauzal de la divisa', 'cda. sotelo', 'cda. talita', 'cda. uña de gato', 'cda. varela', 'cda. velázquez', 'cda. venezuela', 'cda. vera', 'cda. viraró', 'cda. vázquez', 'cda. yacaré', 'gajo del sarandí', 'zja. aguapey', 'zja. carpinchos', 'zja. de la cerrillada', 'zja. de la estancia', 'zja. de la media luna', 'zja. de la totora', 'zja. de las orejanas', 'zja. de las tunas', 'zja. de los carpinchos', 'zja. de los juncos', 'zja. de los novios', 'zja. de los talas', 'zja. de taboada', 'zja. del ceibo', 'zja. del cerro grande', 'zja. del duraznal', 'zja. del espinillar', 'zja. del potrero', 'zja. del sauce', 'zja. del sauzal grande', 'zja. del tigre', 'zja. fea', 'zja. honda'],
@@ -246,6 +253,7 @@ export const IGM_UY = {
   limite_hist_1835_area_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_A:LimiteA_Ley84_28AGO1835',
+    featureCount:  8,
     titulo:       'Límites departamentales históricos 1835 (área)',
     geomType:     'polygon',
     labelField:   'nam',
@@ -272,6 +280,7 @@ export const IGM_UY = {
   limite_hist_1835_linea_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_L:Limite_Ley84_28AGO1835',
+    featureCount:  8,
     titulo:       'Límites departamentales históricos 1835 (línea)',
     geomType:     'line',
     labelField:   'def',
@@ -300,6 +309,7 @@ export const IGM_UY = {
   limite_hist_1837_area_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_A:LimiteA_Ley158_14JUN1837',
+    featureCount:  11,
     titulo:       'Límites departamentales históricos 1837 (área)',
     geomType:     'polygon',
     labelField:   'nam',
@@ -327,6 +337,7 @@ export const IGM_UY = {
   limite_hist_1837_linea_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_L:Limite_Ley158_14JUN1837',
+    featureCount:  12,
     titulo:       'Límites departamentales históricos 1837 (línea)',
     geomType:     'line',
     labelField:   'def',
@@ -355,6 +366,7 @@ export const IGM_UY = {
   limite_hist_1856_area_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_A:LimiteA_Ley493_10JUL1856',
+    featureCount:  12,
     titulo:       'Límites departamentales históricos 1856 (área)',
     geomType:     'polygon',
     labelField:   'nam',
@@ -382,6 +394,7 @@ export const IGM_UY = {
   limite_hist_1856_linea_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_L:Limite_Ley493_10JUL1856',
+    featureCount:  13,
     titulo:       'Límites departamentales históricos 1856 (línea)',
     geomType:     'line',
     labelField:   'def',
@@ -410,6 +423,7 @@ export const IGM_UY = {
   limite_hist_1880_area_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_A:LimiteA_Ley1474_7JUL1880',
+    featureCount:  13,
     titulo:       'Límites departamentales históricos 1880 (área)',
     geomType:     'polygon',
     labelField:   'nam',
@@ -437,6 +451,7 @@ export const IGM_UY = {
   limite_hist_1880_linea_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_L:Limite_Ley1474_7JUL1880',
+    featureCount:  15,
     titulo:       'Límites departamentales históricos 1880 (línea)',
     geomType:     'line',
     labelField:   'def',
@@ -465,6 +480,7 @@ export const IGM_UY = {
   limite_hist_1884_area_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_A:LimiteA_Ley1757_1OCT1884',
+    featureCount:  16,
     titulo:       'Límites departamentales históricos 1884 (área)',
     geomType:     'polygon',
     labelField:   'nam',
@@ -492,6 +508,7 @@ export const IGM_UY = {
   limite_hist_1884_linea_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_L:Limite_Ley1757_1OCT1884',
+    featureCount:  18,
     titulo:       'Límites departamentales históricos 1884 (línea)',
     geomType:     'line',
     labelField:   'def',
@@ -520,6 +537,7 @@ export const IGM_UY = {
   limite_hist_1885_area_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_A:LimiteA_Ley1854_30DIC1885',
+    featureCount:  17,
     titulo:       'Límites departamentales históricos 1885 (área)',
     geomType:     'polygon',
     labelField:   'nam',
@@ -547,6 +565,7 @@ export const IGM_UY = {
   limite_hist_1885_linea_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_L:Limite_Ley1854_30DIC1885',
+    featureCount:  19,
     titulo:       'Límites departamentales históricos 1885 (línea)',
     geomType:     'line',
     labelField:   'def',
@@ -575,6 +594,7 @@ export const IGM_UY = {
   limite_hist_1927_area_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_A:LimiteA_Ley8187_15DIC1927',
+    featureCount:  17,
     titulo:       'Límites departamentales históricos 1927 (área)',
     geomType:     'polygon',
     labelField:   'nam',
@@ -602,6 +622,7 @@ export const IGM_UY = {
   limite_hist_1927_linea_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_L:Limite_Ley8187_15DIC1927',
+    featureCount:  19,
     titulo:       'Límites departamentales históricos 1927 (línea)',
     geomType:     'line',
     labelField:   'def',
@@ -630,6 +651,7 @@ export const IGM_UY = {
   limite_hist_1934_area_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_A:LimiteA_RinconDeManeco_10AGO1934',
+    featureCount:  17,
     titulo:       'Límites históricos Rincón de Maneco 1934 (área)',
     geomType:     'polygon',
     labelField:   'nam',
@@ -657,6 +679,7 @@ export const IGM_UY = {
   limite_hist_1934_linea_uy: {
     source:       'igm_uy',
     typename:     'Limites_Administrativos_Historicos_L:Limite_RinconDeManeco_10Ago1934',
+    featureCount:  20,
     titulo:       'Límites históricos Rincón de Maneco 1934 (línea)',
     geomType:     'line',
     labelField:   'def',
