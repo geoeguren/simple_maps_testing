@@ -88,9 +88,6 @@ module.exports = async function handler(req, res) {
   const maskBbox        = bbox(maskNormalizada);
   const clipped         = [];
 
-  console.log(`[clip] mask type: ${maskNormalizada.geometry?.type}, bbox: ${maskBbox}`);
-  console.log(`[clip] layer features: ${layer.features?.length}`);
-
   for (const feat of layer.features || []) {
     try {
       const geomType = feat.geometry?.type;
@@ -114,8 +111,6 @@ module.exports = async function handler(req, res) {
       }
     } catch { /* feature individual rota — omitir */ }
   }
-
-  console.log(`[clip] clipped features: ${clipped.length}`);
 
   return res.status(200).json({
     type:     'FeatureCollection',
